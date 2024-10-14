@@ -1,5 +1,5 @@
 //
-//  File.swift
+//  ListCommand.swift
 //  
 //
 //  Created by Stefan Urbanek on 11/01/2022.
@@ -49,7 +49,10 @@ extension PoieticTool {
             case .charts:
                 listCharts(design)
             }
+
+            try env.close()
         }
+        
         func listAll(_ design: Design) {
             let sorted = design.currentFrame.snapshots.sorted { left, right in
                 left.id < right.id

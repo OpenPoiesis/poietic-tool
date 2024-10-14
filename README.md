@@ -3,6 +3,9 @@
 Command-line tool for manipulating and exploring Poietic Models, with support for
 Stock and Flow simulation.
 
+See also: [Full documentation](https://github.com/OpenPoiesis/PoieticTool/blob/main/Docs/Tool.md)
+with all the commands.
+
 
 ## Installation
 
@@ -56,7 +59,7 @@ Command summary:
 - `import`: Import a frame into the design.
 - `run`: Run the simulation and generate output
 - `write-dot`: Write a Graphviz DOT file.
-- `metamodel`: Show the metamodel
+- `metamodel`: Describe the metamodel (supports: text, markdown and HTML output)
 - `create-library` Create a library of multiple models.
 
 Use `--help` with a desired command to learn more.
@@ -79,6 +82,7 @@ poietic info
 poietic edit add Stock name=water formula=100
 poietic edit add Flow name=outflow formula=10
 poietic edit connect Drains water outflow
+poietic info
 
 poietic list formulas
 
@@ -90,6 +94,17 @@ poietic list formulas
 
 poietic run
 ```
+
+Discover design possibilities by exploring the metamodel in a HTML file:
+
+```
+poietic metamodel -f html > metamodel.html
+```
+
+The above command will create a `metamodel.html` file with full description of
+currently available metamodel for the given design.
+
+
 ## Features
 
 - Preserved history – Editing is non-destructive and can be reversed

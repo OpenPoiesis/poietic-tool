@@ -71,7 +71,7 @@ extension PoieticTool {
         
         mutating func run() throws {
             let env = try ToolEnvironment(location: options.designLocation)
-            let design = try env.open()
+            let design = try env.open(allowEmpty: false)
 
             guard let solverType = Solver.registeredSolvers[solverName] else {
                 throw ToolError.unknownSolver(solverName)

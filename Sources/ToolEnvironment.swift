@@ -56,7 +56,7 @@ class ToolEnvironment {
         self.url = url
     }
    
-    public func open() throws (ToolError) -> Design {
+    public func open(allowEmpty: Bool=true) throws (ToolError) -> Design {
         guard self.design == nil else {
             fatalError("Trying to open already opened design: \(url)")
         }
@@ -80,6 +80,11 @@ class ToolEnvironment {
             // FIXME: [REFACTORING] we should not get here
             throw ToolError.unknownError(error)
         }
+        
+        if !allowEmpty && design.isEmpty {
+            throw ToolError.emptyDesign
+        }
+        
         self.design = design
         return design
     }

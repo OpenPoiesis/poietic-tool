@@ -30,6 +30,7 @@ enum ToolError: Error, CustomStringConvertible {
     case unableToSaveDesign(Error)
     case storeError(PersistentStoreError)
     case foreignFrameError(ForeignFrameError)
+    case emptyDesign
     
     // Database errors
     case constraintViolationError(FrameConstraintError)
@@ -74,6 +75,9 @@ enum ToolError: Error, CustomStringConvertible {
             return "Store error: \(error)"
         case .foreignFrameError(let error):
             return "Foreign frame error: \(error)"
+
+        case .emptyDesign:
+            return "The design is empty"
 
         case .constraintViolationError(let error):
             var detail: String = ""
@@ -177,6 +181,8 @@ enum ToolError: Error, CustomStringConvertible {
             return nil
         case .storeError(_):
             return nil
+        case .emptyDesign:
+            return "Design has no frames, create a frame"
         }
     }
 

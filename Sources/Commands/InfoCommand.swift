@@ -1,5 +1,5 @@
 //
-//  File.swift
+//  InfoCommand.swift
 //  
 //
 //  Created by Stefan Urbanek on 30/06/2023.
@@ -18,6 +18,12 @@ extension PoieticTool {
         mutating func run() throws {
             let env = try ToolEnvironment(location: options.designLocation)
             let design = try env.open()
+            guard !design.isEmpty else {
+                print("Design is empty.")
+                try env.close()
+                return
+            }
+
             let frame = design.currentFrame
             
             let items: [(String?, String?)] = [

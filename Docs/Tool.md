@@ -18,25 +18,32 @@ poietic edit add --help
 
 Command summary:
 
-- `new`: Create an empty design.
-- `info`: Get information about the design
-- `list`: List design content objects.
-- `show`: Describe an object.
-- `edit`: Edit an object or a selection of objects.
-    - `set`: Set an attribute value
-    - `undo`: Undo last change
-    - `redo`: Redo undone change
-    - `add`: Create a new node
-    - `connect`: Create a new connection (edge) between two nodes
-    - `remove`: Remove an object – a node or a connection
-    - `auto-parameters`: Automatically connect parameter nodes: connect required, disconnect unused
-    - `layout`: Lay out objects
-    - `align`: Align objects on canvas
-- `import`: Import a frame into the design.
-- `run`: Run the simulation and generate output
-- `write-dot`: Write a Graphviz DOT file.
-- `metamodel`: Show the metamodel
-- `create-library` Create a library of multiple models.
+| Command | Overview |
+|:----|:----|
+|`new`| Create an empty design |
+|`info`| Get information about the design |
+|`list`| List design content objects |
+|`show`| Describe an object |
+|`edit`| Edit an object or a selection of objects _(see subcommands below)_ |
+|`import`| Import a frame into the design |
+|`run`| Run the simulation and generate output |
+|`write-dot`| Write a Graphviz DOT file |
+|`metamodel`| Describe the metamodel (various output formats)|
+|`create-library` | Create a library of multiple models _(experimental)_ |
+
+Edit sub-commands:
+
+| Command | Overview |
+|:----|:----|
+|`set`| Set an attribute value |
+|`undo`| Undo last change |
+|`redo`| Redo undone change |
+|`add`| Create a new node |
+|`connect`| Create a new connection (edge) between two nodes |
+|`remove`| Remove an object – a node or a connection |
+|`auto-parameters`| Automatically connect parameter nodes: connect required, disconnect unused |
+|`layout`| Lay out objects |
+|`align`| Align objects on canvas |
 
 
 ## Commons
@@ -87,15 +94,18 @@ Metamodel Command documentation for more information.
 Create a new, empty database. Usage:
 
 ```bash
-poietic new [--design <design>] [--import <import> ...] [--auto-parameters]
+poietic new [--import <import> ...] [<location>]
 ```
 
 Options:
-                          
+
 - `-i`, `--import <import>`: Poietic frame to import into the first frame. See
   `import` command for more information.
-- `--auto-parameters`: Automatically connect parameter nodes. See
-   the `edit auto-parameters` command for more information.
+
+Arguments:
+
+- `location` (optional): Location of the design file to be created. Default is
+  `design.poietic` in the current directory.
 
 During the creation of a new frame the user has an option to import one or
 multiple frames that will be combined into the first frame of the design.
@@ -103,22 +113,16 @@ multiple frames that will be combined into the first frame of the design.
 Example:
 
 ```
-% poietic new --import ../PoieticExamples/ThinkingInSystems/Capital.poieticframe --auto-parameters
+% poietic new --import ../PoieticExamples/ThinkingInSystems/Capital.poieticframe
 Importing from: ../PoieticExamples/ThinkingInSystems/Capital.poieticframe
 Read 3 objects from collection 'design'
 Read 19 objects from collection 'objects'
 Read 6 objects from collection 'report'
-Added 12 parameter edges and removed 0 edges.
 Design created.
 ```
 
-The above is a convenience for the following:
+See also: `auto-parameters` subcommand of `edit`.
 
-```
-poietic new
-poietic import ../PoieticExamples/ThinkingInSystems/Capital.poieticframe
-poietic auto-parameters
-```
 
 ## Info Command
 
@@ -242,6 +246,8 @@ Current shortcomings, which might be resolved in the future:
   design objects.
 - User has no way to ignore imported IDs, this this should be an option.
 
+See also: `auto-parameters` subcommand of `edit`.
+
 
 ## Run Command
 
@@ -280,6 +286,7 @@ Output formats:
 - `gnuplot`: Create an output for chart objects, one gnuplot file per chart,
   to be processed later by [gnuplot](http://gnuplot.info).
 
+
 ### Simulation Defaults
 
 The `run` command is trying to get simulation defaults contained within the
@@ -290,6 +297,7 @@ that can be set for the simulation defaults:
 ```bash
 poietic metamodel Simulation
 ```
+
 
 ### Gnuplot Output
 
@@ -514,10 +522,15 @@ Alignment modes:
 
 Show information about the metamodel and object types.
 
+Options:
+
+- `-f`/`--output-format`: Output format. Available: `text` (default), `markdown` and
+`html`.
+
 Usage:
 
 ```sh
-poietic metamodel [--design <design>] [<object-type>]
+ poietic metamodel [--design <design>] [--output-format <output-format>] [<object-type>]
 ```
 
 If `object-type` is provided, then the command lists all attributes of the 
@@ -589,6 +602,13 @@ poietic metamodel Flow
 poietic metamodel Stock
 poietic metamodel DesignInfo
 poietic metamodel Simulation
+```
+
+Create a `metamodel.html` file with full description of currently available
+metamodel:
+
+```
+poietic metamodel -f html > metamodel.html
 ```
 
 
