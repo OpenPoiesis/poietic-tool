@@ -30,7 +30,7 @@ Follow instructions how to run them in the documentation contained within the
 repository.
 
 
-## Command-Line Tool
+## Tool Overview
 
 The Poietic Flows includes a command-line tool to create, edit and run
 Stock and Flow models called `poietic`.
@@ -67,7 +67,7 @@ Think of this tool as [ed](https://en.wikipedia.org/wiki/Ed_(text_editor)) but
 for data represented as a graph. At least for now.
 
 The tool is designed in a way that it is by itself interactive for a single-user. 
-For interactivity in a shell, set the `POIETIC_DATABASE` environment variable to
+For interactivity in a shell, set the `POIETIC_DESIGN` environment variable to
 point to a file where the design is stored.
 
 Example session:
@@ -90,7 +90,31 @@ poietic list formulas
 
 poietic run
 ```
+## Features
 
-# Author
+- Preserved history – Editing is non-destructive and can be reversed
+  using undo and redo commands.
+- Exports to different formats:
+    - [Graphviz](https://graphviz.org) dot files
+    - CSV
+    - Charts to [Gnuplot](http://gnuplot.info)
+
+
+
+## See Also
+
+- [Formulas](https://openpoiesis.github.io/PoieticFlows/documentation/poieticflows/formulas)
+  documentation)
+- [Metamodel](https://openpoiesis.github.io/PoieticFlows/documentation/poieticflows/metamodel)
+
+Underlying packages:
+
+- Poietic Core: [repository](https://github.com/openpoiesis/PoieticCore),
+  [documentation](https://openpoiesis.github.io/PoieticCore/documentation/poieticcore/)
+- Poietic Flows: [repository](https://github.com/openpoiesis/PoieticFlows),
+  [documentation](https://openpoiesis.github.io/PoieticFlows/documentation/poieticflows/)
+
+
+## Author
 
 [Stefan Urbanek](mailto:stefan.urbanek@gmail.com)
