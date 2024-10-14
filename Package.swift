@@ -11,6 +11,7 @@ let package = Package(
         .package(url: "https://github.com/openpoiesis/PoieticCore", branch: "main"),
         .package(url: "https://github.com/openpoiesis/PoieticFlows", branch: "main"),
         .package(url: "https://github.com/apple/swift-numerics", from: "1.0.0"),
+        .package(url: "https://github.com/swiftlang/swift-markdown.git", branch: "main"),
     ],
     targets: [
         // Targets are the basic building blocks of a package, defining a module or a test suite.
@@ -22,6 +23,7 @@ let package = Package(
                 "PoieticFlows",
                 .product(name: "ArgumentParser", package: "swift-argument-parser"),
                 .product(name: "RealModule", package: "swift-numerics"),
+                .product(name: "Markdown", package: "swift-markdown"),
             ]
         ),
     ]

@@ -28,6 +28,7 @@ enum ToolError: Error, CustomStringConvertible {
     case malformedLocation(String)
     case fileDoesNotExist(String)
     case unableToSaveDesign(Error)
+    case storeError(PersistentStoreError)
     case foreignFrameError(ForeignFrameError)
     
     // Database errors
@@ -69,6 +70,8 @@ enum ToolError: Error, CustomStringConvertible {
             return "Malformed location: \(value)"
         case .unableToSaveDesign(let value):
             return "Unable to save design. Reason: \(value)"
+        case .storeError(let error):
+            return "Store error: \(error)"
         case .foreignFrameError(let error):
             return "Foreign frame error: \(error)"
 
@@ -171,6 +174,8 @@ enum ToolError: Error, CustomStringConvertible {
         case .fileDoesNotExist(_):
             return nil
         case .foreignFrameError(_):
+            return nil
+        case .storeError(_):
             return nil
         }
     }

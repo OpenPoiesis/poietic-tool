@@ -73,6 +73,9 @@ class ToolEnvironment {
             throw ToolError.constraintViolationError(error)
             
         }
+        catch let error as PersistentStoreError {
+            throw ToolError.storeError(error)
+        }
         catch {
             // FIXME: [REFACTORING] we should not get here
             throw ToolError.unknownError(error)
