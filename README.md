@@ -104,7 +104,6 @@ poietic run
 ## See Also
 
 - [Formulas](https://openpoiesis.github.io/PoieticFlows/documentation/poieticflows/formulas)
-  documentation)
 - [Metamodel](https://openpoiesis.github.io/PoieticFlows/documentation/poieticflows/metamodel)
 
 Underlying packages:
