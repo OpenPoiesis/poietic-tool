@@ -14,7 +14,7 @@ Available platforms: MacOS 14 (and later), Linux
 To install the `poietic` command-line tool, run the following command in the
 project's top-level directory:
 
-```
+```bash
 ./install
 ```
 
@@ -22,8 +22,16 @@ The tool will be installed in the Swift Package Manager's' `~/.swiftpm/bin`
 directory. Make sure you have the directory in your `PATH`, if you do not, then
 add the following to the end of your `~/.zshrc` or `~/.bashrc` file:
 
-```
+```bash
 export PATH=~/.swiftpm/bin:$PATH
+```
+
+**Recommended** (optional): [Graphviz](https://graphviz.org) for visualising the design graph and [Gnuplot](http://www.gnuplot.info/docs_6.0/loc3434.html) for charts. The tool can generate output for both.
+
+On MacOS with Homebrew:
+
+```bash
+brew install graphviz gnuplot
 ```
 
 ## Examples
