@@ -1,6 +1,6 @@
 //
 //  ListCommand.swift
-//  
+//
 //
 //  Created by Stefan Urbanek on 11/01/2022.
 //
@@ -33,9 +33,10 @@ extension PoieticTool {
 
         mutating func run() throws {
             let env = try ToolEnvironment(location: options.designLocation)
-            let design = try env.open()
+            let design = try env.open(allowEmpty: true)
 
             if design.isEmpty {
+                try env.close()
                 throw CleanExit.message("The design design is empty.")
             }
             

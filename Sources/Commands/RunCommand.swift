@@ -138,7 +138,6 @@ extension PoieticTool {
                              states: simulator.output)
             case .gnuplot:
                 try writeGnuplotBundle(path: outputPath,
-                                       frame: frame,
                                        compiledModel: compiledModel,
                                        output: simulator.output)
 //            case .json:
@@ -191,11 +190,9 @@ func writeCSV(path: String,
 /// If the path is '-' then the current directory will be used.
 ///
 func writeGnuplotBundle(path: String,
-                        frame: Frame,
                         compiledModel: CompiledModel,
                         output: [SimulationState]) throws {
     let path = if path == "-" { "." } else { path }
-    let view = StockFlowView(frame)
     let variables = compiledModel.stateVariables
     let fm = FileManager()
     try fm.createDirectory(atPath: path, withIntermediateDirectories: true)
@@ -208,7 +205,7 @@ func writeGnuplotBundle(path: String,
     let timeIndex = variables.firstIndex { $0.name == "time" }!
 
     // Write chart output
-    for chart in view.charts {
+    for chart in compiledModel.charts {
         
         let chartName = chart.node.name!
         // TODO: Plot all the series

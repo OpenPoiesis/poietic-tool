@@ -1,5 +1,5 @@
 //
-//  File.swift
+//  ToolEnvironment.swift
 //  
 //
 //  Created by Stefan Urbanek on 31/05/2024.
@@ -7,7 +7,6 @@
 
 import Foundation
 import PoieticCore
-// Only for the metamodel (to be removed)
 import PoieticFlows
 
 class ToolEnvironment {
@@ -64,8 +63,7 @@ class ToolEnvironment {
         let store = MakeshiftDesignStore(url: url)
         let design: Design
         do {
-            // FIXME: [REFACTORING] make it typed throw
-            // FIXME: [REFACTORING] remove the metamodel here
+            // FIXME: remove the metamodel here
             design = try store.load(metamodel: FlowsMetamodel)
         }
         catch let error as FrameConstraintError {
@@ -77,7 +75,7 @@ class ToolEnvironment {
             throw ToolError.storeError(error)
         }
         catch {
-            // FIXME: [REFACTORING] we should not get here
+            // FIXME: [IMPORTANT] we should not get here
             throw ToolError.unknownError(error)
         }
         

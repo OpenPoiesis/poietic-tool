@@ -1,6 +1,6 @@
 //
 //  InfoCommand.swift
-//  
+//
 //
 //  Created by Stefan Urbanek on 30/06/2023.
 //
@@ -17,8 +17,10 @@ extension PoieticTool {
 
         mutating func run() throws {
             let env = try ToolEnvironment(location: options.designLocation)
-            let design = try env.open()
+            let design = try env.open(allowEmpty: true)
             guard !design.isEmpty else {
+                // We are nice when the design is empty in this command, as
+                // that is what we want to know.
                 print("Design is empty.")
                 try env.close()
                 return
