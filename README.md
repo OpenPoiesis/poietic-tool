@@ -81,29 +81,49 @@ The tool is designed in a way that it is by itself interactive for a single-user
 For interactivity in a shell, set the `POIETIC_DESIGN` environment variable to
 point to a file where the design is stored.
 
-Example session:
+Example session, creates a simple bank account model:
 
-```
+```bash
 poietic new
 poietic info
 
-poietic edit add Stock name=water formula=100
-poietic edit add Flow name=outflow formula=10
-poietic edit connect Drains water outflow
+poietic edit add Stock name=account formula=100
+poietic edit add Auxiliary name=rate formula=0.02
+poietic edit add Flow name=interest formula="account*rate"
+poietic edit connect Fills interest account
+poietic edit connect Parameter rate interest
+poietic edit connect Parameter account interest
 poietic info
 
 poietic list formulas
+```
 
-poietic edit add Stock name=unwanted formula=0
-poietic list formulas
-poietic edit undo
+Run the simulation:
 
-poietic list formulas
-
+```bash
 poietic run
 ```
 
-Discover design possibilities by exploring the metamodel in a HTML file:
+Make some mistakes:
+
+```bash
+poietic edit add Stock name=unwanted formula=0
+poietic list formulas
+
+poietic edit undo
+
+poietic list formulas
+```
+
+If you have [Graphviz](https://graphviz.org) installed, then you can run the
+following and then open the `diagram.png` image:
+
+```bash
+poietic write-dot --output diagram.dot -l name -m "(other)"
+dot -Tpng -odiagram.png diagram.dot
+```
+
+Discover more design possibilities by exploring the metamodel in a HTML file:
 
 ```
 poietic metamodel -f html > metamodel.html
@@ -115,13 +135,16 @@ currently available metamodel for the given design.
 
 ## Features
 
-- Preserved history – Editing is non-destructive and can be reversed
-  using undo and redo commands.
+- Preserved history – Editing is non-destructive, can be reversed using undo
+  and redo commands.
 - Exports to different formats:
     - [Graphviz](https://graphviz.org) dot files
     - CSV
     - Charts to [Gnuplot](http://gnuplot.info)
-
+- Stock, Flow, Auxiliary, Graphical function and more kinds of nodes. See
+  [Metamodel](https://openpoiesis.github.io/PoieticFlows/documentation/poieticflows/metamodel).
+- Arithmetic expressions with built-in functions. See
+  [Formulas](https://openpoiesis.github.io/PoieticFlows/documentation/poieticflows/formulas).
 
 
 ## See Also
