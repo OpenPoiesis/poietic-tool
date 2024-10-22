@@ -3,7 +3,7 @@
 Command-line tool for manipulating and exploring Poietic Models, with support for
 Stock and Flow simulation.
 
-See also: [Full documentation](https://github.com/OpenPoiesis/PoieticTool/blob/main/Docs/Tool.md)
+See also: [Full documentation](https://github.com/OpenPoiesis/poietic-tool/blob/main/Docs/Tool.md)
 with all the commands.
 
 
@@ -36,7 +36,7 @@ brew install graphviz gnuplot
 
 ## Examples
 
-The examples are located in the [Examples repository](https://github.com/OpenPoiesis/PoieticExamples).
+The examples are located in the [Examples repository](https://github.com/OpenPoiesis/poietic-examples).
 Follow instructions how to run them in the documentation contained within the
 repository.
 
@@ -119,7 +119,7 @@ If you have [Graphviz](https://graphviz.org) installed, then you can run the
 following and then open the `diagram.png` image:
 
 ```bash
-poietic write-dot --output diagram.dot -l name -m "(other)"
+poietic write-dot --output diagram.dot -l name 
 dot -Tpng -odiagram.png diagram.dot
 ```
 
@@ -142,22 +142,22 @@ currently available metamodel for the given design.
     - CSV
     - Charts to [Gnuplot](http://gnuplot.info)
 - Stock, Flow, Auxiliary, Graphical function and more kinds of nodes. See
-  [Metamodel](https://openpoiesis.github.io/PoieticFlows/documentation/poieticflows/metamodel).
+  [Metamodel](https://openpoiesis.github.io/poietic-flows/documentation/poieticflows/metamodel).
 - Arithmetic expressions with built-in functions. See
-  [Formulas](https://openpoiesis.github.io/PoieticFlows/documentation/poieticflows/formulas).
+  [Formulas](https://openpoiesis.github.io/poietic-flows/documentation/poieticflows/formulas).
 
 
 ## See Also
 
-- [Formulas](https://openpoiesis.github.io/PoieticFlows/documentation/poieticflows/formulas)
-- [Metamodel](https://openpoiesis.github.io/PoieticFlows/documentation/poieticflows/metamodel)
+- [Formulas](https://openpoiesis.github.io/poietic-flows/documentation/poieticflows/formulas)
+- [Metamodel](https://openpoiesis.github.io/poietic-flows/documentation/poieticflows/metamodel)
 
 Underlying packages:
 
-- Poietic Core: [repository](https://github.com/openpoiesis/PoieticCore),
-  [documentation](https://openpoiesis.github.io/PoieticCore/documentation/poieticcore/)
-- Poietic Flows: [repository](https://github.com/openpoiesis/PoieticFlows),
-  [documentation](https://openpoiesis.github.io/PoieticFlows/documentation/poieticflows/)
+- Poietic Core: [repository](https://github.com/openpoiesis/poietic-core),
+  [documentation](https://openpoiesis.github.io/poietic-core/documentation/poieticcore/)
+- Poietic Flows: [repository](https://github.com/openpoiesis/poietic-flows),
+  [documentation](https://openpoiesis.github.io/poietic-flows/documentation/poieticflows/)
 
 
 ## Author

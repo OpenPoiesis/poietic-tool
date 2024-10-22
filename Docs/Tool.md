@@ -631,7 +631,7 @@ The command extracts `DesignInfo` from the designs. If multiple instances of
 `DesignInfo` are present, then one is chosen arbitrarily.
 
 
-See also: [Poietic Server](https://github.com/OpenPoiesis/PoieticServer)
+See also: [Poietic Server](https://github.com/OpenPoiesis/poietic-server)
 (preview package, unstable).
 
 

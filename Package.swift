@@ -8,8 +8,8 @@ let package = Package(
     platforms: [.macOS("14"), .custom("linux", versionString: "1")],
     dependencies: [
         .package(url: "https://github.com/apple/swift-argument-parser.git", from: "1.2.0"),
-        .package(url: "https://github.com/openpoiesis/PoieticCore", branch: "main"),
-        .package(url: "https://github.com/openpoiesis/PoieticFlows", branch: "main"),
+        .package(url: "https://github.com/openpoiesis/poietic-core", branch: "main"),
+        .package(url: "https://github.com/openpoiesis/poietic-flows", branch: "main"),
         .package(url: "https://github.com/apple/swift-numerics", from: "1.0.0"),
         .package(url: "https://github.com/swiftlang/swift-markdown.git", branch: "main"),
     ],
@@ -19,8 +19,8 @@ let package = Package(
         .executableTarget(
             name: "poietic",
             dependencies: [
-                "PoieticCore",
-                "PoieticFlows",
+                .product(name: "PoieticCore", package: "poietic-core"),
+                .product(name: "PoieticFlows", package: "poietic-flows"),
                 .product(name: "ArgumentParser", package: "swift-argument-parser"),
                 .product(name: "RealModule", package: "swift-numerics"),
                 .product(name: "Markdown", package: "swift-markdown"),
