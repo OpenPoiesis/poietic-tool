@@ -40,7 +40,7 @@ func autoConnectParameters(_ frame: MutableFrame) throws -> (added: [ParameterIn
     var added: [ParameterInfo] = []
     var removed: [ParameterInfo] = []
     
-    let builtinNames: Set<String> = Set(Solver.Variables.map {
+    let builtinNames: Set<String> = Set(Simulator.BuiltinVariables.map {
         $0.name
     })
 

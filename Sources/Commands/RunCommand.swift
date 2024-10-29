@@ -73,21 +73,22 @@ extension PoieticTool {
             let env = try ToolEnvironment(location: options.designLocation)
             let design = try env.open(allowEmpty: false)
 
-            guard let solverType = Solver.registeredSolvers[solverName] else {
+            guard let solverType = StockFlowSimulation.SolverType(rawValue: solverName) else {
                 throw ToolError.unknownSolver(solverName)
             }
             let frame = design.currentFrame
-            let compiledModel = try compile(frame)
-            let simulator = Simulator(model: compiledModel, solverType: solverType)
+            let model = try compile(frame)
+            let simulation = StockFlowSimulation(model, solver: solverType)
+            let simulator = Simulator(model, simulation: simulation)
 
             // Collect names of nodes to be observed
             // -------------------------------------------------------------
-            let variables = compiledModel.stateVariables
+            let variables = model.stateVariables
             if outputNames.isEmpty {
                 outputNames = Array(variables.map {$0.name})
             }
             else {
-                let allNames = compiledModel.stateVariables.map { $0.name }
+                let allNames = model.stateVariables.map { $0.name }
                 let unknownNames = outputNames.filter {
                     !allNames.contains($0)
                 }
@@ -114,7 +115,7 @@ extension PoieticTool {
                 guard let doubleValue = Double(stringValue) else {
                     throw ToolError.typeMismatch("constant override '\(key)'", stringValue, "double")
                 }
-                guard let variable = compiledModel.variable(named: key) else {
+                guard let variable = model.variable(named: key) else {
                     throw ToolError.unknownObjectName(key)
                 }
                 overrideConstants[variable.id] = doubleValue
@@ -138,7 +139,7 @@ extension PoieticTool {
                              states: simulator.output)
             case .gnuplot:
                 try writeGnuplotBundle(path: outputPath,
-                                       compiledModel: compiledModel,
+                                       compiledModel: model,
                                        output: simulator.output)
 //            case .json:
 //                try writeJSON(path: outputPath,
@@ -217,7 +218,7 @@ func writeGnuplotBundle(path: String,
             continue
         }
         let seriesIndex = variables.firstIndex { $0.name == series.name }!
-        let imageFile = path + "chart_\(chartName).png"
+        let imageFile = "chart_\(chartName).png"
         
         let gnuplotCommand =
         """
