@@ -34,9 +34,12 @@ extension PoieticTool {
         
         mutating func run() throws {
             let env = try ToolEnvironment(location: options.designLocation)
-            let design = try env.open()
-            let frame = design.deriveFrame()
+            guard let currentFrame = env.design.currentFrame else {
+                throw ToolError.emptyDesign
+            }
             
+            let frame = env.design.createFrame(cloning: currentFrame)
+
             guard let object = frame.object(stringReference: reference) else {
                 throw ToolError.unknownObject(reference)
             }

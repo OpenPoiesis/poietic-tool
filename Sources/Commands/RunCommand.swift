@@ -71,36 +71,36 @@ extension PoieticTool {
         
         mutating func run() throws {
             let env = try ToolEnvironment(location: options.designLocation)
-            let design = try env.open(allowEmpty: false)
+            guard let frame = env.design.currentFrame else {
+                throw ToolError.emptyDesign
+            }
 
             guard let solverType = StockFlowSimulation.SolverType(rawValue: solverName) else {
                 throw ToolError.unknownSolver(solverName)
             }
-            let frame = design.currentFrame
+
             let model = try compile(frame)
             let simulation = StockFlowSimulation(model, solver: solverType)
             let simulator = Simulator(model, simulation: simulation)
 
             // Collect names of nodes to be observed
             // -------------------------------------------------------------
-            let variables = model.stateVariables
+            var outputVariables: [StateVariable] = []
             if outputNames.isEmpty {
-                outputNames = Array(variables.map {$0.name})
+                outputVariables = model.stateVariables
             }
             else {
-                let allNames = model.stateVariables.map { $0.name }
-                let unknownNames = outputNames.filter {
-                    !allNames.contains($0)
+                var unknownNames: [String] = []
+                for name in outputNames {
+                    guard let variable = model.stateVariables.first(where: { $0.name == name }) else {
+                        unknownNames.append(name)
+                        continue
+                    }
+                    outputVariables.append(variable)
                 }
                 guard unknownNames.isEmpty else {
                     throw ToolError.unknownVariables(unknownNames)
                 }
-            }
-            // TODO: We do not need this any more
-            var outputVariables: [StateVariable] = []
-            for name in outputNames {
-                let variable = variables.first { $0.name == name }!
-                outputVariables.append(variable)
             }
 
             // TODO: Add JSON for controls

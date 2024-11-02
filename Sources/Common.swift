@@ -11,12 +11,8 @@ import PoieticCore
 import PoieticFlows
 import SystemPackage
 
-// FIXME: --vv BEGIN vv--
-
 let DefaultDesignLocation = "design.poietic"
 let DesignEnvironmentVariable = "POIETIC_DESIGN"
-
-// FIXME: --^^ END ^^--
 
 /// Error thrown by the command-line tool.
 ///
@@ -49,6 +45,7 @@ enum ToolError: Error, CustomStringConvertible {
     case malformedObjectReference(String)
     case unknownObject(String)
     case nodeExpected(String)
+    case unknownFrame(String)
 
     // Editing errors
     case noChangesToUndo
@@ -107,6 +104,8 @@ enum ToolError: Error, CustomStringConvertible {
             return "Malformed object reference '\(value). Use either object ID or object identifier."
         case .unknownObject(let value):
             return "Unknown object with reference: \(value)"
+        case .unknownFrame(let value):
+            return "Unknown frame with reference: \(value)"
         case .noChangesToUndo:
             return "No changes to undo"
         case .noChangesToRedo:
@@ -158,6 +157,8 @@ enum ToolError: Error, CustomStringConvertible {
         case .malformedObjectReference(_):
             return "Use either object ID or object identifier."
         case .unknownObject(_):
+            return nil
+        case .unknownFrame(_):
             return nil
         case .noChangesToUndo:
             return nil

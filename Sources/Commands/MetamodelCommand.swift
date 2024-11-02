@@ -39,9 +39,8 @@ extension PoieticTool {
         var objectType: String?
 
         mutating func run() throws {
-            var env = try ToolEnvironment(location: options.designLocation)
-            let design = try env.open()
-            let metamodel = design.metamodel
+            let env = try ToolEnvironment(location: options.designLocation)
+            let metamodel = env.design.metamodel
             
             if let typeName = objectType {
                 guard let type = metamodel.objectType(name: typeName) else {

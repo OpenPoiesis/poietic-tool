@@ -33,9 +33,11 @@ extension PoieticTool {
         
         mutating func run() throws {
             let env = try ToolEnvironment(location: options.designLocation)
-            let design = try env.open()
-            let frame = design.deriveFrame()
-            let graph = frame
+            guard let currentFrame = env.design.currentFrame else {
+                throw ToolError.emptyDesign
+            }
+            
+            let frame = env.design.createFrame(cloning: currentFrame)
             
             guard let type = FlowsMetamodel.objectType(name: typeName) else {
                 throw ToolError.unknownObjectType(typeName)
@@ -64,10 +66,7 @@ extension PoieticTool {
 
             }
 
-            let id = graph.createEdge(type,
-                                      origin: origin.id,
-                                      target: target.id,
-                                      components: [])
+            let id = frame.create(type, structure: .edge(origin.id, target.id))
             
             try env.accept(frame)
             try env.close()

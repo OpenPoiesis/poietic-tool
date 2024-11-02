@@ -10,11 +10,10 @@ import PoieticCore
 import PoieticFlows
 
 class ToolEnvironment {
-    public private(set) var design: Design!
+    public private(set) var design: Design
     public let url: URL
     
-//    public private(set) var readOnly: Bool
-    public var isOpen: Bool { design != nil }
+    public var isOpen: Bool = true
     
     /// Get the design URL. The database location can be specified by options,
     /// environment variable or as a default name, in respective order.
@@ -45,61 +44,45 @@ class ToolEnvironment {
         }
     }
     
-    public init(location: String?, design: Design? = nil) throws (ToolError) {
-        self.url = try Self.designURL(location)
-        self.design = design
+    public convenience init(location: String?, design: Design? = nil) throws (ToolError) {
+        try self.init(url: try Self.designURL(location), design: design)
     }
 
-    public init(url: URL, design: Design? = nil) {
-        self.design = design
+    public init(url: URL, design: Design? = nil) throws (ToolError) {
         self.url = url
-    }
-   
-    public func open(allowEmpty: Bool=true) throws (ToolError) -> Design {
-        guard self.design == nil else {
-            fatalError("Trying to open already opened design: \(url)")
+        if let design {
+            self.design = design
         }
-
-        let store = MakeshiftDesignStore(url: url)
-        let design: Design
-        do {
-            // FIXME: remove the metamodel here
-            design = try store.load(metamodel: FlowsMetamodel)
-        }
-        catch let error as FrameConstraintError {
-            printValidationError(error)
-            throw ToolError.constraintViolationError(error)
+        else {
+            let store = MakeshiftDesignStore(url: url)
+            let design: Design
+            do {
+                // TODO: remove the metamodel here
+                design = try store.load(metamodel: FlowsMetamodel)
+            }
+            catch let error as FrameConstraintError {
+                printValidationError(error)
+                throw ToolError.constraintViolationError(error)
+                
+            }
+            catch let error as PersistentStoreError {
+                throw ToolError.storeError(error)
+            }
+            catch {
+                throw ToolError.unknownError(error)
+            }
             
+            self.design = design
         }
-        catch let error as PersistentStoreError {
-            throw ToolError.storeError(error)
-        }
-        catch {
-            // FIXME: [IMPORTANT] we should not get here
-            throw ToolError.unknownError(error)
-        }
-        
-        if !allowEmpty && design.isEmpty {
-            throw ToolError.emptyDesign
-        }
-        
-        self.design = design
-        return design
     }
 
-    deinit {
-        if self.design != nil {
-            // FIXME: Make sure we close the environment. Then remove this.
-            print("DEBUG: The environment was not closed (the user should not be worried)")
-        }
-    }
     /// Try to accept a frame in a design.
     ///
     /// Tries to accept the frame. If the frame contains constraint violations, then
     /// the violations are printed out in a more human-readable format.
     ///
     public func accept(_ frame: MutableFrame) throws (ToolError) {
-        guard let design = self.design else {
+        guard isOpen else {
             fatalError("Trying to accept already closed design: \(url)")
         }
         do {
@@ -112,25 +95,8 @@ class ToolEnvironment {
         }
     }
     
-    private func printValidationError(_ error: FrameConstraintError) {
-        // FIXME: Print to stderr
-        for violation in error.violations {
-            let objects = violation.objects.map { String($0) }.joined(separator: ",")
-            print("Constraint error: \(violation.constraint.name) object IDs: \(objects)")
-            if let abstract = violation.constraint.abstract {
-                print("    - \(abstract)")
-            }
-        }
-        for item in error.objectErrors {
-            let (id, typeErrors) = item
-            for typeError in typeErrors {
-                print("Type error:\(id): \(typeError)")
-            }
-        }
-    }
-
     public func close() throws (ToolError) {
-        guard let design = self.design else {
+        guard isOpen else {
             fatalError("Trying to close already closed design: \(url)")
         }
         
@@ -141,7 +107,23 @@ class ToolEnvironment {
         catch {
             throw ToolError.unableToSaveDesign(error)
         }
-        self.design = nil
+        isOpen = false
     }
 }
 
+private func printValidationError(_ error: FrameConstraintError) {
+    // FIXME: Print to stderr
+    for violation in error.violations {
+        let objects = violation.objects.map { String($0) }.joined(separator: ",")
+        print("Constraint error: \(violation.constraint.name) object IDs: \(objects)")
+        if let abstract = violation.constraint.abstract {
+            print("    - \(abstract)")
+        }
+    }
+    for item in error.objectErrors {
+        let (id, typeErrors) = item
+        for typeError in typeErrors {
+            print("Type error:\(id): \(typeError)")
+        }
+    }
+}

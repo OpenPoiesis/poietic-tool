@@ -66,9 +66,11 @@ func createLibraryItem(fromDesignAt location: String) throws -> DesignLibraryIte
         url
     }
 
-    var env = ToolEnvironment(url: actualURL)
-    let design = try env.open()
-    let frame = design.currentFrame
+    let env = try ToolEnvironment(url: actualURL)
+
+    guard let frame = env.design.currentFrame else {
+        throw ToolError.emptyDesign
+    }
 
     let info = frame.filter(type: ObjectType.DesignInfo).first?.attributes ?? [:]
     

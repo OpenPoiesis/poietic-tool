@@ -82,7 +82,9 @@ extension PoieticTool {
         
         mutating func run() throws {
             let env = try ToolEnvironment(location: options.designLocation)
-            let design = try env.open()
+            guard let frame = env.design.currentFrame else {
+                throw ToolError.emptyDesign
+            }
 
             guard let testURL = URL(string: output) else {
                 fatalError("Invalid resource reference: \(output)")
@@ -103,7 +105,7 @@ extension PoieticTool {
                                        style: DefaultDOTStyle)
 
             // TODO: Allow export of a selection
-            let graph = design.currentFrame.graph
+            let graph = frame.graph
             try exporter.export(graph: graph)
         }
     }

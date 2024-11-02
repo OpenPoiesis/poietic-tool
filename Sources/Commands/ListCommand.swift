@@ -33,29 +33,28 @@ extension PoieticTool {
 
         mutating func run() throws {
             let env = try ToolEnvironment(location: options.designLocation)
-            let design = try env.open(allowEmpty: true)
 
-            if design.isEmpty {
+            guard let frame = env.design.currentFrame else {
                 try env.close()
-                throw CleanExit.message("The design design is empty.")
+                throw CleanExit.message("The design is empty or has no current frame")
             }
             
             switch listType {
             case .all:
-                listAll(design)
+                listAll(frame)
             case .names:
-                listNames(design)
+                listNames(frame)
             case .formulas:
-                listFormulas(design)
+                listFormulas(frame)
             case .charts:
-                listCharts(design)
+                listCharts(frame)
             }
 
             try env.close()
         }
         
-        func listAll(_ design: Design) {
-            let sorted = design.currentFrame.snapshots.sorted { left, right in
+        func listAll(_ frame: Frame) {
+            let sorted = frame.snapshots.sorted { left, right in
                 left.id < right.id
             }
             let nodes = sorted.compactMap { Node($0) }
@@ -101,8 +100,7 @@ extension PoieticTool {
             }
         }
         
-        func listNames(_ design: Design) {
-            let frame = design.currentFrame
+        func listNames(_ frame: Frame) {
             let names: [String] = frame.snapshots.compactMap { $0.name }
                 .sorted { $0.lexicographicallyPrecedes($1)}
             
@@ -111,8 +109,7 @@ extension PoieticTool {
             }
         }
         
-        func listFormulas(_ design: Design) {
-            let frame = design.currentFrame
+        func listFormulas(_ frame: Frame) {
             var result: [String: String] = [:]
             
             for object in frame.snapshots {
@@ -137,8 +134,7 @@ extension PoieticTool {
             }
         }
         
-        func listCharts(_ design: Design) {
-            let frame = design.currentFrame
+        func listCharts(_ frame: Frame) {
             let view = StockFlowView(frame)
             
             let charts = view.charts

@@ -37,8 +37,7 @@ poietic add Flow name=expenses formula=50
         
         mutating func run() throws {
             let env = try ToolEnvironment(location: options.designLocation)
-            let design = try env.open()
-            let frame = design.deriveFrame()
+            let frame = env.design.createFrame(cloning: env.design.currentFrame)
             
             guard let type = FlowsMetamodel.objectType(name: typeName) else {
                 throw ToolError.unknownObjectType(typeName)

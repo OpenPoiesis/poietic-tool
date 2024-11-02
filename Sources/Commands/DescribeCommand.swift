@@ -36,10 +36,10 @@ extension PoieticTool {
         var reference: String
         
         mutating func run() throws {
-            var env = try ToolEnvironment(location: options.designLocation)
-            let design = try env.open()
-            let frame = design.currentFrame
-            
+            let env = try ToolEnvironment(location: options.designLocation)
+            guard let frame = env.design.currentFrame else {
+                throw ToolError.emptyDesign
+            }
             guard let object = frame.object(stringReference: reference) else {
                 throw ToolError.unknownObject(reference)
             }

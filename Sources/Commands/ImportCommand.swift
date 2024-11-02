@@ -24,9 +24,11 @@ extension PoieticTool {
         
         mutating func run() throws {
             let env = try ToolEnvironment(location: options.designLocation)
-            let design = try env.open()
-            let frame = design.deriveFrame()
-            
+            guard let currentFrame = env.design.currentFrame else {
+                throw ToolError.emptyDesign
+            }
+            let frame = env.design.createFrame(cloning: currentFrame)
+
             let loader = ForeignFrameLoader()
             let foreignFrame = try readFrame(fromPath: fileName)
             do {

@@ -15,37 +15,61 @@ extension PoieticTool {
             = CommandConfiguration(abstract: "Get information about the design")
         @OptionGroup var options: Options
 
+        @Argument(help: "Frame ID (current if not provided)")
+        var frameID: String?
+
         mutating func run() throws {
             let env = try ToolEnvironment(location: options.designLocation)
-            let design = try env.open(allowEmpty: true)
-            guard !design.isEmpty else {
-                // We are nice when the design is empty in this command, as
-                // that is what we want to know.
-                print("Design is empty.")
-                try env.close()
-                return
-            }
 
-            let frame = design.currentFrame
+            let frame: StableFrame?
             
-            let items: [(String?, String?)] = [
+            if let frameID {
+                if let id = ObjectID(frameID) {
+                    if let stableFrame = env.design.frame(id) {
+                        frame = stableFrame
+                    }
+                    else {
+                        throw ToolError.unknownFrame(frameID)
+                    }
+                }
+                else {
+                    throw ToolError.unknownFrame(frameID)
+                }
+            }
+            else {
+                frame = env.design.currentFrame
+            }
+            
+            let currentFrameID: String
+            if let frame = env.design.currentFrame {
+                currentFrameID = "\(frame.id)"
+            }
+            else {
+                currentFrameID = "none"
+            }
+            
+            var items: [(String?, String?)] = [
                 ("Design", env.url.relativeString),
                 (nil, nil),
-                ("Current frame ID", "\(frame.id)"),
-                ("Frame object count", "\(frame.snapshots.count)"),
-                ("Total snapshot count", "\(design.validatedSnapshots.count)"),
-
-                (nil, nil),
-                ("Graph", nil),
-                ("Nodes", "\(frame.nodes.count)"),
-                ("Edges", "\(frame.edges.count)"),
+                ("Current frame ID", "\(currentFrameID)"),
+                ("Total snapshot count", "\(env.design.validatedSnapshots.count)"),
 
                 (nil, nil),
                 ("History", nil),
-                ("History frames", "\(design.versionHistory.count)"),
-                ("Undoable frames", "\(design.undoableFrames.count)"),
-                ("Redoable frames", "\(design.redoableFrames.count)"),
+                ("History frames", "\(env.design.versionHistory.count)"),
+                ("Undoable frames", "\(env.design.undoableFrames.count)"),
+                ("Redoable frames", "\(env.design.redoableFrames.count)"),
             ]
+            
+            if let frame {
+                items += [
+                    (nil, nil),
+                    ("Frame", "\(frame.id)"),
+                    ("All snapshots", "\(frame.snapshots.count)"),
+                    ("Nodes", "\(frame.graph.nodes.count)"),
+                    ("Edges", "\(frame.graph.edges.count)"),
+                ]
+            }
             
             let formattedItems = formatLabelledList(items)
             
