@@ -27,7 +27,7 @@ extension PoieticTool {
             guard let currentFrame = env.design.currentFrame else {
                 throw ToolError.emptyDesign
             }
-            let frame = env.design.createFrame(cloning: currentFrame)
+            let frame = env.design.createFrame(deriving: currentFrame)
 
             let loader = ForeignFrameLoader()
             let foreignFrame = try readFrame(fromPath: fileName)

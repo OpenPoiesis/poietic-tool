@@ -43,7 +43,7 @@ extension PoieticTool {
                 throw ToolError.emptyDesign
             }
             
-            let frame = env.design.createFrame(cloning: currentFrame)
+            let frame = env.design.createFrame(deriving: currentFrame)
 
             var objects: [ObjectSnapshot] = []
             if references.isEmpty {
@@ -63,7 +63,7 @@ extension PoieticTool {
             let step: Double = (2 * Double.pi) / Double(objects.count)
             
             for obj in objects {
-                let obj = frame.mutableObject(obj.id)
+                let obj = frame.mutate(obj.id)
                 let position = Point(center.x + radius * Double.cos(angle),
                                      center.y + radius * Double.sin(angle))
                 obj.position = position

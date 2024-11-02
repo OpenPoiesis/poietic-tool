@@ -29,7 +29,7 @@ extension PoieticTool {
                 throw ToolError.emptyDesign
             }
             
-            let frame = env.design.createFrame(cloning: currentFrame)
+            let frame = env.design.createFrame(deriving: currentFrame)
 
             let result = try autoConnectParameters(frame)
             

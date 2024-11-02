@@ -38,13 +38,13 @@ extension PoieticTool {
                 throw ToolError.emptyDesign
             }
             
-            let frame = env.design.createFrame(cloning: currentFrame)
+            let frame = env.design.createFrame(deriving: currentFrame)
 
             guard let object = frame.object(stringReference: reference) else {
                 throw ToolError.unknownObject(reference)
             }
 
-            let mutableObject = frame.mutableObject(object.id)
+            let mutableObject = frame.mutate(object.id)
 
             try setAttributeFromString(object: mutableObject,
                                        attribute: attributeName,

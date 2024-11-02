@@ -30,7 +30,7 @@ extension PoieticTool {
                 throw ToolError.emptyDesign
             }
             
-            let frame = env.design.createFrame(cloning: currentFrame)
+            let frame = env.design.createFrame(deriving: currentFrame)
 
             guard let object = frame.object(stringReference: reference) else {
                 throw ToolError.unknownObject(reference)

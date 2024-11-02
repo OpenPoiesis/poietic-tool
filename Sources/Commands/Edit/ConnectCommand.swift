@@ -37,7 +37,7 @@ extension PoieticTool {
                 throw ToolError.emptyDesign
             }
             
-            let frame = env.design.createFrame(cloning: currentFrame)
+            let frame = env.design.createFrame(deriving: currentFrame)
             
             guard let type = FlowsMetamodel.objectType(name: typeName) else {
                 throw ToolError.unknownObjectType(typeName)
