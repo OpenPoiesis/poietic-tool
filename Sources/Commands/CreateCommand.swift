@@ -21,8 +21,6 @@ extension PoieticTool {
                 help: "Poietic frame to import into the first frame.")
         var importPaths: [String] = []
 
-        // FIXME: [REFACTORING] add domains + metamodel
-        
         @Argument(help: "Path of design file to be created")
         var location: String = DefaultDesignLocation
 

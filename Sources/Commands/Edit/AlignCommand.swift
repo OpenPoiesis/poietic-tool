@@ -95,7 +95,7 @@ func align(objects: [ObjectSnapshot], mode: AlignmentMode, spacing: Double) {
     }
     let reference = referenceTuple.1
     
-    // FIXME: Implement top, bottom, left and right once we have bounding box
+    // TODO: Implement top, bottom, left and right once we have bounding box
     switch mode {
     case .alignCenterHorizontal, .alignTop, .alignBottom:
         for (object, current) in items {
@@ -106,7 +106,7 @@ func align(objects: [ObjectSnapshot], mode: AlignmentMode, spacing: Double) {
             object.position = Point(x:reference.x, y:current.y)
         }
     case .offsetHorizontal:
-        // FIXME: Spacing requires bounding box
+        // TODO: Spacing requires bounding box
         var x = reference.x
         
         for (object, current) in items {
@@ -114,7 +114,7 @@ func align(objects: [ObjectSnapshot], mode: AlignmentMode, spacing: Double) {
             x += spacing
         }
     case .offsetVertical:
-        // FIXME: Spacing requires bounding box
+        // TODO: Spacing requires bounding box
         var y = reference.y
         
         for (object, current) in items {
