@@ -193,12 +193,12 @@ func compile(_ frame: StableFrame) throws -> CompiledModel {
     // NOTE: Make this in sync with the PoieticServer
     // TODO: Use stderr as output
     let compiledModel: CompiledModel
+    let compiler = Compiler(frame: frame)
     do {
-        let compiler = Compiler(frame: frame)
         compiledModel = try compiler.compile()
     }
-    catch let error as NodeIssuesError {
-        for (id, issues) in error.issues {
+    catch {
+        for (id, issues) in compiler.issues {
             for issue in issues {
                 let object = frame[id]
                 let label: String
@@ -209,9 +209,9 @@ func compile(_ frame: StableFrame) throws -> CompiledModel {
                     label = "\(id)"
                 }
 
-                print("ERROR: node \(label): \(issue)")
-                if let issue = issue as? NodeIssue, let hint = issue.hint {
-                    print("HINT: node \(label): \(hint)")
+                print("ERROR: \(label): \(issue)")
+                if let hint = issue.hint {
+                    print("HINT: \(label): \(hint)")
                 }
             }
         }

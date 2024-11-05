@@ -81,7 +81,7 @@ class ToolEnvironment {
     /// Tries to accept the frame. If the frame contains constraint violations, then
     /// the violations are printed out in a more human-readable format.
     ///
-    public func accept(_ frame: MutableFrame) throws (ToolError) {
+    public func accept(_ frame: TransientFrame) throws (ToolError) {
         guard isOpen else {
             fatalError("Trying to accept already closed design: \(url)")
         }

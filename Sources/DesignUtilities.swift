@@ -35,7 +35,7 @@ public struct ParameterInfo {
 
 /// Automatically connect parameters in a frame.
 ///
-func autoConnectParameters(_ frame: MutableFrame) throws -> (added: [ParameterInfo], removed: [ParameterInfo]) {
+func autoConnectParameters(_ frame: TransientFrame) throws -> (added: [ParameterInfo], removed: [ParameterInfo]) {
     let view = StockFlowView(frame)
     var added: [ParameterInfo] = []
     var removed: [ParameterInfo] = []
