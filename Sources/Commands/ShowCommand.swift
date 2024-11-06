@@ -1,5 +1,5 @@
 //
-//  DescribeCommand.swift
+//  ShowCommand.swift
 //
 //
 //  Created by Stefan Urbanek on 29/06/2023.
@@ -61,11 +61,19 @@ func printObjectAsText(_ object: ObjectSnapshot) {
         ("Structure", "\(object.structure.type)"),
     ]
     
+    let traits = object.type.traits.map { $0.name }.joined(separator: ", ")
+    items.append(("Traits:", traits))
+    
     var seenAttributes: [String] = []
     
+    items.append((nil, nil))
+    items.append(("Attributes", nil))
+
     for trait in object.type.traits {
-        items.append((nil, nil))
-        items.append((trait.label, nil))
+        if trait.attributes.isEmpty {
+            continue
+        }
+        
 
         for attr in trait.attributes {
             let rawValue = object[attr.name]

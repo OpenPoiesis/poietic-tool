@@ -41,24 +41,40 @@ extension PoieticTool {
             }
             
             var items: [(String?, String?)] = [
-                ("Design", env.url.relativeString),
+                ("Design", env.url.relativeString)
+            ]
+
+            if let info = frame?.filter(type: ObjectType.DesignInfo).first {
+                if let text = try info["title"]?.stringValue() {
+                    items.append(("Title", text))
+                }
+                if let text = try info["author"]?.stringValue() {
+                    items.append(("Author", text))
+                }
+                if let text = try info["license"]?.stringValue() {
+                    items.append(("License", text))
+                }
+            }
+            
+            items += [
                 (nil, nil),
                 ("Total snapshot count", "\(env.design.validatedSnapshots.count)"),
 
                 (nil, nil),
-                ("History", nil),
-                ("History frames", "\(env.design.versionHistory.count)"),
-                ("Undoable frames", "\(env.design.undoableFrames.count)"),
-                ("Redoable frames", "\(env.design.redoableFrames.count)"),
+                ("History frame count", "\(env.design.versionHistory.count)"),
+                ("Undoable frame count", "\(env.design.undoableFrames.count)"),
+                ("Redoable frame count", "\(env.design.redoableFrames.count)"),
             ]
             
             if let frame {
+                let unstructuredCount = frame.filter { $0.structure.type == .unstructured }.count
                 items += [
                     (nil, nil),
-                    ("Current frame", "\(frame.id)"),
+                    ("Frame", "\(frame.id)"),
                     ("All snapshots", "\(frame.snapshots.count)"),
                     ("Nodes", "\(frame.graph.nodes.count)"),
                     ("Edges", "\(frame.graph.edges.count)"),
+                    ("Unstructured", "\(unstructuredCount)"),
                 ]
             }
             else {

@@ -105,7 +105,7 @@ enum ToolError: Error, CustomStringConvertible {
         case .unknownObject(let value):
             return "Unknown object with reference: \(value)"
         case .unknownFrame(let value):
-            return "Unknown frame with reference: \(value)"
+            return "Unknown frame: \(value)"
         case .noChangesToUndo:
             return "No changes to undo"
         case .noChangesToRedo:
