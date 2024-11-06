@@ -1,5 +1,5 @@
 //
-//  File.swift
+//  PoieticTool.swift
 //
 //
 //  Created by Stefan Urbanek on 27/06/2023.
@@ -16,7 +16,7 @@ import PoieticCore
 struct PoieticTool: ParsableCommand {
     static let configuration = CommandConfiguration(
         commandName: "poietic",
-        abstract: "Poietic design utility.",
+        abstract: "Poietic tool to edit and run poietic designs",
         subcommands: [
             CreateDB.self,
             Info.self,
@@ -35,6 +35,6 @@ struct PoieticTool: ParsableCommand {
 }
 
 struct Options: ParsableArguments {
-    @Option(name: [.customLong("design"), .customShort("d")], help: "Path to a design file.")
+    @Option(name: [.customLong("design"), .customShort("d")], help: "Path to a design file. If not provided, then \(DesignEnvironmentVariable) environment variable or 'design.poietic' is used")
     var designLocation: String?
 }

@@ -20,7 +20,7 @@ extension ObjectType {
 
         if !traits.isEmpty {
             let inlined: [[InlineMarkup]] = traits.map { [InlineCode($0.name)] }
-            let joined = inlined.joined(separator: [Text(", ")]).flatMap { $0 }
+            let joined = inlined.joined(separator: [Text(", ")]).compactMap { $0 }
             doc.append(Paragraph(
                 [Strong(Text("Traits: "))] + joined
             ))

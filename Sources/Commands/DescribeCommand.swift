@@ -105,7 +105,7 @@ func printObjectAsText(_ object: ObjectSnapshot) {
     }
     else {
         let formattedItems = formatLabelledList(items,
-                                                labelWidth: AttributeColumnWidth)
+                                                minimumWidth: AttributeColumnWidth)
         
         for item in formattedItems {
             print(item)

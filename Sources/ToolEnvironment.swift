@@ -82,9 +82,8 @@ class ToolEnvironment {
     /// the violations are printed out in a more human-readable format.
     ///
     public func accept(_ frame: TransientFrame) throws (ToolError) {
-        guard isOpen else {
-            fatalError("Trying to accept already closed design: \(url)")
-        }
+        precondition(isOpen, "Trying to accept already closed design: \(url)")
+
         do {
             try design.accept(frame)
         }
@@ -96,9 +95,7 @@ class ToolEnvironment {
     }
     
     public func close() throws (ToolError) {
-        guard isOpen else {
-            fatalError("Trying to close already closed design: \(url)")
-        }
+        precondition(isOpen, "Trying to close already closed design: \(url)")
         
         let store = MakeshiftDesignStore(url: url)
         do {

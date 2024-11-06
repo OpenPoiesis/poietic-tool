@@ -26,11 +26,6 @@ extension Frame {
         if let id = ObjectID(stringReference), contains(id) {
             return self[id]
         }
-        else if let snapshot = object(named: stringReference) {
-            return snapshot
-        }
-        else {
-            return nil
-        }
+        return object(named: stringReference)
     }
 }

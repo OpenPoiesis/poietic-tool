@@ -126,7 +126,7 @@ extension PoieticTool {
             }
             
             let sorted = result.keys.sorted {
-                $0.lexicographicallyPrecedes($1)
+                $0.localizedLowercase.lexicographicallyPrecedes($1.localizedLowercase)
             }
             
             for name in sorted {

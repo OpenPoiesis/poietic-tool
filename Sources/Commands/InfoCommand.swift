@@ -40,18 +40,9 @@ extension PoieticTool {
                 frame = env.design.currentFrame
             }
             
-            let currentFrameID: String
-            if let frame = env.design.currentFrame {
-                currentFrameID = "\(frame.id)"
-            }
-            else {
-                currentFrameID = "none"
-            }
-            
             var items: [(String?, String?)] = [
                 ("Design", env.url.relativeString),
                 (nil, nil),
-                ("Current frame ID", "\(currentFrameID)"),
                 ("Total snapshot count", "\(env.design.validatedSnapshots.count)"),
 
                 (nil, nil),
@@ -64,10 +55,16 @@ extension PoieticTool {
             if let frame {
                 items += [
                     (nil, nil),
-                    ("Frame", "\(frame.id)"),
+                    ("Current frame", "\(frame.id)"),
                     ("All snapshots", "\(frame.snapshots.count)"),
                     ("Nodes", "\(frame.graph.nodes.count)"),
                     ("Edges", "\(frame.graph.edges.count)"),
+                ]
+            }
+            else {
+                items += [
+                    (nil, nil),
+                    ("Current frame", "no current frame"),
                 ]
             }
             

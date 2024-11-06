@@ -6,22 +6,11 @@
 //
 
 
-extension String {
-    /// Returns a right-aligned string padded with `padding` to the desired
-    /// width `width`.
-    ///
-    public func alignRight(_ width: Int, padding: String = " ") -> String {
-        // TODO: Allow lenght of padding to be more than one character
-        let repeats = width - self.count
-        return String(repeating: padding, count: repeats) + self
-    }
-}
-
 func formatLabelledList(_ items: [(String?, String?)],
                         separator: String = ": ",
-                        labelWidth: Int? = nil) -> [String] {
-    let actualWidth = labelWidth
-                        ?? items.map { $0.0?.count ?? 0 }.max() ?? 0
+                        minimumWidth: Int? = nil) -> [String] {
+    let maxWidth = items.map { $0.0?.count ?? 0 }.max() ?? 0
+    let width = max(maxWidth, minimumWidth ?? 0)
     
     var result: [String] = []
     
@@ -29,17 +18,17 @@ func formatLabelledList(_ items: [(String?, String?)],
         let item: String
 
         if let label {
-            let alignedLabel = label.alignRight(actualWidth)
+            let padding = String(repeating: " ", count: width - label.count)
             if let value {
-                item = "\(alignedLabel)\(separator)\(value)"
+                item = "\(label)\(padding)\(separator)\(value)"
             }
             else {
-                item = "\(alignedLabel)"
+                item = "\(label)"
             }
         }
         else {
             if let value {
-                let padding = "".alignRight(actualWidth + separator.count)
+                let padding = String(repeating: " ", count: width)
                 item = "\(padding)\(value)"
             }
             else {
