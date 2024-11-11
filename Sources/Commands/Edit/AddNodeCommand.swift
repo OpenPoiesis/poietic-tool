@@ -43,19 +43,17 @@ poietic add Flow name=expenses formula=50
                 throw ToolError.unknownObjectType(typeName)
             }
 
-            let id: ObjectID
+            let object: MutableObject
             
             switch type.structuralType {
             case .unstructured:
-                id = frame.create(type)
+                object = frame.create(type)
             case .node:
-                id = frame.createNode(type)
+                object = frame.create(type, structure: .node)
             default:
                 throw ToolError.structuralTypeMismatch("node or unstructured",
                                                        type.structuralType.rawValue)
             }
-            
-            let object = frame[id]
             
             for item in attributeAssignments {
                 guard let split = parseValueAssignment(item) else {
@@ -71,8 +69,7 @@ poietic add Flow name=expenses formula=50
             try env.accept(frame)
             try env.close()
 
-            print("Created node \(id)")
+            print("Created node \(object.id)")
         }
     }
-
 }

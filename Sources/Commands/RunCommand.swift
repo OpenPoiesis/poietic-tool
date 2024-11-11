@@ -116,7 +116,7 @@ extension PoieticTool {
                     throw ToolError.typeMismatch("constant override '\(key)'", stringValue, "double")
                 }
                 guard let variable = model.variable(named: key) else {
-                    throw ToolError.unknownObjectName(key)
+                    throw ToolError.unknownObject(key)
                 }
                 overrideConstants[variable.id] = doubleValue
             }
@@ -178,7 +178,6 @@ func writeCSV(path: String,
     
 }
 
-// TODO: This is quickly put together, just to see what we need. Requires proper design.
 /// Write a Gnuplot directory bundle.
 ///
 /// The function will create a directory at `path` if it does not exist and then

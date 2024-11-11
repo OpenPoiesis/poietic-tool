@@ -61,18 +61,16 @@ extension PoieticTool {
             
             let frame = env.design.createFrame(deriving: currentFrame)
 
-            var objects: [ObjectSnapshot] = []
+            var objects: [MutableObject] = []
             
             for ref in references {
                 guard let object = frame.object(stringReference: ref) else {
                     throw ToolError.unknownObject(ref)
                 }
-                objects.append(object)
+                objects.append(frame.mutate(object.id))
             }
 
-            align(objects: objects,
-                  mode: mode,
-                  spacing: spacing)
+            align(objects: objects, mode: mode, spacing: spacing)
             
             try env.accept(frame)
             try env.close()
@@ -80,8 +78,8 @@ extension PoieticTool {
     }
 }
 
-func align(objects: [ObjectSnapshot], mode: AlignmentMode, spacing: Double) {
-    let items: [(ObjectSnapshot, Point)] = objects.compactMap {
+func align(objects: [MutableObject], mode: AlignmentMode, spacing: Double) {
+    let items: [(MutableObject, Point)] = objects.compactMap {
         if let position = $0.position {
             ($0, position)
         }

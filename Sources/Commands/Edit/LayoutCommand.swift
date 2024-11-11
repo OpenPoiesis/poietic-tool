@@ -45,16 +45,16 @@ extension PoieticTool {
             
             let frame = env.design.createFrame(deriving: currentFrame)
 
-            var objects: [ObjectSnapshot] = []
+            var objects: [MutableObject] = []
             if references.isEmpty {
-                objects = frame.nodes.map { $0.snapshot }
+                objects = frame.snapshots.map { frame.mutate($0.id) }
             }
             else {
                 for ref in references {
                     guard let object = frame.object(stringReference: ref) else {
                         throw ToolError.unknownObject(ref)
                     }
-                    objects.append(object)
+                    objects.append(frame.mutate(object.id))
                 }
             }
             let center = Point(100.0, 100.0)

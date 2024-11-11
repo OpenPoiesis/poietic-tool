@@ -35,7 +35,6 @@ enum ToolError: Error, CustomStringConvertible {
 //    case foreignFrameError(String, ForeignFrameError)
     
     // Simulation errors
-    case unknownObjectName(String)
     case unknownVariables([String])
     case unknownSolver(String)
     case compilationError
@@ -91,8 +90,6 @@ enum ToolError: Error, CustomStringConvertible {
             
         case .unknownSolver(let value):
             return "Unknown solver '\(value)'"
-        case .unknownObjectName(let value):
-            return "Unknown object with name '\(value)'"
         case .unknownVariables(let names):
             let varlist = names.joined(separator: ", ")
             return "Unknown variables: \(varlist)"
@@ -103,7 +100,7 @@ enum ToolError: Error, CustomStringConvertible {
         case .malformedObjectReference(let value):
             return "Malformed object reference '\(value). Use either object ID or object identifier."
         case .unknownObject(let value):
-            return "Unknown object with reference: \(value)"
+            return "Unknown object '\(value)'"
         case .unknownFrame(let value):
             return "Unknown frame: \(value)"
         case .noChangesToUndo:
@@ -146,8 +143,6 @@ enum ToolError: Error, CustomStringConvertible {
             
         case .unknownSolver(_):
             return "Check the list of available solvers by running the 'info' command."
-        case .unknownObjectName(_):
-            return "See the list of available names by using the 'list' command."
         case .unknownVariables(_):
             return "See the list of available simulation variables using the 'list' command."
         case .compilationError:
@@ -157,7 +152,7 @@ enum ToolError: Error, CustomStringConvertible {
         case .malformedObjectReference(_):
             return "Use either object ID or object identifier."
         case .unknownObject(_):
-            return nil
+            return "See the list of available objects and their names by using the 'list' command."
         case .unknownFrame(_):
             return nil
         case .noChangesToUndo:
@@ -240,7 +235,7 @@ func parseValueAssignment(_ assignment: String) -> (String, String)? {
     return (String(split[0]), String(split[1]))
 }
 
-func setAttributeFromString(object: ObjectSnapshot,
+func setAttributeFromString(object: MutableObject,
                             attribute attributeName: String,
                             string: String) throws {
     let type = object.type

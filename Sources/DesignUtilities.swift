@@ -61,7 +61,7 @@ func autoConnectParameters(_ frame: TransientFrame) throws -> (added: [Parameter
             case .missing:
                 // Find missing parameter
                 guard let parameterID = frame.object(named: name)?.id else {
-                    throw ToolError.unknownObjectName(name)
+                    throw ToolError.unknownObject(name)
                 }
                 let edge = frame.createEdge(ObjectType.Parameter,
                                             origin: parameterID,
@@ -70,7 +70,7 @@ func autoConnectParameters(_ frame: TransientFrame) throws -> (added: [Parameter
                                          parameterID: parameterID,
                                          targetID: target.id,
                                          targetName: target.name,
-                                         edgeID: edge)
+                                         edgeID: edge.id)
                 added.append(info)
             case let .unused(node, edge):
                 frame.remove(edge: edge)

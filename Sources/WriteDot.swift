@@ -85,7 +85,7 @@ extension PoieticTool {
             guard let frame = env.design.currentFrame else {
                 throw ToolError.emptyDesign
             }
-
+            
             guard let testURL = URL(string: output) else {
                 fatalError("Invalid resource reference: \(output)")
             }
@@ -104,9 +104,7 @@ extension PoieticTool {
                                        missingLabel: missingLabel,
                                        style: DefaultDOTStyle)
 
-            // TODO: Allow export of a selection
-            let graph = frame.graph
-            try exporter.export(graph: graph)
+            try exporter.export(frame)
         }
     }
 }

@@ -52,7 +52,7 @@ extension PoieticTool {
                 throw ToolError.unknownObject( self.origin)
             }
             
-            guard let origin = Node(originObject) else {
+            guard originObject.structure == .node else {
                 throw ToolError.nodeExpected(self.origin)
 
             }
@@ -61,18 +61,17 @@ extension PoieticTool {
                 throw ToolError.unknownObject(self.target)
             }
 
-            guard let target = Node(targetObject) else {
+            guard targetObject.structure == .node else {
                 throw ToolError.nodeExpected(target)
 
             }
 
-            let id = frame.create(type, structure: .edge(origin.id, target.id))
+            let id = frame.create(type, structure: .edge(originObject.id, targetObject.id))
             
             try env.accept(frame)
             try env.close()
 
             print("Created edge \(id)")
-//            print("Current frame ID: \(design.currentFrame.id)")
         }
     }
 

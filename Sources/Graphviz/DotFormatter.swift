@@ -63,7 +63,6 @@ public class DotFormatter {
     /// - an HTML string (<...>).  (not implemented)
     ///
     static func quote(_ string: String) -> String {
-        // TODO: We are not handling proper numerals, we just handle alphanumerics
         /*
         ID is:
 
@@ -76,10 +75,9 @@ public class DotFormatter {
          
          The HTML string handling is not implemented here.
         */
-        // TODO: We are not doing the HTML string
+        // Note: We are not doing the HTML string
         
         guard !string.isEmpty else {
-            // TODO: Should we raise an error here?
             return "\"\""
         }
 

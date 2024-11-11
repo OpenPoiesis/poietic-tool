@@ -20,7 +20,6 @@ extension PoieticTool {
             case all = "all"
             case names = "names"
             case formulas = "formulas"
-            case charts = "charts"
             case graphicalFunctions = "graphical-functions"
             var defaultValueDescription: String { "all" }
             
@@ -49,8 +48,6 @@ extension PoieticTool {
                 listFormulas(frame)
             case .graphicalFunctions:
                 listGraphicalFunctions(frame)
-            case .charts:
-                listCharts(frame)
             }
 
             try env.close()
@@ -58,12 +55,12 @@ extension PoieticTool {
     }
 }
 
-func listAll(_ frame: Frame) {
+func listAll(_ frame: StableFrame) {
     let sorted = frame.snapshots.sorted { left, right in
         left.id < right.id
     }
-    let nodes = sorted.compactMap { Node($0) }
-    let edges = sorted.compactMap { Edge($0) }
+    let nodes = sorted.filter { $0.structure.type == .node }
+    let edges = sorted.compactMap { EdgeSnapshot($0) }
     let unstructured = sorted.filter { $0.structure.type == .unstructured }
 
     if unstructured.count > 0 {
@@ -105,7 +102,7 @@ func listAll(_ frame: Frame) {
     }
 }
 
-func listNames(_ frame: Frame) {
+func listNames(_ frame: StableFrame) {
     let names: [String] = frame.snapshots.compactMap { $0.name }
         .sorted { $0.lexicographicallyPrecedes($1)}
     
@@ -114,7 +111,7 @@ func listNames(_ frame: Frame) {
     }
 }
 
-func listFormulas(_ frame: Frame) {
+func listFormulas(_ frame: StableFrame) {
     var result: [String: String] = [:]
     
     for object in frame.snapshots {
@@ -137,7 +134,7 @@ func listFormulas(_ frame: Frame) {
     }
 }
 
-func listGraphicalFunctions(_ frame: Frame) {
+func listGraphicalFunctions(_ frame: StableFrame) {
     var result: [String: [Point]?] = [:]
     
     for object in frame.snapshots {
@@ -165,21 +162,5 @@ func listGraphicalFunctions(_ frame: Frame) {
             print("    (invalid point array representation)")
         }
         
-    }
-}
-
-func listCharts(_ frame: Frame) {
-    let view = StockFlowView(frame)
-    
-    let charts = view.charts
-    
-    let sorted = charts.sorted {
-        ($0.node.name!).lexicographicallyPrecedes($1.node.name!)
-    }
-    
-    for chart in sorted {
-        let seriesStr = chart.series.map { $0.name! }
-            .joined(separator: " ")
-        print("\(chart.node.name!): \(seriesStr)")
     }
 }

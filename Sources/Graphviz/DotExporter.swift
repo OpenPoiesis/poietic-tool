@@ -54,15 +54,15 @@ public class DotExporter {
     }
     
     /// Export nodes and edges into the output.
-    public func export(graph: Graph) throws {
+    public func export(_ frame: StableFrame) throws  {
         var output: String = ""
         let formatter = DotFormatter(name: name, type: .directed)
 
         output = formatter.header()
         
-        for node in graph.nodes {
+        for node in frame.nodes {
             let label: String
-
+            
             if let attribute = labelAttribute {
                 if let value = node.attribute(forKey: attribute) {
                     label = String(describing: value)
@@ -78,17 +78,17 @@ public class DotExporter {
                 label = String(node.id)
             }
 
-            var attributes = format(graph: graph, node: node)
+            var attributes = format(graph: frame, node: node)
             attributes["label"] = label
 
             let id = "\(node.id)"
             output += formatter.node(id, attributes: attributes)
         }
 
-        for edge in graph.edges {
-            let attributes = format(graph: graph, edge: edge)
+        for edge in frame.edges {
+            var attributes = format(graph: frame, edge: edge)
             // TODO: Edge label
-            
+            // attributes["label"] = edge.type.name
             output += formatter.edge(from:"\(edge.origin)",
                                      to:"\(edge.target)",
                                      attributes: attributes)
@@ -104,11 +104,11 @@ public class DotExporter {
         }
     }
     
-    public func format(graph: Graph, node: Node) -> [String:String] {
+    public func format(graph: StableFrame, node: StableObject) -> [String:String] {
         var combined: [String:String] = [:]
         
         for style in style?.nodeStyles ?? [] {
-            if style.predicate.match(frame: graph.frame, object: node.snapshot) {
+            if style.predicate.match(frame: graph, object: node) {
                 combined.merge(style.attributes) { (_, new) in new}
             }
         }
@@ -116,11 +116,11 @@ public class DotExporter {
         return combined
     }
 
-    public func format(graph: Graph, edge: Edge) -> [String:String] {
+    public func format(graph: StableFrame, edge: EdgeSnapshot) -> [String:String] {
         var combined: [String:String] = [:]
         
         for style in style?.edgeStyles ?? [] {
-            if style.predicate.match(frame: graph.frame, object: edge.snapshot) {
+            if style.predicate.match(frame: graph, object: edge.snapshot) {
                 combined.merge(style.attributes) { (_, new) in new}
             }
         }
