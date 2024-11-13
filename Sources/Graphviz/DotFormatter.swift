@@ -183,8 +183,8 @@ public class DotFormatter {
     /// Returns a string representing an edge statement.
     ///
     /// - Parameters:
-    ///   - from: Originating node identifier.
-    ///   - to: Target node identifier.
+    ///   - origin: Originating node identifier.
+    ///   - target: Target node identifier.
     ///   - attributes: Optional dictionary of attributes for a node.
     ///
     public func edge(from origin:String, to target:String, attributes:

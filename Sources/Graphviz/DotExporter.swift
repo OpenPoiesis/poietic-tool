@@ -38,8 +38,10 @@ public class DotExporter {
     ///     - path: Path to the file where the output is written
     ///     - name: Name of the graph in the output
     ///     - labelAttribute: Attribute of exported nodes that will be used
-    ///     as a label of nodes in the output. If not set then node ID will be
-    ///     used.
+    ///       as a label of nodes in the output. If not set then node ID will be
+    ///       used.
+    ///     - style: style of the graph
+    ///     - missingLabel: text to be used when a label attribute is not present
     ///
     public init(path: FilePath,
                 name: String,
@@ -86,7 +88,7 @@ public class DotExporter {
         }
 
         for edge in frame.edges {
-            var attributes = format(graph: frame, edge: edge)
+            let attributes = format(graph: frame, edge: edge)
             // TODO: Edge label
             // attributes["label"] = edge.type.name
             output += formatter.edge(from:"\(edge.origin)",
@@ -108,7 +110,7 @@ public class DotExporter {
         var combined: [String:String] = [:]
         
         for style in style?.nodeStyles ?? [] {
-            if style.predicate.match(frame: graph, object: node) {
+            if style.predicate.match(node, in: graph) {
                 combined.merge(style.attributes) { (_, new) in new}
             }
         }
@@ -120,7 +122,7 @@ public class DotExporter {
         var combined: [String:String] = [:]
         
         for style in style?.edgeStyles ?? [] {
-            if style.predicate.match(frame: graph, object: edge.snapshot) {
+            if style.predicate.match(edge.snapshot, in: graph) {
                 combined.merge(style.attributes) { (_, new) in new}
             }
         }
