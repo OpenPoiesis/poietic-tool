@@ -281,9 +281,9 @@ func makeFileURL(fromPath path: String) throws (ToolError) -> URL {
     return url
 }
 
-func readFrame(fromPath path: String) throws (ToolError) -> ForeignFrame {
+func readFrame(fromPath path: String) throws (ToolError) -> any ForeignFrameProtocol {
     let reader = JSONFrameReader()
-    let foreignFrame: ForeignFrame
+    let foreignFrame: any ForeignFrameProtocol
     let url = try makeFileURL(fromPath: path)
     
     do {
