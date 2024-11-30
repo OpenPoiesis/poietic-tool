@@ -55,7 +55,7 @@ extension PoieticTool {
     }
 }
 
-func listAll(_ frame: StableFrame) {
+func listAll(_ frame: DesignFrame) {
     let sorted = frame.snapshots.sorted { left, right in
         left.id < right.id
     }
@@ -102,7 +102,7 @@ func listAll(_ frame: StableFrame) {
     }
 }
 
-func listNames(_ frame: StableFrame) {
+func listNames(_ frame: DesignFrame) {
     let names: [String] = frame.snapshots.compactMap { $0.name }
         .sorted { $0.lexicographicallyPrecedes($1)}
     
@@ -111,7 +111,7 @@ func listNames(_ frame: StableFrame) {
     }
 }
 
-func listFormulas(_ frame: StableFrame) {
+func listFormulas(_ frame: DesignFrame) {
     var result: [String: String] = [:]
     
     for object in frame.snapshots {
@@ -134,7 +134,7 @@ func listFormulas(_ frame: StableFrame) {
     }
 }
 
-func listGraphicalFunctions(_ frame: StableFrame) {
+func listGraphicalFunctions(_ frame: DesignFrame) {
     var result: [String: [Point]?] = [:]
     
     for object in frame.snapshots {

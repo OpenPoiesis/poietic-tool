@@ -21,7 +21,7 @@ extension PoieticTool {
         mutating func run() throws {
             let env = try ToolEnvironment(location: options.designLocation)
 
-            let frame: StableFrame?
+            let frame: DesignFrame?
             
             if let frameID {
                 if let id = ObjectID(frameID) {
