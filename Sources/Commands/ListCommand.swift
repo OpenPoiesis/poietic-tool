@@ -60,7 +60,7 @@ func listAll(_ frame: StableFrame) {
         left.id < right.id
     }
     let nodes = sorted.filter { $0.structure.type == .node }
-    let edges = sorted.compactMap { EdgeSnapshot($0) }
+    let edges = sorted.compactMap { EdgeObject($0) }
     let unstructured = sorted.filter { $0.structure.type == .unstructured }
 
     if unstructured.count > 0 {

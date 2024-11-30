@@ -53,7 +53,7 @@ extension PoieticTool {
     }
 }
 
-func printObjectAsText(_ object: StableObject) {
+func printObjectAsText(_ object: DesignObject) {
     var items: [(String?, String?)] = [
         ("Type", "\(object.type.name)"),
         ("Object ID", "\(object.id)"),
@@ -122,7 +122,7 @@ func printObjectAsText(_ object: StableObject) {
 
 }
 
-func printObjectAsJSON(_ object: StableObject) {
+func printObjectAsJSON(_ object: DesignObject) {
     let data = try! JSONFrameWriter.objectToJSON(object)
     let output = String(data: data, encoding: .utf8)!
     print(output)

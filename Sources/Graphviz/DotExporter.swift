@@ -106,7 +106,7 @@ public class DotExporter {
         }
     }
     
-    public func format(graph: StableFrame, node: StableObject) -> [String:String] {
+    public func format(graph: StableFrame, node: DesignObject) -> [String:String] {
         var combined: [String:String] = [:]
         
         for style in style?.nodeStyles ?? [] {
@@ -118,7 +118,7 @@ public class DotExporter {
         return combined
     }
 
-    public func format(graph: StableFrame, edge: EdgeSnapshot) -> [String:String] {
+    public func format(graph: StableFrame, edge: EdgeObject<StableFrame.Snapshot>) -> [String:String] {
         var combined: [String:String] = [:]
         
         for style in style?.edgeStyles ?? [] {

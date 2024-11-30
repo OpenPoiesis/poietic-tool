@@ -58,7 +58,7 @@ extension PoieticTool {
             
             items += [
                 (nil, nil),
-                ("Total snapshot count", "\(env.design.validatedSnapshots.count)"),
+                ("Total snapshot count", "\(env.design.validatedObjects.count)"),
 
                 (nil, nil),
                 ("History frame count", "\(env.design.versionHistory.count)"),
