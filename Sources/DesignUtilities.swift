@@ -22,13 +22,13 @@ import PoieticCore
 
 public struct ParameterInfo {
     /// Name of the parameter
-    let parameterName: String
+    let parameterName: String?
     /// ID of the parameter node
     let parameterID: ObjectID
-    /// ID of node using the parameter
-    let targetID: ObjectID
     /// Name of node using the parameter
     let targetName: String?
+    /// ID of node using the parameter
+    let targetID: ObjectID
     /// ID of the edge from the parameter to the target
     let edgeID: ObjectID
 }
@@ -54,36 +54,33 @@ func autoConnectParameters(_ frame: TransientFrame) throws -> (added: [Parameter
         }
         let allNodeVars: Set<String> = Set(component.parsedFormula.allVariables)
         let required = Array(allNodeVars.subtracting(builtinNames))
-        let params = view.parameters(target.id, required: required)
+        let resolved = view.resolveParameters(target.id, required: required)
         
-        for (name, status) in params {
-            switch status {
-            case .missing:
-                // Find missing parameter
-                guard let parameterID = frame.object(named: name)?.id else {
-                    throw ToolError.unknownObject(name)
-                }
-                let edge = frame.createEdge(ObjectType.Parameter,
-                                            origin: parameterID,
-                                          target: target.id)
-                let info = ParameterInfo(parameterName: name,
-                                         parameterID: parameterID,
-                                         targetID: target.id,
-                                         targetName: target.name,
-                                         edgeID: edge.id)
-                added.append(info)
-            case let .unused(node, edge):
-                frame.remove(edge: edge)
-                let info = ParameterInfo(parameterName: name,
-                                         parameterID: node,
-                                         targetID: target.id,
-                                         targetName: target.name,
-                                         edgeID: edge)
-                removed.append(info)
-            case .used:
-                continue
+        for name in resolved.missing {
+            guard let paramNode = frame.object(named: name) else {
+                throw ToolError.unknownObject(name)
             }
+            let edge = frame.createEdge(.Parameter, origin: paramNode.id, target: target.id)
+            let info = ParameterInfo(parameterName: name,
+                                     parameterID: paramNode.id,
+                                     targetName: target.name,
+                                     targetID: target.id,
+                                     edgeID: edge.id)
+            added.append(info)
+        }
+
+        for edge in resolved.unused {
+            let node = frame.object(edge.origin)
+            frame.removeCascading(edge.id)
+            
+            let info = ParameterInfo(parameterName: node.name,
+                                     parameterID: node.id,
+                                     targetName: target.name,
+                                     targetID: target.id,
+                                     edgeID: edge.id)
+            removed.append(info)
         }
     }
+
     return (added: added, removed: removed)
 }

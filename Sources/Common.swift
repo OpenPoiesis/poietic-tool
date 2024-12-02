@@ -30,7 +30,7 @@ enum ToolError: Error, CustomStringConvertible {
     
     // Database errors
     case constraintViolationError(FrameConstraintError)
-    
+    case unnamedObject(ObjectID)
     // Import error
 //    case foreignFrameError(String, ForeignFrameError)
     
@@ -87,7 +87,8 @@ enum ToolError: Error, CustomStringConvertible {
                 detail = "unspecified validation error(s)"
             }
             return "Database validation failed: \(detail)"
-            
+        case .unnamedObject(let id):
+            return "Object \(id) has no name"
         case .unknownSolver(let value):
             return "Unknown solver '\(value)'"
         case .unknownVariables(let names):
@@ -149,6 +150,8 @@ enum ToolError: Error, CustomStringConvertible {
             return nil
         case .constraintError:
             return nil
+        case .unnamedObject(let id):
+            return "Set object's attribute 'name'"
         case .malformedObjectReference(_):
             return "Use either object ID or object identifier."
         case .unknownObject(_):
