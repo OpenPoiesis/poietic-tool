@@ -40,7 +40,7 @@ func autoConnectParameters(_ frame: TransientFrame) throws -> (added: [Parameter
     var added: [ParameterInfo] = []
     var removed: [ParameterInfo] = []
     
-    let builtinNames: Set<String> = Set(Simulator.BuiltinVariables.map {
+    let builtinNames: Set<String> = Set(BuiltinVariable.allCases.map {
         $0.name
     })
 

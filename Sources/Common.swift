@@ -150,7 +150,7 @@ enum ToolError: Error, CustomStringConvertible {
             return nil
         case .constraintError:
             return nil
-        case .unnamedObject(let id):
+        case .unnamedObject(_):
             return "Set object's attribute 'name'"
         case .malformedObjectReference(_):
             return "Use either object ID or object identifier."
