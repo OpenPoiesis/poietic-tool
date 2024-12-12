@@ -190,7 +190,7 @@ func writeCSV(path: String,
 /// If the path is '-' then the current directory will be used.
 ///
 func writeGnuplotBundle(path: String,
-                        compiledModel: CompiledModel,
+                        compiledModel: SimulationPlan,
                         output: [SimulationState]) throws {
     let path = if path == "-" { "." } else { path }
     let variables = compiledModel.stateVariables

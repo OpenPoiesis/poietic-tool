@@ -187,10 +187,10 @@ enum ToolError: Error, CustomStringConvertible {
 
 }
 
-func compile(_ frame: DesignFrame) throws -> CompiledModel {
+func compile(_ frame: DesignFrame) throws -> SimulationPlan {
     // NOTE: Make this in sync with the PoieticServer
     // TODO: Use stderr as output
-    let compiledModel: CompiledModel
+    let compiledModel: SimulationPlan
     let compiler = Compiler(frame: frame)
     do {
         compiledModel = try compiler.compile()
