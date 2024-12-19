@@ -243,8 +243,8 @@ func setAttributeFromString(object: MutableObject,
                             string: String) throws {
     let type = object.type
     if let attr = type.attribute(attributeName), attr.type.isArray {
-        let json = try JSONValue(string: string)
-        let arrayValue = try Variant.fromJSON(json)
+        let json = try JSONValue(parsing: string)
+        let arrayValue = try Variant(json: json)
         object.setAttribute(value: arrayValue,
                                 forKey: attributeName)
     }
