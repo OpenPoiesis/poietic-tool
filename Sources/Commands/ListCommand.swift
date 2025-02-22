@@ -60,7 +60,7 @@ func listAll(_ frame: DesignFrame) {
         left.id < right.id
     }
     let nodes = sorted.filter { $0.structure.type == .node }
-    let edges = sorted.compactMap { EdgeObject($0) }
+    let edges = sorted.compactMap { EdgeSnapshot($0,in: frame) }
     let unstructured = sorted.filter { $0.structure.type == .unstructured }
 
     if unstructured.count > 0 {
@@ -89,12 +89,12 @@ func listAll(_ frame: DesignFrame) {
     }
     if edges.count > 0 {
         print("EDGES")
-        for object in edges {
-            let name: String = object.name ?? "(unnamed)"
+        for edge in edges {
+            let name: String = edge.object.name ?? "(unnamed)"
             let line: String = [
-                "\(object.id)",
-                "\(object.origin)-->\(object.target)",
-                "\(object.type.name)",
+                "\(edge.object.id)",
+                "\(edge.origin)-->\(edge.target)",
+                "\(edge.object.type.name)",
                 "\(name)",
             ].joined(separator: " ")
             print("  \(line)")

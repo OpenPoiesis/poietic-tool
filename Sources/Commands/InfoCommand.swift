@@ -72,8 +72,8 @@ extension PoieticTool {
                     (nil, nil),
                     ("Frame", "\(frame.id)"),
                     ("All snapshots", "\(frame.snapshots.count)"),
-                    ("Nodes", "\(frame.graph.nodes.count)"),
-                    ("Edges", "\(frame.graph.edges.count)"),
+                    ("Nodes", "\(frame.nodes.count)"),
+                    ("Edges", "\(frame.edges.count)"),
                     ("Unstructured", "\(unstructuredCount)"),
                 ]
             }

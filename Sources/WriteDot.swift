@@ -18,7 +18,7 @@ let DefaultDOTStyle = DotStyle(
                      attributes: [
                         "labelloc": "b",
                      ]),
-        DotNodeStyle(predicate: IsTypePredicate(ObjectType.Flow),
+        DotNodeStyle(predicate: IsTypePredicate(ObjectType.FlowRate),
                      attributes: [
                         "shape": "ellipse",
                         "style": "bold",
@@ -36,13 +36,7 @@ let DefaultDOTStyle = DotStyle(
                      ]),
     ],
     edges: [
-        DotEdgeStyle(predicate: IsTypePredicate(ObjectType.Drains),
-                     attributes: [
-                        "color": "blue:white:blue",
-                        "arrowhead": "empty",
-                        "arrowsize": "2",
-                     ]),
-        DotEdgeStyle(predicate: IsTypePredicate(ObjectType.Fills),
+        DotEdgeStyle(predicate: IsTypePredicate(ObjectType.Flow),
                      attributes: [
                         "color": "blue:white:blue",
                         "arrowhead": "empty",

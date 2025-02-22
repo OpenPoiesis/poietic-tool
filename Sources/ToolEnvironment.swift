@@ -111,7 +111,7 @@ class ToolEnvironment {
 private func printValidationError(_ error: FrameConstraintError) {
     // FIXME: Print to stderr
     for violation in error.violations {
-        let objects = violation.objects.map { String($0) }.joined(separator: ",")
+        let objects = violation.objects.map { $0.stringValue }.joined(separator: ",")
         print("Constraint error: \(violation.constraint.name) object IDs: \(objects)")
         if let abstract = violation.constraint.abstract {
             print("    - \(abstract)")

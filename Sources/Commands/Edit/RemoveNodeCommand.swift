@@ -43,7 +43,7 @@ extension PoieticTool {
 
             print("Removed object: \(object.id)")
             if !removed.isEmpty {
-                let list = removed.map { String($0) }.joined(separator: ", ")
+                let list = removed.map { $0.stringValue }.joined(separator: ", ")
                 print("Removed cascading: \(list)")
             }
 //            print("Current frame ID: \(design.currentFrame.id)")

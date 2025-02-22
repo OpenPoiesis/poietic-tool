@@ -73,11 +73,11 @@ public class DotExporter {
                     label = missingLabel
                 }
                 else {
-                    label = String(node.id)
+                    label = node.id.stringValue
                 }
             }
             else {
-                label = String(node.id)
+                label = node.id.stringValue
             }
 
             var attributes = format(graph: frame, node: node)
@@ -88,7 +88,7 @@ public class DotExporter {
         }
 
         for edge in frame.edges {
-            let attributes = format(graph: frame, edge: edge)
+            let attributes = format(graph: frame, edge: edge.object)
             // TODO: Edge label
             // attributes["label"] = edge.type.name
             output += formatter.edge(from:"\(edge.origin)",
@@ -118,11 +118,11 @@ public class DotExporter {
         return combined
     }
 
-    public func format(graph: DesignFrame, edge: EdgeObject<DesignFrame.Snapshot>) -> [String:String] {
+    public func format(graph: DesignFrame, edge: DesignObject) -> [String:String] {
         var combined: [String:String] = [:]
         
         for style in style?.edgeStyles ?? [] {
-            if style.predicate.match(edge.snapshot, in: graph) {
+            if style.predicate.match(edge, in: graph) {
                 combined.merge(style.attributes) { (_, new) in new}
             }
         }
