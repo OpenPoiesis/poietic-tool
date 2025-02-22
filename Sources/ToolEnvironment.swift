@@ -47,7 +47,7 @@ class ToolEnvironment {
     public convenience init(location: String?, design: Design? = nil) throws (ToolError) {
         try self.init(url: try Self.designURL(location), design: design)
     }
-
+    
     public init(url: URL, design: Design? = nil) throws (ToolError) {
         self.url = url
         if let design {
@@ -75,7 +75,7 @@ class ToolEnvironment {
             self.design = design
         }
     }
-
+    
     /// Try to accept a frame in a design.
     ///
     /// Tries to accept the frame. If the frame contains constraint violations, then
@@ -83,13 +83,13 @@ class ToolEnvironment {
     ///
     public func accept(_ frame: TransientFrame) throws (ToolError) {
         precondition(isOpen, "Trying to accept already closed design: \(url)")
-
+        
         do {
             try design.accept(frame)
         }
         catch {
-            printValidationError(error)
-
+            printValidationError(error, frame: frame)
+            
             throw ToolError.constraintViolationError(error)
         }
     }
@@ -106,9 +106,10 @@ class ToolEnvironment {
         }
         isOpen = false
     }
+    
 }
 
-private func printValidationError(_ error: FrameConstraintError) {
+private func printValidationError(_ error: FrameConstraintError, frame: TransientFrame? = nil) {
     // FIXME: Print to stderr
     for violation in error.violations {
         let objects = violation.objects.map { $0.stringValue }.joined(separator: ",")
@@ -117,10 +118,62 @@ private func printValidationError(_ error: FrameConstraintError) {
             print("    - \(abstract)")
         }
     }
+    if error.objectErrors.count > 0 {
+        print("Object Errors:")
+    }
     for item in error.objectErrors {
         let (id, typeErrors) = item
+        
+        let detail: String
+        if let frame {
+            detail = objectDetail(id, in: frame)
+        }
+        else {
+            detail = "\(id)"
+        }
+        
+        print("\(detail)")
         for typeError in typeErrors {
-            print("Type error:\(id): \(typeError)")
+            print("    \(typeError)")
         }
     }
+}
+private func objectDetail(_ id: ObjectID, in frame: TransientFrame) -> String {
+    guard frame.contains(id) else {
+        return "\(id)"
+    }
+    
+    var text: String = "\(id)"
+    // id
+    let object = frame[id]
+    
+    if let name = object.name {
+        text += ":\(name)"
+    }
+    text += ":\(object.type.name)"
+    
+    if case let .edge(origin, target) = object.structure {
+        let originObject = frame[origin]
+        let targetObject = frame[target]
+        
+        text += " Edge \(origin)"
+        
+        if let name = originObject.name {
+            text += ":\(name):\(originObject.type.name)"
+        }
+        else {
+            text += ":\(originObject.type.name)"
+        }
+
+        text += " -> \(target)"
+        if let name = targetObject.name {
+            text += ":\(name):\(targetObject.type.name)"
+        }
+        else {
+            text += ":\(targetObject.type.name)"
+        }
+        return text
+    }
+    
+    return text
 }
