@@ -60,7 +60,7 @@ class ToolEnvironment {
                 // TODO: remove the metamodel here
                 design = try store.load(metamodel: FlowsMetamodel)
             }
-            catch let error as FrameConstraintError {
+            catch let error as FrameValidationError {
                 printValidationError(error)
                 throw ToolError.constraintViolationError(error)
                 
@@ -109,7 +109,7 @@ class ToolEnvironment {
     
 }
 
-private func printValidationError(_ error: FrameConstraintError, frame: TransientFrame? = nil) {
+private func printValidationError(_ error: FrameValidationError, frame: TransientFrame? = nil) {
     // FIXME: Print to stderr
     for violation in error.violations {
         let objects = violation.objects.map { $0.stringValue }.joined(separator: ",")

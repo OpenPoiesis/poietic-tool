@@ -29,7 +29,7 @@ enum ToolError: Error, CustomStringConvertible {
     case emptyDesign
     
     // Database errors
-    case constraintViolationError(FrameConstraintError)
+    case constraintViolationError(FrameValidationError)
     case unnamedObject(ObjectID)
     // Import error
 //    case foreignFrameError(String, ForeignFrameError)
