@@ -20,6 +20,7 @@ extension PoieticTool {
             case all = "all"
             case names = "names"
             case formulas = "formulas"
+            case pseudoEquations = "pseudo-equations"
             case graphicalFunctions = "graphical-functions"
             var defaultValueDescription: String { "all" }
             
@@ -46,6 +47,8 @@ extension PoieticTool {
                 listNames(frame)
             case .formulas:
                 listFormulas(frame)
+            case .pseudoEquations:
+                try listPseudoEquations(frame, env: env)
             case .graphicalFunctions:
                 listGraphicalFunctions(frame)
             }
@@ -60,7 +63,7 @@ func listAll(_ frame: DesignFrame) {
         left.id < right.id
     }
     let nodes = sorted.filter { $0.structure.type == .node }
-    let edges = sorted.compactMap { EdgeSnapshot($0,in: frame) }
+    let edges = sorted.compactMap { EdgeObject($0,in: frame) }
     let unstructured = sorted.filter { $0.structure.type == .unstructured }
 
     if unstructured.count > 0 {
@@ -131,6 +134,33 @@ func listFormulas(_ frame: DesignFrame) {
     
     for name in sorted {
         print("\(name) = \(result[name]!)")
+    }
+}
+
+func listPseudoEquations(_ frame: DesignFrame, env: ToolEnvironment) throws (ToolError) {
+    // FIXME: Add stocks
+    let validFrame = try env.validate(frame)
+    let plan: SimulationPlan = try env.compile(validFrame)
+    print("Not quite equations ...")
+    for stock in plan.stocks {
+        let obj = frame[stock.id]
+        // This should not happen if the model is valid, but just in case
+        let name = (obj.name ?? "(unnamed)")
+        var total = ""
+        
+        if !stock.inflows.isEmpty {
+            let inflows = stock.inflows.map { plan.stateVariables[$0].name + plan.stateVariables[$0].kind.rawValue}
+            total += inflows.joined(separator: " + ")
+        }
+        if !stock.outflows.isEmpty {
+            if !stock.inflows.isEmpty {
+                total += " - "
+            }
+            let outflows = stock.outflows.map { plan.stateVariables[$0].name }
+            total += outflows.joined(separator: " - ")
+        }
+        
+        print("Δ \(name) = \(total)")
     }
 }
 

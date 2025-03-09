@@ -71,15 +71,17 @@ extension PoieticTool {
         
         mutating func run() throws {
             let env = try ToolEnvironment(location: options.designLocation)
-            guard let frame = env.design.currentFrame else {
+            guard let stableFrame = env.design.currentFrame else {
                 throw ToolError.emptyDesign
             }
-
+            
+            let validFrame = try env.validate(stableFrame)
+            
             guard let solverType = StockFlowSimulation.SolverType(rawValue: solverName) else {
                 throw ToolError.unknownSolver(solverName)
             }
 
-            let model = try compile(frame)
+            let model = try env.compile(validFrame)
             let simulation = StockFlowSimulation(model, solver: solverType)
             let simulator = Simulator(model, simulation: simulation)
 

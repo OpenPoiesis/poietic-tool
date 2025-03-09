@@ -17,8 +17,9 @@ let DesignEnvironmentVariable = "POIETIC_DESIGN"
 /// Error thrown by the command-line tool.
 ///
 enum ToolError: Error, CustomStringConvertible {
+    // TODO: Go through the errors and review (marked with OK are OK)
     // FIXME: Do not have this
-    case unknownError(Error)
+    case internalError(Error)
     
     // I/O errors
     case malformedLocation(String)
@@ -28,17 +29,16 @@ enum ToolError: Error, CustomStringConvertible {
     case foreignFrameError(ForeignFrameError)
     case emptyDesign
     
-    // Database errors
-    case constraintViolationError(FrameValidationError)
+    // Design errors
+    case brokenStructuralIntegrity(StructuralIntegrityError)
     case unnamedObject(ObjectID)
-    // Import error
-//    case foreignFrameError(String, ForeignFrameError)
+    
+    case validationFailed(DesignIssueCollection)   /* OK */
+    case compilationFailed(DesignIssueCollection)  /* OK */
     
     // Simulation errors
     case unknownVariables([String])
     case unknownSolver(String)
-    case compilationError
-    case constraintError
     
     // Query errors
     case malformedObjectReference(String)
@@ -60,8 +60,8 @@ enum ToolError: Error, CustomStringConvertible {
     
     public var description: String {
         switch self {
-        case .unknownError(let error):
-            return "Unknown error: \(error)"
+        case .internalError(let error):
+            return "Internal error: \(error)"
 
         case .malformedLocation(let value):
             return "Malformed location: \(value)"
@@ -75,18 +75,42 @@ enum ToolError: Error, CustomStringConvertible {
         case .emptyDesign:
             return "The design is empty"
 
-        case .constraintViolationError(let error):
+        // Design Errors
+        case .brokenStructuralIntegrity(let error):
+            return "Broken structural integrity: \(error)"
+        case .validationFailed(let error):
             var detail: String = ""
-            if !error.violations.isEmpty {
-                detail += "\(error.violations.count) constraint violation errors"
+            if !error.designIssues.isEmpty {
+                detail += "\(error.designIssues.count) design issues"
             }
-            if !error.objectErrors.isEmpty {
-                detail += "\(error.objectErrors.count) objects with errors"
+            if !error.objectIssues.isEmpty {
+                if detail == "" {
+                    detail += " "
+                }
+                detail += "\(error.objectIssues.count) objects with errors"
             }
             if detail == "" {
                 detail = "unspecified validation error(s)"
             }
-            return "Database validation failed: \(detail)"
+            return "Design validation failed: \(detail)"
+
+        case .compilationFailed(let error):
+            var detail: String = ""
+            if !error.designIssues.isEmpty {
+                detail += "\(error.designIssues.count) design issues"
+            }
+            if !error.objectIssues.isEmpty {
+                if detail == "" {
+                    detail += " "
+                }
+                detail += "\(error.objectIssues.count) objects with errors"
+            }
+            if detail == "" {
+                detail = "unspecified compilation error(s)"
+            }
+            return "Design compilation failed: \(detail)"
+
+
         case .unnamedObject(let id):
             return "Object \(id) has no name"
         case .unknownSolver(let value):
@@ -94,10 +118,6 @@ enum ToolError: Error, CustomStringConvertible {
         case .unknownVariables(let names):
             let varlist = names.joined(separator: ", ")
             return "Unknown variables: \(varlist)"
-        case .compilationError:
-            return "Design compilation failed"
-        case .constraintError:
-            return "Model constraint violation"
         case .malformedObjectReference(let value):
             return "Malformed object reference '\(value). Use either object ID or object identifier."
         case .unknownObject(let value):
@@ -131,25 +151,24 @@ enum ToolError: Error, CustomStringConvertible {
         //       covered.
         
         switch self {
-        case .unknownError(_):
-            return "Not your fault."
-            
+        case .internalError(_):
+            return "Not your fault. Contact the developers with more details - what you did and what the error was"
         case .malformedLocation(_):
             return nil
         case .unableToSaveDesign(_):
             return "Check whether the location is correct and that you have permissions for writing."
 
-        case .constraintViolationError(_):
-            return "Unfortunately the only way is to inspect the database file. 'doctor' command is not yet implemented."
-            
+        case .brokenStructuralIntegrity(_):
+            return "Unfortunately the only way is to inspect the database or a foreign frame. 'doctor' command is not yet implemented."
+        case .validationFailed(_):
+            return "Make sure that the design is conforming to the metamodel. (In the future there will be 'doctor' command to help you.)"
+        case .compilationFailed(_):
+            return "Make sure that the design is conforming to the metamodel and the rules of simulation. (In the future there will be 'doctor' command to help you.)"
+
         case .unknownSolver(_):
             return "Check the list of available solvers by running the 'info' command."
         case .unknownVariables(_):
             return "See the list of available simulation variables using the 'list' command."
-        case .compilationError:
-            return nil
-        case .constraintError:
-            return nil
         case .unnamedObject(_):
             return "Set object's attribute 'name'"
         case .malformedObjectReference(_):
@@ -185,37 +204,6 @@ enum ToolError: Error, CustomStringConvertible {
         }
     }
 
-}
-
-func compile(_ frame: DesignFrame) throws -> SimulationPlan {
-    // NOTE: Make this in sync with the PoieticServer
-    // TODO: Use stderr as output
-    let compiledModel: SimulationPlan
-    let compiler = Compiler(frame: frame)
-    do {
-        compiledModel = try compiler.compile()
-    }
-    catch {
-        for (id, issues) in compiler.issues {
-            for issue in issues {
-                let object = frame[id]
-                let label: String
-                if let name = object.name {
-                    label = "\(id)(\(name))"
-                }
-                else {
-                    label = "\(id)"
-                }
-
-                print("ERROR: \(label): \(issue)")
-                if let hint = issue.hint {
-                    print("HINT: \(label): \(hint)")
-                }
-            }
-        }
-        throw ToolError.compilationError
-    }
-    return compiledModel
 }
 
 /// Parse single-string value assignment into a (attributeName, value) tuple.

@@ -5,6 +5,7 @@
 //  Created by Stefan Urbanek on 31/05/2024.
 //
 
+@preconcurrency import ArgumentParser
 import Foundation
 import PoieticCore
 import PoieticFlows
@@ -48,6 +49,16 @@ class ToolEnvironment {
         try self.init(url: try Self.designURL(location), design: design)
     }
     
+    /// Create a new tool environment given the URL and optional design.
+    ///
+    /// If the design is provided, then it is used and the URL is assigned as a storage URL
+    /// of the design.
+    ///
+    /// If the design is not provided, then it is attempted to load from the URL.
+    ///
+    /// - Warning: If both the design and URL are provided, the provided design will potentially
+    ///            overwrite the design currently present at the URL.
+    ///
     public init(url: URL, design: Design? = nil) throws (ToolError) {
         self.url = url
         if let design {
@@ -60,22 +71,55 @@ class ToolEnvironment {
                 // TODO: remove the metamodel here
                 design = try store.load(metamodel: FlowsMetamodel)
             }
-            catch let error as FrameValidationError {
-                printValidationError(error)
-                throw ToolError.constraintViolationError(error)
-                
-            }
             catch let error as PersistentStoreError {
                 throw ToolError.storeError(error)
             }
             catch {
-                throw ToolError.unknownError(error)
+                throw ToolError.internalError(error)
             }
             
             self.design = design
         }
     }
     
+    /// Get a frame by given ID as a string or current frame.
+    ///
+    /// Use this method to get a frame by user-provided reference.
+    ///
+    /// - Throws ``ToolError/unknownFrame(_:)`` when the frame is not found or
+    ///   ``ToolError/emptyDesign`` if there are no frames in the design.
+    public func frame(_ reference: String? = nil) throws (ToolError) -> DesignFrame {
+        guard let frame = try frameIfPresent(reference) else {
+            throw .emptyDesign
+        }
+        return frame
+    }
+
+    /// Get a frame by given ID as a string or current frame.
+    ///
+    /// Use this method to get a frame by user-provided reference.
+    ///
+    /// - Throws ``ToolError/unknownFrame(_:)`` when the frame is not found.
+    ///
+    public func frameIfPresent(_ reference: String? = nil) throws (ToolError) -> DesignFrame? {
+        if let reference {
+            if let id = ObjectID(reference), let frame = design.frame(id) {
+                return frame
+            }
+            else {
+                throw ToolError.unknownFrame(reference)
+            }
+        }
+        else {
+            if let frame = design.currentFrame {
+                return frame
+            }
+            else {
+                return nil
+            }
+        }
+    }
+
     /// Try to accept a frame in a design.
     ///
     /// Tries to accept the frame. If the frame contains constraint violations, then
@@ -84,13 +128,55 @@ class ToolEnvironment {
     public func accept(_ frame: TransientFrame) throws (ToolError) {
         precondition(isOpen, "Trying to accept already closed design: \(url)")
         
+        let stableFrame: DesignFrame
         do {
-            try design.accept(frame)
+            stableFrame = try design.accept(frame)
         }
         catch {
-            printValidationError(error, frame: frame)
-            
-            throw ToolError.constraintViolationError(error)
+            throw ToolError.brokenStructuralIntegrity(error)
+        }
+        try validate(stableFrame)
+    }
+   
+    /// Try to validate the frame.
+    ///
+    /// If the frame is successfully validated then its validated version is returned.
+    ///
+    /// If the frame validation failed, errors are printed and a ``ToolError`` is thrown.
+    ///
+    @discardableResult
+    public func validate(_ frame: DesignFrame) throws (ToolError) -> ValidatedFrame {
+        do {
+            return try design.validate(frame)
+        }
+        catch {
+            let issues = error.asDesignIssueCollection()
+            printObjectIssuesError(issues, in: frame)
+            throw .validationFailed(issues)
+        }
+    }
+    
+    /// Try to compile the frame.
+    ///
+    /// If the frame is successfully compiled then the simulation plan returned.
+    ///
+    /// If the frame compilation failed, errors are printed and a ``ToolError`` is thrown.
+    ///
+    @discardableResult
+    public func compile(_ frame: ValidatedFrame) throws (ToolError) -> SimulationPlan {
+        let compiler = Compiler(frame: frame)
+        do {
+            return try compiler.compile()
+        }
+        catch {
+            if error == .hasIssues {
+                let issues = compiler.designIssueCollection()
+                printObjectIssuesError(issues, in: frame)
+                throw .compilationFailed(issues)
+            }
+            else {
+                throw .internalError(error)
+            }
         }
     }
     
@@ -106,39 +192,25 @@ class ToolEnvironment {
         }
         isOpen = false
     }
-    
 }
 
-private func printValidationError(_ error: FrameValidationError, frame: TransientFrame? = nil) {
-    // FIXME: Print to stderr
-    for violation in error.violations {
-        let objects = violation.objects.map { $0.stringValue }.joined(separator: ",")
-        print("Constraint error: \(violation.constraint.name) object IDs: \(objects)")
-        if let abstract = violation.constraint.abstract {
-            print("    - \(abstract)")
+
+func printObjectIssuesError(_ issues: DesignIssueCollection, in frame: some Frame) {
+    print("DESIGN ISSUES:")
+    for issue in issues.designIssues {
+        print("ERROR: \(issue)")
+    }
+    for (id, objIssues) in issues.objectIssues {
+        let detail = objectDetail(id, in: frame)
+        print("Object \(detail):")
+        for issue in objIssues {
+            print("      \(issue)")
         }
     }
-    if error.objectErrors.count > 0 {
-        print("Object Errors:")
-    }
-    for item in error.objectErrors {
-        let (id, typeErrors) = item
-        
-        let detail: String
-        if let frame {
-            detail = objectDetail(id, in: frame)
-        }
-        else {
-            detail = "\(id)"
-        }
-        
-        print("\(detail)")
-        for typeError in typeErrors {
-            print("    \(typeError)")
-        }
-    }
+
 }
-private func objectDetail(_ id: ObjectID, in frame: TransientFrame) -> String {
+
+private func objectDetail(_ id: ObjectID, in frame: some Frame) -> String {
     guard frame.contains(id) else {
         return "\(id)"
     }
