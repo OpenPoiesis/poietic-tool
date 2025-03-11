@@ -169,12 +169,12 @@ class ToolEnvironment {
             return try compiler.compile()
         }
         catch {
-            if error == .hasIssues {
-                let issues = compiler.designIssueCollection()
-                printObjectIssuesError(issues, in: frame)
-                throw .compilationFailed(issues)
-            }
-            else {
+            switch error {
+            case .issues(let issues):
+                let designIssues = issues.asDesignIssueCollection()
+                printObjectIssuesError(designIssues, in: frame)
+                throw .compilationFailed(designIssues)
+            case .internalError(let error):
                 throw .internalError(error)
             }
         }
