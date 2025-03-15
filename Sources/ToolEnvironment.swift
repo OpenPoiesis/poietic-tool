@@ -71,11 +71,8 @@ class ToolEnvironment {
                 // TODO: remove the metamodel here
                 design = try store.load(metamodel: FlowsMetamodel)
             }
-            catch let error as PersistentStoreError {
-                throw ToolError.storeError(error)
-            }
             catch {
-                throw ToolError.internalError(error)
+                throw ToolError.storeError(error)
             }
             
             self.design = design
