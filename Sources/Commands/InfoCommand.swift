@@ -76,6 +76,17 @@ extension PoieticTool {
                     ("Edges", "\(frame.edges.count)"),
                     ("Unstructured", "\(unstructuredCount)"),
                 ]
+
+                if let obj = frame.first(trait: .Simulation) {
+                    let params = SimulationParameters(fromObject: obj)
+                    items += [
+                        (nil, nil),
+                        ("Simulation Parameters", nil),
+                        ("Initial time", "\(params.initialTime)"),
+                        ("End time", "\(params.endTime)"),
+                        ("Time delta", "\(params.timeDelta)"),
+                    ]
+                }
             }
             else {
                 items += [

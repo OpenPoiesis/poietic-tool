@@ -29,6 +29,9 @@ extension PoieticTool {
             }
         }
         
+        @Option(name: [.customLong("type")], help: "Type of objects to list")
+        var typeName: String?
+
         @Argument(help: "Kind of list or type of objects to show.")
         var listType: ListType = .all
 
@@ -39,14 +42,37 @@ extension PoieticTool {
                 try env.close()
                 throw CleanExit.message("The design is empty or has no current frame")
             }
+           
+            let type: ObjectType?
             
+            if let typeName  {
+                if let maybeType = env.design.metamodel.objectType(name: typeName) {
+                    type = maybeType
+                }
+                else {
+                    try env.close()
+                    throw CleanExit.message("Unknown type name: \(typeName)")
+                }
+            }
+            else {
+                type = nil
+            }
+            
+            let snapshots: [DesignObject]
+            if let type {
+                snapshots = frame.filter(type: type)
+            }
+            else {
+                snapshots = frame.snapshots
+            }
+
             switch listType {
             case .all:
-                listAll(frame)
+                listAll(snapshots,in: frame)
             case .names:
-                listNames(frame)
+                listNames(snapshots, in: frame)
             case .formulas:
-                listFormulas(frame)
+                listFormulas(snapshots)
             case .pseudoEquations:
                 try listPseudoEquations(frame, env: env)
             case .graphicalFunctions:
@@ -58,8 +84,8 @@ extension PoieticTool {
     }
 }
 
-func listAll(_ frame: DesignFrame) {
-    let sorted = frame.snapshots.sorted { left, right in
+func listAll(_ snapshots: [DesignObject], in frame: some Frame) {
+    let sorted = snapshots.sorted { left, right in
         left.id < right.id
     }
     let nodes = sorted.filter { $0.structure.type == .node }
@@ -105,8 +131,8 @@ func listAll(_ frame: DesignFrame) {
     }
 }
 
-func listNames(_ frame: DesignFrame) {
-    let names: [String] = frame.snapshots.compactMap { $0.name }
+func listNames(_ snapshots: [DesignObject], in frame: DesignFrame) {
+    let names: [String] = snapshots.compactMap { $0.name }
         .sorted { $0.lexicographicallyPrecedes($1)}
     
     for name in names {
@@ -114,10 +140,10 @@ func listNames(_ frame: DesignFrame) {
     }
 }
 
-func listFormulas(_ frame: DesignFrame) {
+func listFormulas(_ snapshots: [DesignObject]) {
     var result: [String: String] = [:]
     
-    for object in frame.snapshots {
+    for object in snapshots {
         guard let name = object.name else {
             continue
         }

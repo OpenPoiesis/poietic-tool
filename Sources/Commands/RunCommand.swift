@@ -81,20 +81,20 @@ extension PoieticTool {
                 throw ToolError.unknownSolver(solverName)
             }
 
-            let model = try env.compile(validFrame)
-            let simulation = StockFlowSimulation(model, solver: solverType)
-            let simulator = Simulator(model, simulation: simulation)
+            let plan = try env.compile(validFrame)
+            let simulation = StockFlowSimulation(plan, solver: solverType)
+            let simulator = Simulator(simulation: simulation, parameters: plan.simulationParameters)
 
             // Collect names of nodes to be observed
             // -------------------------------------------------------------
             var outputVariables: [StateVariable] = []
             if outputNames.isEmpty {
-                outputVariables = model.stateVariables
+                outputVariables = plan.stateVariables
             }
             else {
                 var unknownNames: [String] = []
                 for name in outputNames {
-                    guard let variable = model.stateVariables.first(where: { $0.name == name }) else {
+                    guard let variable = plan.stateVariables.first(where: { $0.name == name }) else {
                         unknownNames.append(name)
                         continue
                     }
@@ -117,7 +117,7 @@ extension PoieticTool {
                 guard let doubleValue = Double(stringValue) else {
                     throw ToolError.typeMismatch("constant override '\(key)'", stringValue, "double")
                 }
-                guard let variable = model.variable(named: key) else {
+                guard let variable = plan.variable(named: key) else {
                     throw ToolError.unknownObject(key)
                 }
                 overrideConstants[variable.id] = doubleValue
@@ -129,20 +129,17 @@ extension PoieticTool {
             
             // Run the simulation
             // -------------------------------------------------------------
-            // Try to get number of steps providede in the design.
-            let defaultSteps = simulator.compiledModel.simulationDefaults?.simulationSteps
-            let actualSteps = steps ?? defaultSteps ?? 10
-            try simulator.run(actualSteps)
+            try simulator.run()
 
             switch outputFormat {
             case .csv:
                 try writeCSV(path: outputPath,
                              variables: outputVariables,
-                             states: simulator.output)
+                             states: simulator.result.states)
             case .gnuplot:
                 try writeGnuplotBundle(path: outputPath,
-                                       compiledModel: model,
-                                       output: simulator.output)
+                                       compiledModel: plan,
+                                       output: simulator.result.states)
 //            case .json:
 //                try writeJSON(path: outputPath,
 //                              variables: outputVariables,
