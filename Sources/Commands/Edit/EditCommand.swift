@@ -22,6 +22,7 @@ extension PoieticTool {
                 AutoParameters.self,
                 Layout.self,
                 Align.self,
+                PruneHistory.self,
             ]
         )
         
