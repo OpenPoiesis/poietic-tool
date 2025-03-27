@@ -11,10 +11,10 @@ import PoieticCore
 import PoieticFlows
 
 class ToolEnvironment {
-    public private(set) var design: Design
-    public let url: URL
+    private(set) var design: Design
+    let url: URL
     
-    public var isOpen: Bool = true
+    var isOpen: Bool = true
     
     /// Get the design URL. The database location can be specified by options,
     /// environment variable or as a default name, in respective order.
@@ -45,7 +45,7 @@ class ToolEnvironment {
         }
     }
     
-    public convenience init(location: String?, design: Design? = nil) throws (ToolError) {
+    convenience init(location: String?, design: Design? = nil) throws (ToolError) {
         try self.init(url: try Self.designURL(location), design: design)
     }
     
@@ -59,7 +59,7 @@ class ToolEnvironment {
     /// - Warning: If both the design and URL are provided, the provided design will potentially
     ///            overwrite the design currently present at the URL.
     ///
-    public init(url: URL, design: Design? = nil) throws (ToolError) {
+    init(url: URL, design: Design? = nil) throws (ToolError) {
         self.url = url
         if let design {
             self.design = design
@@ -85,7 +85,7 @@ class ToolEnvironment {
     ///
     /// - Throws ``ToolError/unknownFrame(_:)`` when the frame is not found or
     ///   ``ToolError/emptyDesign`` if there are no frames in the design.
-    public func frame(_ reference: String? = nil) throws (ToolError) -> DesignFrame {
+    func frame(_ reference: String? = nil) throws (ToolError) -> DesignFrame {
         guard let frame = try frameIfPresent(reference) else {
             throw .emptyDesign
         }
@@ -98,7 +98,7 @@ class ToolEnvironment {
     ///
     /// - Throws ``ToolError/unknownFrame(_:)`` when the frame is not found.
     ///
-    public func frameIfPresent(_ reference: String? = nil) throws (ToolError) -> DesignFrame? {
+    func frameIfPresent(_ reference: String? = nil) throws (ToolError) -> DesignFrame? {
         if let reference {
             if let id = ObjectID(reference), let frame = design.frame(id) {
                 return frame
@@ -122,7 +122,7 @@ class ToolEnvironment {
     /// Tries to accept the frame. If the frame contains constraint violations, then
     /// the violations are printed out in a more human-readable format.
     ///
-    public func accept(_ frame: TransientFrame) throws (ToolError) {
+    func accept(_ frame: TransientFrame) throws (ToolError) {
         precondition(isOpen, "Trying to accept already closed design: \(url)")
         
         let stableFrame: DesignFrame
@@ -142,7 +142,7 @@ class ToolEnvironment {
     /// If the frame validation failed, errors are printed and a ``ToolError`` is thrown.
     ///
     @discardableResult
-    public func validate(_ frame: DesignFrame) throws (ToolError) -> ValidatedFrame {
+    func validate(_ frame: DesignFrame) throws (ToolError) -> ValidatedFrame {
         do {
             return try design.validate(frame)
         }
@@ -160,7 +160,7 @@ class ToolEnvironment {
     /// If the frame compilation failed, errors are printed and a ``ToolError`` is thrown.
     ///
     @discardableResult
-    public func compile(_ frame: ValidatedFrame) throws (ToolError) -> SimulationPlan {
+    func compile(_ frame: ValidatedFrame) throws (ToolError) -> SimulationPlan {
         let compiler = Compiler(frame: frame)
         do {
             return try compiler.compile()
@@ -177,7 +177,7 @@ class ToolEnvironment {
         }
     }
     
-    public func close() throws (ToolError) {
+    func close() throws (ToolError) {
         precondition(isOpen, "Trying to close already closed design: \(url)")
         
         let store = MakeshiftDesignStore(url: url)

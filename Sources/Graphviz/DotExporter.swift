@@ -114,6 +114,10 @@ public class DotExporter {
                 combined.merge(style.attributes) { (_, new) in new}
             }
         }
+       
+        if let position = node.position {
+            combined["pos"] = "\(position.x/100),\(position.y/100)!"
+        }
         
         return combined
     }

@@ -7,7 +7,6 @@
 
 @preconcurrency import ArgumentParser
 import PoieticCore
-import PoieticFlows
 import RealModule
 
 // TODO: We need bounding box

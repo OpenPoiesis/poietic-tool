@@ -19,13 +19,21 @@ extension PoieticTool {
 
         @OptionGroup var options: Options
 
+        @Option(name: [.customLong("--start-time")],
+                help: "Initial time, overrides design-specified initial time")
+        var startTime: Double?
+
+        @Option(name: [.customLong("--end-time")],
+                help: "Final time, overrides design-specified end time")
+        var endTime: Double?
+
         @Option(name: [.long, .customShort("s")],
-                help: "Number of steps to run")
+                help: "Maximum number of steps to run, before end-time is reached")
         var steps: Int?
         
         @Option(name: [.long, .customShort("t")],
-                help: "Time delta")
-        var timeDelta: Double = 1.0
+                help: "Time delta, overrides design-specified time delta")
+        var timeDelta: Double?
         
         @Option(name: [.customLong("solver")],
                 help: "Type of the solver to be used for computation")
@@ -82,8 +90,23 @@ extension PoieticTool {
             }
 
             let plan = try env.compile(validFrame)
+            
+            var parameters = plan.simulationParameters ?? SimulationParameters()
+            
+            if let timeDelta {
+                parameters.timeDelta = timeDelta
+            }
+            
+            if let endTime {
+                parameters.endTime = endTime
+            }
+            
+            if let startTime {
+                parameters.initialTime = startTime
+            }
+            
             let simulation = StockFlowSimulation(plan, solver: solverType)
-            let simulator = Simulator(simulation: simulation, parameters: plan.simulationParameters)
+            let simulator = Simulator(simulation: simulation, parameters: parameters)
 
             // Collect names of nodes to be observed
             // -------------------------------------------------------------
@@ -129,7 +152,7 @@ extension PoieticTool {
             
             // Run the simulation
             // -------------------------------------------------------------
-            try simulator.run()
+            try simulator.run(steps)
 
             switch outputFormat {
             case .csv:

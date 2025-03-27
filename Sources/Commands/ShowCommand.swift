@@ -7,7 +7,6 @@
 
 @preconcurrency import ArgumentParser
 import PoieticCore
-import PoieticFlows
 
 /// Width of the attribute label column for right-aligned display.
 ///

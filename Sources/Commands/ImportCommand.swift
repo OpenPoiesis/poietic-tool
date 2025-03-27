@@ -8,9 +8,6 @@
 @preconcurrency import ArgumentParser
 import Foundation
 import PoieticCore
-import PoieticFlows
-
-
 
 // TODO: Merge with PrintCommand, use --format=id
 extension PoieticTool {

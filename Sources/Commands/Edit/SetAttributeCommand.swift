@@ -7,7 +7,6 @@
 
 @preconcurrency import ArgumentParser
 import PoieticCore
-import PoieticFlows
 
 // TODO: Add import from CSV for multiple attributes and objects
 // TODO: Add import from JSON for multiple attributes and objects

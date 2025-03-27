@@ -70,7 +70,7 @@ extension PoieticTool {
             case .all:
                 listAll(snapshots,in: frame)
             case .names:
-                listNames(snapshots, in: frame)
+                listNames(snapshots)
             case .formulas:
                 listFormulas(snapshots)
             case .pseudoEquations:
@@ -131,7 +131,7 @@ func listAll(_ snapshots: [DesignObject], in frame: some Frame) {
     }
 }
 
-func listNames(_ snapshots: [DesignObject], in frame: DesignFrame) {
+func listNames(_ snapshots: [DesignObject]) {
     let names: [String] = snapshots.compactMap { $0.name }
         .sorted { $0.lexicographicallyPrecedes($1)}
     

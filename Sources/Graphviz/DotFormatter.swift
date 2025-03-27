@@ -9,7 +9,7 @@
 
 /// Type of the graph – directed or undirected.
 ///
-public enum DotGraphType {
+enum DotGraphType {
     case undirected
     case directed
 
@@ -47,7 +47,7 @@ extension Character {
 /// Formatter for GraphViz DOT file format statements. Use to produce strings
 /// representing various DOT file parts such as nodes, edges and graph headers.
 ///
-public class DotFormatter {
+class DotFormatter {
     let name: String
     let type: DotGraphType
     
@@ -124,7 +124,7 @@ public class DotFormatter {
     /// Creates a DOT file writer that writes the output into the stream
     /// `output`.
     ///
-    public init(name: String="output", type: DotGraphType = .directed) {
+    init(name: String="output", type: DotGraphType = .directed) {
         self.name = name
         self.type = type
     }
@@ -148,7 +148,7 @@ public class DotFormatter {
 
     /// Produces a sequence of opening statements for a graph file.
     ///
-    public func header() -> String {
+    func header() -> String {
         let quotedName = DotFormatter.quote(name)
         return line("\(type.dotKeyword) \(quotedName) {")
     }
@@ -156,7 +156,7 @@ public class DotFormatter {
 
     /// Returns closing statements for a graph file.
     ///
-    public func footer() -> String {
+    func footer() -> String {
         return line("}")
     }
 
@@ -167,7 +167,7 @@ public class DotFormatter {
     ///   - id: Node identifier.
     ///   - attributes: Optional dictionary of attributes for a node.
     ///
-    public func node(_ id: String, attributes: [String:String]?=nil) -> String {
+    func node(_ id: String, attributes: [String:String]?=nil) -> String {
         let attributeString: String
         if let attributes = attributes {
             attributeString = "[" + DotFormatter.formatAttributes(attributes) + "]"
@@ -187,7 +187,7 @@ public class DotFormatter {
     ///   - target: Target node identifier.
     ///   - attributes: Optional dictionary of attributes for a node.
     ///
-    public func edge(from origin:String, to target:String, attributes:
+    func edge(from origin:String, to target:String, attributes:
                           [String:String]?=nil) -> String {
         let quotedOrigin = DotFormatter.quote(origin)
         let quotedTarget = DotFormatter.quote(target)

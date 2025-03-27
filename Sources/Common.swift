@@ -8,7 +8,6 @@
 import Foundation
 import ArgumentParser
 import PoieticCore
-import PoieticFlows
 import SystemPackage
 
 let DefaultDesignLocation = "design.poietic"
