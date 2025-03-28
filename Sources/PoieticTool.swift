@@ -16,7 +16,7 @@ struct PoieticTool: ParsableCommand {
         commandName: "poietic",
         abstract: "Poietic tool to edit and run poietic designs",
         subcommands: [
-            CreateDB.self,
+            NewDesign.self,
             Info.self,
             List.self,
             Show.self,

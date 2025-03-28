@@ -62,6 +62,9 @@ extension PoieticTool {
                        help: "Set (override) a value of a constant node in a form 'attribute=value'")
         var overrideValues: [String] = []
 
+        @Option(name: [.customLong("frame")], help: "Frame to run")
+        var frameRef: String?
+
         /// Path to the output directory.
         /// The generated files are:
         /// out/
@@ -79,10 +82,8 @@ extension PoieticTool {
         
         mutating func run() throws {
             let env = try ToolEnvironment(location: options.designLocation)
-            guard let stableFrame = env.design.currentFrame else {
-                throw ToolError.emptyDesign
-            }
-            
+            let stableFrame = try env.existingFrame(frameRef)
+
             let validFrame = try env.validate(stableFrame)
             
             guard let solverType = StockFlowSimulation.SolverType(rawValue: solverName) else {

@@ -16,19 +16,17 @@ extension PoieticTool {
                 abstract: "Automatically connect parameter nodes: connect required, disconnect unused"
             )
 
-        @OptionGroup var options: Options
+        @OptionGroup var globalOptions: Options
+        @OptionGroup var options: EditOptions
 
         @Flag(name: [.customLong("verbose"), .customShort("v")],
                 help: "Print created and removed edges")
         var verbose: Bool = false
 
         mutating func run() throws {
-            let env = try ToolEnvironment(location: options.designLocation)
-            guard let currentFrame = env.design.currentFrame else {
-                throw ToolError.emptyDesign
-            }
-            
-            let frame = env.design.createFrame(deriving: currentFrame)
+            let env = try ToolEnvironment(location: globalOptions.designLocation)
+            let original = try env.existingFrame(options.deriveRef)
+            let frame = env.design.createFrame(deriving: original)
 
             let result = try autoConnectParameters(frame)
             
@@ -41,7 +39,7 @@ extension PoieticTool {
                 }
             }
 
-            try env.accept(frame)
+            try env.accept(frame, replacing: options.replaceRef, appendHistory: options.appendHistory)
             try env.close()
             
             if result.added.count + result.removed.count > 0 {

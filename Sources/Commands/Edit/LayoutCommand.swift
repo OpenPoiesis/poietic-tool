@@ -28,7 +28,8 @@ extension PoieticTool {
                 abstract: "Lay out objects"
             )
 
-        @OptionGroup var options: Options
+        @OptionGroup var globalOptions: Options
+        @OptionGroup var options: EditOptions
 
         @Option
         var layout: LayoutType = .circle
@@ -37,12 +38,9 @@ extension PoieticTool {
         var references: [String] = []
         
         mutating func run() throws {
-            let env = try ToolEnvironment(location: options.designLocation)
-            guard let currentFrame = env.design.currentFrame else {
-                throw ToolError.emptyDesign
-            }
-            
-            let frame = env.design.createFrame(deriving: currentFrame)
+            let env = try ToolEnvironment(location: globalOptions.designLocation)
+            let original = try env.existingFrame(options.deriveRef)
+            let frame = env.design.createFrame(deriving: original)
 
             var objects: [MutableObject] = []
             if references.isEmpty {
@@ -69,7 +67,7 @@ extension PoieticTool {
                 angle += step
             }
             
-            try env.accept(frame)
+            try env.accept(frame, replacing: options.replaceRef, appendHistory: options.appendHistory)
             try env.close()
         }
     }

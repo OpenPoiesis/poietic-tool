@@ -28,7 +28,7 @@ extension PoieticTool {
                 Undo.self,
                 Redo.self,
                 Add.self,
-                NewConnection.self,
+                Connect.self,
                 Remove.self,
                 AutoParameters.self,
                 Layout.self,

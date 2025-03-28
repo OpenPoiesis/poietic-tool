@@ -17,19 +17,17 @@ extension PoieticTool {
                 abstract: "Remove an object – a node or a connection"
             )
 
-        @OptionGroup var options: Options
+        @OptionGroup var globalOptions: Options
+        @OptionGroup var options: EditOptions
 
         @Argument(help: "ID of an object to be removed")
         var reference: String
 
         
         mutating func run() throws {
-            let env = try ToolEnvironment(location: options.designLocation)
-            guard let currentFrame = env.design.currentFrame else {
-                throw ToolError.emptyDesign
-            }
-            
-            let frame = env.design.createFrame(deriving: currentFrame)
+            let env = try ToolEnvironment(location: globalOptions.designLocation)
+            let original = try env.existingFrame(options.deriveRef)
+            let frame = env.design.createFrame(deriving: original)
 
             guard let object = frame.object(stringReference: reference) else {
                 throw ToolError.unknownObject(reference)
@@ -37,7 +35,7 @@ extension PoieticTool {
 
             let removed = frame.removeCascading(object.id)
 
-            try env.accept(frame)
+            try env.accept(frame, replacing: options.replaceRef, appendHistory: options.appendHistory)
             try env.close()
 
             print("Removed object: \(object.id)")

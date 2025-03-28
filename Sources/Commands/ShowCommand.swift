@@ -30,15 +30,16 @@ extension PoieticTool {
         @Option(name: [.long, .customShort("f")], help: "Output format")
         var outputFormat: OutputFormat = .text
 
+        @Option(name: [.customLong("frame")], help: "Frame to get object from")
+        var frameRef: String?
         
         @Argument(help: "ID of an object to be described")
         var reference: String
         
         mutating func run() throws {
             let env = try ToolEnvironment(location: options.designLocation)
-            guard let frame = env.design.currentFrame else {
-                throw ToolError.emptyDesign
-            }
+            let frame = try env.existingFrame(frameRef)
+            
             guard let object = frame.object(stringReference: reference) else {
                 throw ToolError.unknownObject(reference)
             }

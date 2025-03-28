@@ -150,7 +150,7 @@ class ToolEnvironment {
     /// Tries to accept the frame. If the frame contains constraint violations, then
     /// the violations are printed out in a more human-readable format.
     ///
-    func accept(_ frame: TransientFrame, replacing: String? = nil) throws (ToolError) {
+    func accept(_ frame: TransientFrame, replacing: String? = nil, appendHistory: Bool = true) throws (ToolError) {
         precondition(isOpen, "Trying to accept already closed design: \(url)")
         
         let stableFrame: DesignFrame
@@ -165,7 +165,7 @@ class ToolEnvironment {
         }
         else {
             do {
-                stableFrame = try design.accept(frame)
+                stableFrame = try design.accept(frame, appendHistory: appendHistory)
             }
             catch {
                 throw ToolError.brokenStructuralIntegrity(error)

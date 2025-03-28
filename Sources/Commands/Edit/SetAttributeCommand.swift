@@ -19,7 +19,8 @@ extension PoieticTool {
                 abstract: "Set an attribute value"
             )
 
-        @OptionGroup var options: Options
+        @OptionGroup var globalOptions: Options
+        @OptionGroup var options: EditOptions
 
         @Argument(help: "ID of an object to be modified")
         var reference: String
@@ -32,12 +33,9 @@ extension PoieticTool {
 
         
         mutating func run() throws {
-            let env = try ToolEnvironment(location: options.designLocation)
-            guard let currentFrame = env.design.currentFrame else {
-                throw ToolError.emptyDesign
-            }
-            
-            let frame = env.design.createFrame(deriving: currentFrame)
+            let env = try ToolEnvironment(location: globalOptions.designLocation)
+            let original = try env.existingFrame(options.deriveRef)
+            let frame = env.design.createFrame(deriving: original)
 
             guard let object = frame.object(stringReference: reference) else {
                 throw ToolError.unknownObject(reference)
@@ -49,7 +47,7 @@ extension PoieticTool {
                                        attribute: attributeName,
                                        string: value)
             
-            try env.accept(frame)
+            try env.accept(frame, replacing: options.replaceRef, appendHistory: options.appendHistory)
             try env.close()
             
             print("Property set in \(reference): \(attributeName) = \(value)")

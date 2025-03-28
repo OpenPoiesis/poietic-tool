@@ -74,12 +74,13 @@ extension PoieticTool {
                 help: "Label used if the node has no label attribute")
         var missingLabel = "(none)"
         
+        @Option(name: [.customLong("frame")], help: "Frame ID or name")
+        var frameRef: String?
+        
         mutating func run() throws {
             let env = try ToolEnvironment(location: options.designLocation)
-            guard let frame = env.design.currentFrame else {
-                throw ToolError.emptyDesign
-            }
-            
+            let frame = try env.existingFrame(frameRef)
+
             guard let testURL = URL(string: output) else {
                 fatalError("Invalid resource reference: \(output)")
             }

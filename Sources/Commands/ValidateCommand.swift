@@ -13,16 +13,13 @@ extension PoieticTool {
             = CommandConfiguration(abstract: "Get information about the design")
         @OptionGroup var options: Options
 
-        @Argument(help: "Frame ID to validate (current if not provided)")
-        var frameID: String?
+        @Argument(help: "Frame ID or name to validate (current if not provided)")
+        var frameRef: String?
 
         mutating func run() throws {
             let env = try ToolEnvironment(location: options.designLocation)
-            
-            guard let frame = try env.frameIfPresent(frameID) else {
-                throw CleanExit.message("No current frame")
-            }
-            
+            let frame = try env.existingFrame(frameRef)
+
             let validFrame = try env.validate(frame)
             print("Frame validation passed.")
             let _ = try env.compile(validFrame)

@@ -1,6 +1,6 @@
 //
-//  File.swift
-//  
+//  NewCommand.swift
+//
 //
 //  Created by Stefan Urbanek on 25/03/2024.
 //

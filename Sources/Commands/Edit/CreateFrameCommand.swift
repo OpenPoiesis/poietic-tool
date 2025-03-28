@@ -51,7 +51,7 @@ Note: Frame with requested IDs can not be --forced to be replaced. Remove the fr
         @Option(name: [.customLong("id")], help: "Create a frame with given id")
         var requestedRef: String?
 
-        @Option(name: [.customLong("deriving")], help: "Derive an existing frame")
+        @Option(name: [.customLong("derive")], help: "Derive an existing frame")
         var derivingRef: String?
 
         @Flag(name: [.customLong("force")], help: "Replace existing frame")

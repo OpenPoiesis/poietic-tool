@@ -10,15 +10,14 @@ import PoieticFlows
 import PoieticCore
 
 extension PoieticTool {
-    struct CreateDB: ParsableCommand {
-        static let configuration
-        = CommandConfiguration(
+    struct NewDesign: ParsableCommand {
+        static let configuration = CommandConfiguration(
             commandName: "new",
             abstract: "Create an empty design."
         )
         
         @Option(name: [.customLong("import"), .customShort("i")],
-                help: "Poietic frame to import into the first frame.")
+                help: "Poietic frame to import into the first frame")
         var importPaths: [String] = []
 
         @Argument(help: "Path of design file to be created")
