@@ -58,12 +58,14 @@ extension PoieticTool {
             
             items += [
                 (nil, nil),
-                ("Total snapshot count", "\(env.design.snapshots.count)"),
+                ("Total snapshots", "\(env.design.snapshots.count)"),
 
                 (nil, nil),
-                ("History frame count", "\(env.design.versionHistory.count)"),
-                ("Undoable frame count", "\(env.design.undoableFrames.count)"),
-                ("Redoable frame count", "\(env.design.redoableFrames.count)"),
+                ("Total frames", "\(env.design.frames.count)"),
+                ("History frames", "\(env.design.versionHistory.count)"),
+                ("Undoable frames", "\(env.design.undoableFrames.count)"),
+                ("Redoable frames", "\(env.design.redoableFrames.count)"),
+                ("Named frames", "\(env.design.namedFrames.count)"),
             ]
             
             if let frame {
@@ -104,4 +106,3 @@ extension PoieticTool {
         }
     }
 }
-

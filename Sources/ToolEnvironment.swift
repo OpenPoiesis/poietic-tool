@@ -79,17 +79,45 @@ class ToolEnvironment {
         }
     }
     
-    /// Get a frame by given ID as a string or current frame.
+    /// Get a frame by its name or an ID reference.
     ///
     /// Use this method to get a frame by user-provided reference.
     ///
+    func frame(_ reference: String) -> DesignFrame? {
+        if let frame = design.frame(name: reference) {
+            return frame
+        }
+        else if let id = ObjectID(reference), let frame = design.frame(id) {
+            return frame
+        }
+        else {
+            return nil
+        }
+    }
+
+    /// Get a frame by ID or a name. If reference is not provided, get
+    /// the current frame.
+    ///
     /// - Throws ``ToolError/unknownFrame(_:)`` when the frame is not found or
     ///   ``ToolError/emptyDesign`` if there are no frames in the design.
-    func frame(_ reference: String? = nil) throws (ToolError) -> DesignFrame {
-        guard let frame = try frameIfPresent(reference) else {
-            throw .emptyDesign
+    ///
+    func existingFrame(_ reference: String? = nil) throws (ToolError) -> DesignFrame {
+        if let reference {
+            if let frame = frame(reference) {
+                return frame
+            }
+            else {
+                throw .unknownFrame(reference)
+            }
         }
-        return frame
+        else {
+            if let frame = design.currentFrame {
+                return frame
+            }
+            else {
+                throw .emptyDesign
+            }
+        }
     }
 
     /// Get a frame by given ID as a string or current frame.
@@ -122,16 +150,28 @@ class ToolEnvironment {
     /// Tries to accept the frame. If the frame contains constraint violations, then
     /// the violations are printed out in a more human-readable format.
     ///
-    func accept(_ frame: TransientFrame) throws (ToolError) {
+    func accept(_ frame: TransientFrame, replacing: String? = nil) throws (ToolError) {
         precondition(isOpen, "Trying to accept already closed design: \(url)")
         
         let stableFrame: DesignFrame
-        do {
-            stableFrame = try design.accept(frame)
+
+        if let name = replacing {
+            do {
+                stableFrame = try design.accept(frame, replacingName: name)
+            }
+            catch {
+                throw ToolError.brokenStructuralIntegrity(error)
+            }
         }
-        catch {
-            throw ToolError.brokenStructuralIntegrity(error)
+        else {
+            do {
+                stableFrame = try design.accept(frame)
+            }
+            catch {
+                throw ToolError.brokenStructuralIntegrity(error)
+            }
         }
+        
         try validate(stableFrame)
     }
    

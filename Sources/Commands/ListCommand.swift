@@ -16,8 +16,16 @@ extension PoieticTool {
             = CommandConfiguration(abstract: "List design content objects")
         @OptionGroup var options: Options
 
+        enum EntityType {
+            case frames
+            case objects
+        }
+        
         enum ListType: String, CaseIterable, ExpressibleByArgument{
             case all = "all"
+            case namedFrames = "named-frames"
+            case frames
+            case history
             case names = "names"
             case formulas = "formulas"
             case pseudoEquations = "pseudo-equations"
@@ -27,9 +35,27 @@ extension PoieticTool {
             static var allValueStrings: [String] {
                 ListType.allCases.map { "\($0.rawValue)" }
             }
+            
+            var entityType: EntityType {
+                switch self {
+                case .all: .objects
+
+                case .namedFrames: .frames
+                case .frames: .frames
+                case .history: .frames
+                    
+                case .formulas: .objects
+                case .graphicalFunctions: .objects
+                case .names: .objects
+                case .pseudoEquations: .objects
+                }
+            }
         }
         
-        @Option(name: [.customLong("type")], help: "Type of objects to list")
+        @Option(name: [.customLong("frame")], help: "List objects in frame (ID or name). If not provided, current is used.")
+        var frameRef: String?
+
+        @Option(name: [.customLong("type")], help: "Filter list objects by type (when applicable)")
         var typeName: String?
 
         @Argument(help: "Kind of list or type of objects to show.")
@@ -37,12 +63,29 @@ extension PoieticTool {
 
         mutating func run() throws {
             let env = try ToolEnvironment(location: options.designLocation)
-
-            guard let frame = env.design.currentFrame else {
-                try env.close()
-                throw CleanExit.message("The design is empty or has no current frame")
+            
+            switch listType.entityType {
+            case .frames:
+                try listFrames(env)
+            case .objects:
+                let frame = try env.existingFrame(frameRef)
+                try listObjects(env, in: frame)
             }
-           
+            try env.close()
+        }
+        func listFrames(_ env: ToolEnvironment) throws {
+            switch listType {
+            case .namedFrames:
+                listNamedFrames(env.design)
+            case .frames:
+                listFrameIDs(env.design)
+            case .history:
+                listHistory(env.design)
+            default:
+                return
+            }
+        }
+        func listObjects(_ env: ToolEnvironment, in frame: DesignFrame) throws {
             let type: ObjectType?
             
             if let typeName  {
@@ -69,6 +112,8 @@ extension PoieticTool {
             switch listType {
             case .all:
                 listAll(snapshots,in: frame)
+            case .namedFrames:
+                listNamedFrames(env.design)
             case .names:
                 listNames(snapshots)
             case .formulas:
@@ -77,9 +122,9 @@ extension PoieticTool {
                 try listPseudoEquations(frame, env: env)
             case .graphicalFunctions:
                 listGraphicalFunctions(frame)
+            default:
+                return
             }
-
-            try env.close()
         }
     }
 }
@@ -218,5 +263,32 @@ func listGraphicalFunctions(_ frame: DesignFrame) {
             print("    (invalid point array representation)")
         }
         
+    }
+}
+
+func listNamedFrames(_ design: Design) {
+    let names = design.namedFrames.keys
+    let sorted = names.sorted {
+        $0.localizedLowercase.lexicographicallyPrecedes($1.localizedLowercase)
+    }
+    for name in sorted {
+        let frame = design.frame(name: name)!
+        print("\(name) \(frame.id)")
+    }
+}
+
+func listFrameIDs(_ design: Design) {
+    for frame in design.frames {
+        print("\(frame.id)")
+    }
+}
+func listHistory(_ design: Design) {
+    print("UNDO")
+    for id in design.undoableFrames {
+        print("\(id)")
+    }
+    print("REDO")
+    for id in design.redoableFrames {
+        print("\(id)")
     }
 }

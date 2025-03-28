@@ -22,12 +22,13 @@ extension PoieticTool {
                 usage: """
 Create a new node:
 
-poietic add Stock name=account formula=100
-poietic add Flow name=expenses formula=50
+poietic edit add Stock name=account formula=100
+poietic edit add FlowRate name=expenses formula=50
 """
             )
 
-        @OptionGroup var options: Options
+        @OptionGroup var globalOptions: Options
+        @OptionGroup var options: EditOptions
 
         @Argument(help: "Type of the object to be created")
         var typeName: String
@@ -36,8 +37,9 @@ poietic add Flow name=expenses formula=50
         var attributeAssignments: [String] = []
         
         mutating func run() throws {
-            let env = try ToolEnvironment(location: options.designLocation)
-            let frame = env.design.createFrame(deriving: env.design.currentFrame)
+            let env = try ToolEnvironment(location: globalOptions.designLocation)
+            let original = try env.existingFrame(options.deriveRef)
+            let frame = env.design.createFrame(deriving: original)
             
             guard let type = FlowsMetamodel.objectType(name: typeName) else {
                 throw ToolError.unknownObjectType(typeName)
@@ -66,10 +68,10 @@ poietic add Flow name=expenses formula=50
 
             }
 
-            try env.accept(frame)
+            try env.accept(frame, replacing: options.replaceRef)
             try env.close()
 
-            print("Created node \(object.id)")
+            print("Created node \(object.id) in frame \(frame.id)")
         }
     }
 }

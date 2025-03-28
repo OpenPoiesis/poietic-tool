@@ -31,7 +31,7 @@ enum ToolError: Error, CustomStringConvertible {
     // Design errors
     case brokenStructuralIntegrity(StructuralIntegrityError)
     case unnamedObject(ObjectID)
-    
+
     case validationFailed(DesignIssueCollection)   /* OK */
     case compilationFailed(DesignIssueCollection)  /* OK */
     
@@ -44,6 +44,8 @@ enum ToolError: Error, CustomStringConvertible {
     case unknownObject(String)
     case nodeExpected(String)
     case unknownFrame(String)
+    case frameExists(String)
+    case invalidFrameID(String)
 
     // Editing errors
     case noChangesToUndo
@@ -70,7 +72,6 @@ enum ToolError: Error, CustomStringConvertible {
             return "Store error: \(error)"
         case .foreignFrameError(let error):
             return "Foreign frame error: \(error)"
-
         case .emptyDesign:
             return "The design is empty"
 
@@ -123,6 +124,10 @@ enum ToolError: Error, CustomStringConvertible {
             return "Unknown object '\(value)'"
         case .unknownFrame(let value):
             return "Unknown frame: \(value)"
+        case .frameExists(let value):
+            return "Frame already exists: \(value)"
+        case .invalidFrameID(let value):
+            return "Invalid frame ID: \(value)"
         case .noChangesToUndo:
             return "No changes to undo"
         case .noChangesToRedo:
@@ -176,6 +181,10 @@ enum ToolError: Error, CustomStringConvertible {
             return "See the list of available objects and their names by using the 'list' command."
         case .unknownFrame(_):
             return nil
+        case .frameExists(let value):
+            return "Use another frame name or ID, or use force to replace existing"
+        case .invalidFrameID(_):
+            return "The frame ID is malformed. If you are trying to remove a named frame, use the --name flag"
         case .noChangesToUndo:
             return nil
         case .noChangesToRedo:
