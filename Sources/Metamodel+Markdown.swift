@@ -15,7 +15,7 @@ extension ObjectType {
         doc.append(Heading(level: level, Text(self.label)))
         
         doc.append(Paragraph(
-            Strong(Text("Name: ")), InlineCode(self.label))
+            Strong(Text("Name: ")), InlineCode(self.name))
         )
 
         if !traits.isEmpty {
@@ -101,15 +101,73 @@ extension Metamodel {
             }
         }
         
-        doc.append(Markdown.Heading(level: 1, Text("Constraints")))
+        doc.append(Markdown.Heading(level: 1, Text("Edge Rules")))
         
-        if constraints.isEmpty {
+
+        if edgeRules.isEmpty {
             doc.append(Paragraph(
-                Text("There are no constraints in this metamodel.")
+                Text("No edge rules.")
             ))
         }
         else {
             var rows: [Table.Row] = []
+            let header = Table.Head(
+                Table.Cell(Text("Edge Type")),
+                Table.Cell(Text("Origin")),
+                Table.Cell(Text("Target")),
+                Table.Cell(Text("Cardinality at Origin")),
+                Table.Cell(Text("Cardinality at Target"))
+            )
+            
+            for rule in edgeRules {
+                var originText: InlineMarkup
+                var targetText: InlineMarkup
+                
+                if let pred = rule.originPredicate {
+                    originText = InlineCode(String(describing: pred))
+                }
+                else {
+                    originText = Emphasis(Text("any"))
+                }
+                if let pred = rule.targetPredicate {
+                    targetText = InlineCode(String(describing: pred))
+                }
+                else {
+                    targetText = Emphasis(Text("any"))
+                }
+
+                let row = Table.Row(
+                    Table.Cell(Text(rule.type.name)),
+                    Table.Cell(originText),
+                    Table.Cell(targetText),
+                    Table.Cell(Text("from \(rule.outgoing)")),
+                    Table.Cell(Text("to \(rule.incoming)"))
+                )
+                rows.append(row)
+
+            }
+            let table = Table(columnAlignments: [.left, .left, .left, .center, .center],
+                              header: header, body: Table.Body(rows))
+            
+            doc.append(table)
+
+        }
+        
+        doc.append(Markdown.Heading(level: 1, Text("Constraints")))
+        
+        if constraints.isEmpty {
+            doc.append(Paragraph(
+                Text("No constraints.")
+            ))
+        }
+        else {
+            var rows: [Table.Row] = []
+
+            let header = Table.Head(
+                Table.Cell(Text("Name")),
+                Table.Cell(Text("Description"))
+            )
+            
             for constraint in constraints {
                 let abstractText: InlineMarkup
                 
@@ -126,11 +184,6 @@ extension Metamodel {
                 )
                 rows.append(row)
             }
-            
-            let header = Table.Head(
-                Table.Cell(Text("Name")),
-                Table.Cell(Text("Description"))
-            )
             
             let table = Table(columnAlignments: [.left, .left],
                               header: header, body: Table.Body(rows))
