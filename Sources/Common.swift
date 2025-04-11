@@ -181,7 +181,7 @@ enum ToolError: Error, CustomStringConvertible {
             return "See the list of available objects and their names by using the 'list' command."
         case .unknownFrame(_):
             return nil
-        case .frameExists(let value):
+        case .frameExists(_):
             return "Use another frame name or ID, or use force to replace existing"
         case .invalidFrameID(_):
             return "The frame ID is malformed. If you are trying to remove a named frame, use the --name flag"

@@ -220,7 +220,7 @@ func listPseudoEquations(_ frame: DesignFrame, env: ToolEnvironment) throws (Too
         var total = ""
         
         if !stock.inflows.isEmpty {
-            let inflows = stock.inflows.map { plan.stateVariables[$0].name + plan.stateVariables[$0].kind.rawValue}
+            let inflows = stock.inflows.map { plan.stateVariables[$0].name }
             total += inflows.joined(separator: " + ")
         }
         if !stock.outflows.isEmpty {

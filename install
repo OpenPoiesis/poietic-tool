@@ -12,7 +12,7 @@
 SWIFTPM_BIN=.swiftpm/bin
 
 (swift package experimental-uninstall poietic 2> /dev/null) || true
-swift package experimental-install
+swift package experimental-install -c debug
 
 if [[ $PATH != *${SWIFTPM_BIN}* ]]; then
     echo "WARNING: The directory $HOME/$SWIFTPM_BIN does not seem to be in your PATH."
