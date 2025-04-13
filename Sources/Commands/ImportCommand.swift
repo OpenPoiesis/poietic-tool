@@ -23,19 +23,18 @@ extension PoieticTool {
         
         mutating func run() throws {
             let env = try ToolEnvironment(location: globalOptions.designLocation)
-            let original = try env.existingFrame(options.deriveRef)
-            let frame = env.design.createFrame(deriving: original)
+            let trans = try env.deriveOrCreate(options.deriveRef)
 
             let loader = ForeignFrameLoader()
             let foreignFrame = try readFrame(fromPath: fileName)
             do {
-                try loader.load(foreignFrame, into: frame)
+                try loader.load(foreignFrame, into: trans)
             }
             catch {
                 throw ToolError.frameLoadingError(error)
             }
 
-            try env.accept(frame, replacing: options.replaceRef, appendHistory: options.appendHistory)
+            try env.accept(trans, replacing: options.replaceRef, appendHistory: options.appendHistory)
             try env.close()
         }
     }

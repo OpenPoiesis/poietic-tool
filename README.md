@@ -89,8 +89,8 @@ poietic info
 
 poietic edit add Stock name=account formula=100
 poietic edit add Auxiliary name=rate formula=0.02
-poietic edit add Flow name=interest formula="account*rate"
-poietic edit connect Fills interest account
+poietic edit add FlowRate name=interest formula="account * rate"
+poietic edit connect Flow interest account
 poietic edit connect Parameter rate interest
 poietic edit connect Parameter account interest
 poietic info

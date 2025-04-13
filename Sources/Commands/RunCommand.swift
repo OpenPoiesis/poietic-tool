@@ -19,11 +19,11 @@ extension PoieticTool {
 
         @OptionGroup var options: Options
 
-        @Option(name: [.customLong("--start-time")],
+        @Option(name: [.customLong("start-time")],
                 help: "Initial time, overrides design-specified initial time")
         var startTime: Double?
 
-        @Option(name: [.customLong("--end-time")],
+        @Option(name: [.customLong("end-time")],
                 help: "Final time, overrides design-specified end time")
         var endTime: Double?
 

@@ -39,19 +39,18 @@ extension PoieticTool {
         
         mutating func run() throws {
             let env = try ToolEnvironment(location: globalOptions.designLocation)
-            let original = try env.existingFrame(options.deriveRef)
-            let frame = env.design.createFrame(deriving: original)
+            let trans = try env.deriveOrCreate(options.deriveRef)
 
             var objects: [MutableObject] = []
             if references.isEmpty {
-                objects = frame.snapshots.map { frame.mutate($0.id) }
+                objects = trans.snapshots.map { trans.mutate($0.id) }
             }
             else {
                 for ref in references {
-                    guard let object = frame.object(stringReference: ref) else {
+                    guard let object = trans.object(stringReference: ref) else {
                         throw ToolError.unknownObject(ref)
                     }
-                    objects.append(frame.mutate(object.id))
+                    objects.append(trans.mutate(object.id))
                 }
             }
             let center = Point(100.0, 100.0)
@@ -60,14 +59,14 @@ extension PoieticTool {
             let step: Double = (2 * Double.pi) / Double(objects.count)
             
             for obj in objects {
-                let obj = frame.mutate(obj.id)
+                let obj = trans.mutate(obj.id)
                 let position = Point(center.x + radius * Double.cos(angle),
                                      center.y + radius * Double.sin(angle))
                 obj.position = position
                 angle += step
             }
             
-            try env.accept(frame, replacing: options.replaceRef, appendHistory: options.appendHistory)
+            try env.accept(trans, replacing: options.replaceRef, appendHistory: options.appendHistory)
             try env.close()
         }
     }

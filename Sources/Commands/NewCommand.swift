@@ -16,16 +16,15 @@ extension PoieticTool {
             abstract: "Create an empty design."
         )
         
+        @OptionGroup var options: Options
+
         @Option(name: [.customLong("import"), .customShort("i")],
                 help: "Poietic frame to import into the first frame")
         var importPaths: [String] = []
 
-        @Argument(help: "Path of design file to be created")
-        var location: String = DefaultDesignLocation
-
         mutating func run() throws {
             let design = Design(metamodel: FlowsMetamodel)
-            let env = try ToolEnvironment(location: location, design: design)
+            let env = try ToolEnvironment(location: options.designLocation, design: design)
 
             if !importPaths.isEmpty {
                 let loader = ForeignFrameLoader()
@@ -46,7 +45,12 @@ extension PoieticTool {
             }
             
             try env.close()
-            print("Design created: \(env.url)")
+            if env.url.scheme == nil || env.url.scheme == "file" {
+                print("Design created: \(env.url.path)")
+            }
+            else {
+                print("Design created: \(env.url)")
+            }
         }
     }
 }

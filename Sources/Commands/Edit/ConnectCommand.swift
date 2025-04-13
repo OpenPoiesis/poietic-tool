@@ -34,8 +34,7 @@ extension PoieticTool {
         
         mutating func run() throws {
             let env = try ToolEnvironment(location: globalOptions.designLocation)
-            let original = try env.existingFrame(options.deriveRef)
-            let frame = env.design.createFrame(deriving: original)
+            let trans = try env.deriveOrCreate(options.deriveRef)
 
             guard let type = FlowsMetamodel.objectType(name: typeName) else {
                 throw ToolError.unknownObjectType(typeName)
@@ -46,7 +45,7 @@ extension PoieticTool {
                                                        type.structuralType.rawValue)
             }
             
-            guard let originObject = frame.object(stringReference: self.origin) else {
+            guard let originObject = trans.object(stringReference: self.origin) else {
                 throw ToolError.unknownObject( self.origin)
             }
             
@@ -55,7 +54,7 @@ extension PoieticTool {
 
             }
             
-            guard let targetObject = frame.object(stringReference: self.target) else {
+            guard let targetObject = trans.object(stringReference: self.target) else {
                 throw ToolError.unknownObject(self.target)
             }
 
@@ -64,9 +63,9 @@ extension PoieticTool {
 
             }
 
-            let id = frame.create(type, structure: .edge(originObject.id, targetObject.id))
+            let id = trans.create(type, structure: .edge(originObject.id, targetObject.id))
             
-            try env.accept(frame, replacing: options.replaceRef, appendHistory: options.appendHistory)
+            try env.accept(trans, replacing: options.replaceRef, appendHistory: options.appendHistory)
             try env.close()
 
             print("Created edge \(id)")

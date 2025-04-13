@@ -38,8 +38,7 @@ poietic edit add FlowRate name=expenses formula=50
         
         mutating func run() throws {
             let env = try ToolEnvironment(location: globalOptions.designLocation)
-            let original = try env.existingFrame(options.deriveRef)
-            let frame = env.design.createFrame(deriving: original)
+            let trans = try env.deriveOrCreate(options.deriveRef)
             
             guard let type = FlowsMetamodel.objectType(name: typeName) else {
                 throw ToolError.unknownObjectType(typeName)
@@ -49,9 +48,9 @@ poietic edit add FlowRate name=expenses formula=50
             
             switch type.structuralType {
             case .unstructured:
-                object = frame.create(type)
+                object = trans.create(type)
             case .node:
-                object = frame.create(type, structure: .node)
+                object = trans.create(type, structure: .node)
             default:
                 throw ToolError.structuralTypeMismatch("node or unstructured",
                                                        type.structuralType.rawValue)
@@ -68,10 +67,10 @@ poietic edit add FlowRate name=expenses formula=50
 
             }
 
-            try env.accept(frame, replacing: options.replaceRef, appendHistory: options.appendHistory)
+            try env.accept(trans, replacing: options.replaceRef, appendHistory: options.appendHistory)
             try env.close()
 
-            print("Created node \(object.id) in frame \(frame.id)")
+            print("Created node \(object.id) in frame \(trans.id)")
         }
     }
 }

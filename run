@@ -1,0 +1,126 @@
+#!/bin/zsh
+#
+# Script to run the demo designs in this repository.
+#
+# USAGE:
+#
+#     ./run PATH_TO_POIETIC_FRAME
+#
+#
+# REQUIREMENTS
+#
+# Requires the following executables to be discoverable through your PATH:
+#
+#     poietic - the poietic command-line tool from the PoieticFlows package
+#
+# Other optional tools that will be used if installed:
+#
+#     gnuplot - tool to create charts
+#     dot     - graphviz command
+#
+# Environment variables used (optional):
+#
+#     OUTPUT - path to the output directory, default: ./out
+#
+#
+# STUDY:
+#
+# Search for the word `main` in this file to see how the poietic
+# command is being used. The rest is just convenience.
+#
+
+set -e
+
+# -----------------------------------------------------------------------------------
+# Some internal config, you might skip this to the next section ...
+
+# Path to the output directory, default ./out
+OUTPUT_DIR="${OUTPUT:-./out}"
+DOT_FILE=$OUTPUT_DIR/diagram.dot
+
+poietic () {
+    if [[ -v POIETIC ]]
+    then
+        if ! command -v ${POIETIC} &> /dev/null
+        then
+            echo "Poietic command '${POIETIC}' not found. Set POIETIC environment variable with a valid executable path." 1>&2
+            exit 1
+        fi
+        $POIETIC $*
+    else
+        swift run poietic $*
+    fi
+}
+
+if [ -z "$1" ] ; then
+    echo "Please specify a path to the poietic frame bundle (*.poieticframe)."
+    exit 1
+fi
+
+FRAME_BUNDLE=$1
+
+#
+# -----------------------------------------------------------------------------------
+mkdir -p "${OUTPUT_DIR}"
+
+# Path to the database.
+export POIETIC_DESIGN="${OUTPUT_DIR}/design.poietic"
+
+# -----------------------------------------------------------------------------------
+# MAIN: Prepare the database and run the example
+# -----------------------------------------------------------------------------------
+# BEGIN main
+#
+
+echo "Building and running ${FRAME_BUNDLE}"
+
+# Create a new empty database.
+poietic new --import $FRAME_BUNDLE
+poietic edit auto-parameters
+
+# Create graphviz output
+poietic write-dot \
+        --output ${DOT_FILE} \
+        -l name \
+        -m "(other)"
+
+# Run the model and generate output into the ./out directory.
+poietic run --solver euler -f gnuplot -o ${OUTPUT_DIR}
+
+# END main
+# -----------------------------------------------------------------------------------
+
+# Create graphviz diagram image.
+# -----------------------------------------------------------------------------------
+
+if command -v dot &> /dev/null
+then
+    dot -Tpng -o${OUTPUT_DIR}/diagram.png ${DOT_FILE}
+    echo "Diagram image created in ${OUTPUT_DIR}/diagram.png"
+else
+    echo "WARNING: Graphviz tool 'dot' not found, diagram image not created." 1>&2
+    echo "HINT: Install package 'graphviz' using your system's package manager." 1>&2
+    echo "HINT: On a mac, run: brew install graphviz" 1>&2
+fi
+
+
+# Create charts using gnuplot.
+# -----------------------------------------------------------------------------------
+
+if command -v gnuplot &> /dev/null
+then
+	# Create charts using gnuplot.
+	cd ${OUTPUT_DIR}
+
+    rm "*.gnuplot" 2> /dev/null && echo "Removed previous gnuplots."
+
+	gnuplot *.gnuplot
+	echo "Chart images created in ${OUTPUT_DIR}"
+else
+	echo "WARNING: Gnuplot not found, chart images not created." 1>&2
+	echo "HINT: Install package 'gnuplot' using your system's package manager." 1>&2
+	echo "HINT: On a mac, run: brew install gnuplot" 1>&2
+fi
+
+echo "Output created in ${OUTPUT_DIR}"
+

@@ -120,6 +120,29 @@ class ToolEnvironment {
         }
     }
 
+    /// Derive a frame from existing frame, if the reference is valid or create a new frame if
+    /// there is no current frame.
+    ///
+    /// - Throws ``ToolError/unknownFrame(_:)`` when the frame is not found or
+    ///   ``ToolError/emptyDesign`` if there are no frames in the design.
+    ///
+    func deriveOrCreate(_ reference: String? = nil) throws (ToolError) -> TransientFrame {
+        if let reference {
+            if let original = frame(reference) {
+                return design.createFrame(deriving: original)
+            }
+            else {
+                throw .unknownFrame(reference)
+            }
+        }
+        else if let original = design.currentFrame {
+            return design.createFrame(deriving: original)
+        }
+        else {
+            return design.createFrame()
+        }
+    }
+
     /// Get a frame by given ID as a string or current frame.
     ///
     /// Use this method to get a frame by user-provided reference.

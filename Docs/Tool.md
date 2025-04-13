@@ -94,7 +94,7 @@ Metamodel Command documentation for more information.
 Create a new, empty database. Usage:
 
 ```bash
-poietic new [--import <import> ...] [<location>]
+USAGE: poietic new [--design <design>] [--import <import> ...]
 ```
 
 Options:
@@ -102,10 +102,6 @@ Options:
 - `-i`, `--import <import>`: Poietic frame to import into the first frame. See
   `import` command for more information.
 
-Arguments:
-
-- `location` (optional): Location of the design file to be created. Default is
-  `design.poietic` in the current directory.
 
 During the creation of a new frame the user has an option to import one or
 multiple frames that will be combined into the first frame of the design.
@@ -113,11 +109,8 @@ multiple frames that will be combined into the first frame of the design.
 Example:
 
 ```
-% poietic new --import ../PoieticExamples/ThinkingInSystems/Capital.poieticframe
+% poietic new --import ../poietic-examples/ThinkingInSystems/Capital.poieticframe
 Importing from: ../PoieticExamples/ThinkingInSystems/Capital.poieticframe
-Read 3 objects from collection 'design'
-Read 19 objects from collection 'objects'
-Read 6 objects from collection 'report'
 Design created.
 ```
 
@@ -131,31 +124,18 @@ Get information about the design.
 Usage:
 
 ```bash
-poietic info [--design <design>]
+poietic info [--design <design>] [<frame-id>]
 ```
 
-Example:
+Arguments:
 
-```
-% poietic info
-   Available solvers: euler, rk4
-  Built-in functions: abs, floor, ceiling, round, power, sum, min, max
+- `<frame-id>`: Frame ID (current if not provided)
 
-     Design database: design.poietic
 
-    Current frame ID: 1
-  Frame object count: 40
-Total snapshot count: 40
+Options:
 
-               Graph
-               Nodes: 15
-               Edges: 22
-
-             History
-      History frames: 1
-     Undoable frames: 0
-     Redoable frames: 0
-```
+- `--type <type>`: Filter objects by given object type, when listing objects. For example to list
+  just stocks, use `--type Stock`
 
 ## List Command
 
@@ -164,16 +144,24 @@ List design content objects.
 Usage:
 
 ```
-poietic list [--design <design>] [<list-type>]
+poietic list [--design <design>] [--frame <frame>] [--type <type>] [<list-type>]
 ```
 
-The list type can be:
+Lists types for objects and object-related properties:
+
 - `all`: List all objects in the design in groups: unstructured objects, nodes and
-   edges. Each entry contains object ID, object type name and object name
-- `names`: list only names of objects
+   edges. Each entry contains object ID, object type name and object name.
+- `names`: list only names of objects.
 - `formulas`: List arithmetic formulas in the form: `name = formula`, for example
-  `growth_goal = capital * 0.1`
-- `charts`: List charts in the form: `chart: series`
+  `growth_goal = capital * 0.1`.
+- `pseudo-equations`: List equations for stocks.
+- `charts`: List charts in the form: `chart: series`.
+
+Lists types for frames:
+
+- `named-frames`: List of frames that have a name associated, such as application configuration
+- `frames`: List of frame IDs.
+- `history`: List frame IDs for undo and redo history.
 
 ## Show Command
 
@@ -197,26 +185,17 @@ Example:
 
 ```
 % poietic show depreciation
-                Type: Flow
-           Object ID: 26
-         Snapshot ID: 27
-           Structure: node
+Type                : FlowRate
+Object ID           : 26
+Snapshot ID         : 27
+Structure           : node
+Traits:             : Name, Formula, FlowRate, ComputedValue, NumericIndicator, DiagramNode
 
-                Name
-                name: depreciation
-
-             Formula
-             formula: capital / capital_lifetime
-
-                Flow
-            priority: 0
-
-            Position
-            position: [0, 0]
-             z_index: 0
-             
-% poietic show -f json depreciation
-{"type":"Flow","snapshot_id":27,"id":26,"structure":"node","attributes":{"formula":"capital \/ capital_lifetime","position":[0,0],"name":"depreciation","priority":0,"z_index":0}}
+Attributes
+name                : depreciation
+formula             : capital / capital_lifetime
+priority            : 0
+z_index             : 0
 ```
 
 ## Import Command
@@ -226,7 +205,7 @@ Import a frame into the design.
 Usage:
 
 ```sh
-poietic import [--design <design>] <file-name>
+poietic import [--design <design>] [--derive <derive>] [--replace <replace>] [--append-history] [--no-append-history] <file-name>
 ```
 
 Imports a poietic frame file or a bundle into the design. See documentation
@@ -257,18 +236,19 @@ Usage:
 
 ```
 poietic run [--design <design>] \
-            [--steps <steps>] \
-            [--time-delta <time-delta>] \
-            [--solver <solver>] \
-            [--output-format <output-format>] \
-            [--variable <variable> ...] \
-            [--constant <constant> ...] \
-            [--output <output>]
-```
+    [--start-time <start-time>] \
+    [--end-time <end-time>] \
+    [--time-delta <time-delta>] \
+    [--output-format <output-format>] \
+    [--variable <variable> ...] \
+    [--constant <constant> ...] \
+    [--frame <frame>] \
+    [--output <output>]```
 
 Options:
 
-- `-s, --steps <steps>`: Number of steps to run
+- `--start-time`: Initial time for the `time` variable.
+- `--end-time`: Final simulation time. Default is `start_time + 10 * time_delta`
 - `-t, --time-delta`: Time delta to use. Default: 1.0 (unit-less)
 - `--solver <solver>`: Type of the solver to be used for computation.
 - `-f, --output-format <output-format>`: Output format, see below.

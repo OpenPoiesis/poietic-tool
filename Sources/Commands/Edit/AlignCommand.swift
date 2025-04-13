@@ -55,21 +55,20 @@ extension PoieticTool {
         
         mutating func run() throws {
             let env = try ToolEnvironment(location: globalOptions.designLocation)
-            let original = try env.existingFrame(options.deriveRef)
-            let frame = env.design.createFrame(deriving: original)
+            let trans = try env.deriveOrCreate(options.deriveRef)
 
             var objects: [MutableObject] = []
             
             for ref in references {
-                guard let object = frame.object(stringReference: ref) else {
+                guard let object = trans.object(stringReference: ref) else {
                     throw ToolError.unknownObject(ref)
                 }
-                objects.append(frame.mutate(object.id))
+                objects.append(trans.mutate(object.id))
             }
 
             align(objects: objects, mode: mode, spacing: spacing)
             
-            try env.accept(frame, replacing: options.replaceRef, appendHistory: options.appendHistory)
+            try env.accept(trans, replacing: options.replaceRef, appendHistory: options.appendHistory)
             try env.close()
         }
     }

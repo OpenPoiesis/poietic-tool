@@ -25,10 +25,9 @@ extension PoieticTool {
 
         mutating func run() throws {
             let env = try ToolEnvironment(location: globalOptions.designLocation)
-            let original = try env.existingFrame(options.deriveRef)
-            let frame = env.design.createFrame(deriving: original)
+            let trans = try env.deriveOrCreate(options.deriveRef)
 
-            let result = try autoConnectParameters(frame)
+            let result = try autoConnectParameters(trans)
             
             if verbose {
                 for info in result.added {
@@ -39,7 +38,7 @@ extension PoieticTool {
                 }
             }
 
-            try env.accept(frame, replacing: options.replaceRef, appendHistory: options.appendHistory)
+            try env.accept(trans, replacing: options.replaceRef, appendHistory: options.appendHistory)
             try env.close()
             
             if result.added.count + result.removed.count > 0 {
