@@ -24,6 +24,7 @@ Command summary:
 |`info`| Get information about the design |
 |`list`| List design content objects |
 |`show`| Describe an object |
+|`validate`| Validate the design for potential errors |
 |`edit`| Edit an object or a selection of objects _(see subcommands below)_ |
 |`import`| Import a frame into the design |
 |`run`| Run the simulation and generate output |
@@ -44,6 +45,14 @@ Edit sub-commands:
 |`auto-parameters`| Automatically connect parameter nodes: connect required, disconnect unused |
 |`layout`| Lay out objects |
 |`align`| Align objects on canvas |
+
+Advanced `edit` sub-commands:
+
+| Command | Overview |
+|:----|:----|
+|`prune-history`| Remove all undo-redo history |
+|`create-frame`| Create a new frame or derive a copy from existing frame |
+|`remove-frame`| Remove existing frame |
 
 
 ## Commons
@@ -243,7 +252,8 @@ poietic run [--design <design>] \
     [--variable <variable> ...] \
     [--constant <constant> ...] \
     [--frame <frame>] \
-    [--output <output>]```
+    [--output <output>]
+```
 
 Options:
 

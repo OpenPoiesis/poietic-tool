@@ -2,17 +2,22 @@
 
 Advanced option summary:
 
-- `--derive FRAME` - derive an existing frame by ID or name
-- `--replace NAME` - replace existing named frame, discarding the old one
-- `--no-append-history` - do not add the resulting edited frame to the undo/redo history
+| Option | Overview |
+|:----|:----|
+| `--derive FRAME` | derive an existing frame by ID or name |
+| `--replace NAME` | replace existing named frame, discarding the old one |
+| `--no-append-history` | do not add the resulting edited frame to the undo/redo history |
 
 The options are available to most of the `edit` sub-commands.
 
-Advanced commands:
+Advanced `edit` sub-commands:
 
-- `edit prune-history` – Remove all undo/redo frames from the design, keep only current frame and
-  the frames not in the history.
-
+| Command | Overview |
+|:----|:----|
+|`prune-history`| Remove all undo/redo frames from the design, keep only current frame and
+  the frames not in the history |
+|`create-frame`| Create a new frame or derive a copy from existing frame |
+|`remove-frame`| Remove existing frame |
 
 ## Named Frames
 
@@ -22,7 +27,9 @@ is used in the command-line tool, a frame name can be used.
 
 Known frame names:
 
-- `configuration` – application configuration, such as zoom level, canvas position
+- `settings` – application settings for the design, such as zoom level, canvas view position, etc.
+    It should contain at least one object of type `DiagramSettings`. See the metamodel, using the
+    `metamodel DiagramSettings` command for more information.
 
 ### Replacing Named Frames
 
