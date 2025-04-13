@@ -11,6 +11,11 @@
 
 SWIFTPM_BIN=.swiftpm/bin
 
+if ! command -v swift >/dev/null 2>&1; then
+    echo "Error: 'swift' command not found. Please install Swift."
+    exit 1
+fi
+
 (swift package experimental-uninstall poietic 2> /dev/null) || true
 swift package experimental-install -c debug
 
