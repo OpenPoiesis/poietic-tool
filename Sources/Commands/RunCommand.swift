@@ -192,7 +192,7 @@ func writeCSV(path: String,
     for state in states {
         var row: [String] = []
         for variable in variables {
-            let value = state[variable.index]
+            let value: Variant = state[variable.index]
             row.append(try value.stringValue())
         }
         try writer.write(row: row)
