@@ -33,38 +33,44 @@ public struct ParameterInfo {
     let edgeID: ObjectID
 }
 
+func resolveParameters(objects: [DesignObject], view: StockFlowView) -> [ObjectID:ResolvedParameters] {
+    var result: [ObjectID:ResolvedParameters] = [:]
+    let builtinNames = Set(BuiltinVariable.allCases.map { $0.name })
+    
+    for object in objects {
+        guard let formulaText = try? object["formula"]?.stringValue() else {
+            continue
+        }
+        let parser = ExpressionParser(string: formulaText)
+        guard let formula = try? parser.parse() else {
+            continue
+        }
+        let variables: Set<String> = Set(formula.allVariables)
+        let required = Array(variables.subtracting(builtinNames))
+        let resolved = view.resolveParameters(object.id, required: required)
+        result[object.id] = resolved
+    }
+    return result
+}
+
 /// Automatically connect parameters in a frame.
 ///
-func autoConnectParameters(_ frame: TransientFrame) throws -> (added: [ParameterInfo], removed: [ParameterInfo]) {
-    let view = StockFlowView(frame)
+func autoConnectParameters(_ resolvedMap: [ObjectID:ResolvedParameters], in frame: TransientFrame) throws -> (added: [ParameterInfo], removed: [ParameterInfo]) {
     var added: [ParameterInfo] = []
     var removed: [ParameterInfo] = []
     
-    let builtinNames: Set<String> = Set(BuiltinVariable.allCases.map {
-        $0.name
-    })
 
-    let context = RuntimeContext(frame: frame)
-    var formulaCompiler = FormulaCompilerSystem()
-    formulaCompiler.update(context)
-
-    for target in view.simulationNodes {
-        guard let component: ParsedFormulaComponent = context.component(for: target.id) else {
-            continue
-        }
-        let allNodeVars: Set<String> = Set(component.parsedFormula.allVariables)
-        let required = Array(allNodeVars.subtracting(builtinNames))
-        let resolved = view.resolveParameters(target.id, required: required)
-        
+    for (id, resolved) in resolvedMap {
+        let object = frame[id]
         for name in resolved.missing {
             guard let paramNode = frame.object(named: name) else {
                 throw ToolError.unknownObject(name)
             }
-            let edge = frame.createEdge(.Parameter, origin: paramNode.id, target: target.id)
+            let edge = frame.createEdge(.Parameter, origin: paramNode.id, target: object.id)
             let info = ParameterInfo(parameterName: name,
                                      parameterID: paramNode.id,
-                                     targetName: target.name,
-                                     targetID: target.id,
+                                     targetName: object.name,
+                                     targetID: object.id,
                                      edgeID: edge.id)
             added.append(info)
         }
@@ -75,8 +81,8 @@ func autoConnectParameters(_ frame: TransientFrame) throws -> (added: [Parameter
             
             let info = ParameterInfo(parameterName: node.name,
                                      parameterID: node.id,
-                                     targetName: target.name,
-                                     targetID: target.id,
+                                     targetName: object.name,
+                                     targetID: object.id,
                                      edgeID: edge.id)
             removed.append(info)
         }

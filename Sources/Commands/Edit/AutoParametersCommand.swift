@@ -7,6 +7,7 @@
 
 @preconcurrency import ArgumentParser
 import PoieticCore
+import PoieticFlows
 
 extension PoieticTool {
     struct AutoParameters: ParsableCommand {
@@ -25,9 +26,14 @@ extension PoieticTool {
 
         mutating func run() throws {
             let env = try ToolEnvironment(location: globalOptions.designLocation)
+            let original = try env.existingFrame(options.deriveRef)
             let trans = try env.deriveOrCreate(options.deriveRef)
 
-            let result = try autoConnectParameters(trans)
+            let validated = try env.validate(original)
+            let view = StockFlowView(validated)
+            let nodes = view.simulationNodes
+            let resolvedParams = resolveParameters(objects: nodes, view: view)
+            let result = try autoConnectParameters(resolvedParams, in: trans)
             
             if verbose {
                 for info in result.added {
