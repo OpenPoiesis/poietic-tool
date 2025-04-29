@@ -69,7 +69,7 @@ class ToolEnvironment {
             let design: Design
             do {
                 // TODO: remove the metamodel here
-                design = try store.load(metamodel: FlowsMetamodel)
+                design = try store.load(metamodel: StockFlowMetamodel)
             }
             catch {
                 throw ToolError.storeError(error)

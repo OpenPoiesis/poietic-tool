@@ -33,6 +33,7 @@ extension PoieticTool {
             let view = StockFlowView(validated)
             let nodes = view.simulationNodes
             let resolvedParams = resolveParameters(objects: nodes, view: view)
+            // TODO: Know whether there is anything to do at this point
             let result = try autoConnectParameters(resolvedParams, in: trans)
             
             if verbose {

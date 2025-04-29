@@ -40,7 +40,7 @@ poietic edit add FlowRate name=expenses formula=50
             let env = try ToolEnvironment(location: globalOptions.designLocation)
             let trans = try env.deriveOrCreate(options.deriveRef)
             
-            guard let type = FlowsMetamodel.objectType(name: typeName) else {
+            guard let type = StockFlowMetamodel.objectType(name: typeName) else {
                 throw ToolError.unknownObjectType(typeName)
             }
 

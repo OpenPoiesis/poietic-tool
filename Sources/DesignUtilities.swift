@@ -33,6 +33,7 @@ public struct ParameterInfo {
     let edgeID: ObjectID
 }
 
+// FIXME: Sync with poietic-godot and actually make cleaner, shared in PoieticFlows
 func resolveParameters(objects: [DesignObject], view: StockFlowView) -> [ObjectID:ResolvedParameters] {
     var result: [ObjectID:ResolvedParameters] = [:]
     let builtinNames = Set(BuiltinVariable.allCases.map { $0.name })

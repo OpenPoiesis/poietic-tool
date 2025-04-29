@@ -23,7 +23,7 @@ extension PoieticTool {
         var importPaths: [String] = []
 
         mutating func run() throws {
-            let design = Design(metamodel: FlowsMetamodel)
+            let design = Design(metamodel: StockFlowMetamodel)
             let env = try ToolEnvironment(location: options.designLocation, design: design)
 
             if !importPaths.isEmpty {
