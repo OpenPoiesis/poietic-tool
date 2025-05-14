@@ -108,7 +108,7 @@ Note: Frame with requested IDs can not be --forced to be replaced. Remove the fr
                 createdRef = frame.id.stringValue
             }
 
-            try env.close()
+            try env.closeAndSave()
 
             print("Created frame \(createdRef)")
         }

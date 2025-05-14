@@ -24,8 +24,9 @@ enum ToolError: Error, CustomStringConvertible {
     case malformedLocation(String)
     case fileDoesNotExist(String)
     case unableToSaveDesign(Error)
-    case storeError(PersistentStoreError)
-    case foreignFrameError(ForeignFrameError)
+    case storeError(DesignStoreError)
+    case designReaderError(RawDesignReaderError, URL?)
+    case designLoaderError(RawDesignLoaderError, URL?)
     case emptyDesign
     
     // Design errors
@@ -56,8 +57,6 @@ enum ToolError: Error, CustomStringConvertible {
     
     case invalidAttributeAssignment(String)
     case typeMismatch(String, String, String)
-
-    case frameLoadingError(FrameLoaderError)
     
     public var description: String {
         switch self {
@@ -70,8 +69,10 @@ enum ToolError: Error, CustomStringConvertible {
             return "Unable to save design. Reason: \(value)"
         case .storeError(let error):
             return "Store error: \(error)"
-        case .foreignFrameError(let error):
-            return "Foreign frame error: \(error)"
+        case .designReaderError(let error, let url):
+            return "Error while reading \(url.map { $0.description } ?? "(unknown location)"): \(error)"
+        case .designLoaderError(let error, let url):
+            return "Error while loading \(url.map { $0.description } ?? "(unknown location)"): \(error)"
         case .emptyDesign:
             return "The design is empty"
 
@@ -143,8 +144,6 @@ enum ToolError: Error, CustomStringConvertible {
             return "Invalid attribute assignment: \(value)"
         case .typeMismatch(let subject, let value, let expected):
             return "Type mismatch in \(subject) value '\(value)', expected type: \(expected)"
-        case .frameLoadingError(let error):
-            return "Frame loading error: \(error)"
         case .fileDoesNotExist(let file):
             return "File '\(file)' not found"
         }
@@ -199,11 +198,11 @@ enum ToolError: Error, CustomStringConvertible {
             return "Attribute assignment should be in a form: `attribute_name=value`, everything after '=' is considered a value. Ex.: `name=account`, `formula=fish * 10`."
         case .typeMismatch(_, _, _):
             return nil
-        case .frameLoadingError(_):
-            return nil
+        case .designLoaderError(_):
+            return "Check the metamodel version and potentially use a design doctor"
+        case .designReaderError(_):
+            return "Check the design source structure and format version"
         case .fileDoesNotExist(_):
-            return nil
-        case .foreignFrameError(_):
             return nil
         case .storeError(_):
             return nil
@@ -280,23 +279,18 @@ func makeFileURL(fromPath path: String) throws (ToolError) -> URL {
     return url
 }
 
-func readFrame(fromPath path: String) throws (ToolError) -> any ForeignFrameProtocol {
-    let reader = JSONFrameReader()
-    let foreignFrame: any ForeignFrameProtocol
+func readRawDesign(fromPath path: String) throws (ToolError) -> RawDesign {
+    let reader = JSONDesignReader(variantCoding: .dictionaryWithFallback)
+    let design: RawDesign
     let url = try makeFileURL(fromPath: path)
     
     do {
-        if url.hasDirectoryPath {
-            foreignFrame = try reader.read(bundleAtURL: url)
-        }
-        else {
-            foreignFrame = try reader.read(fileAtURL: url)
-        }
+        design = try reader.read(fileAtURL: url)
     }
     catch {
-        throw .foreignFrameError(error)
+        throw .designReaderError(error, url)
     }
-    return foreignFrame
+    return design
 }
 
 func formatLabelledList(_ items: [(String?, String?)],

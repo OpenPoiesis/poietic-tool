@@ -27,7 +27,7 @@ extension PoieticTool {
             let frameID = env.design.undoableFrames.last!
             env.design.undo(to: frameID)
 
-            try env.close()
+            try env.closeAndSave()
             print("Did undo")
         }
     }
@@ -53,7 +53,7 @@ extension PoieticTool {
             let frameID = env.design.redoableFrames.first!
             env.design.redo(to: frameID)
 
-            try env.close()
+            try env.closeAndSave()
             print("Did redo.")
         }
     }

@@ -52,7 +52,7 @@ extension PoieticTool {
             else {
                 printAll(metamodel, format: outputFormat)
             }
-            try env.close()
+            try env.closeAndSave()
         }
         
         func printType(_ type: ObjectType,

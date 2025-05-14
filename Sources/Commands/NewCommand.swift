@@ -8,6 +8,7 @@
 @preconcurrency import ArgumentParser
 import PoieticFlows
 import PoieticCore
+import Foundation
 
 extension PoieticTool {
     struct NewDesign: ParsableCommand {
@@ -27,24 +28,25 @@ extension PoieticTool {
             let env = try ToolEnvironment(location: options.designLocation, design: design)
 
             if !importPaths.isEmpty {
-                let loader = ForeignFrameLoader()
+                let loader = RawDesignLoader(metamodel: design.metamodel, options: .nameFromID)
                 let frame = design.createFrame()
 
                 for path in importPaths {
-                    let foreignFrame = try readFrame(fromPath: path)
+                    let rawDesign = try readRawDesign(fromPath: path)
                     print("Importing from: \(path)")
                     do {
-                        try loader.load(foreignFrame, into: frame)
+                        // FIXME: [WIP] add which frame to load
+                        try loader.load(rawDesign.snapshots, into: frame)
                     }
                     catch {
-                        throw ToolError.frameLoadingError(error)
+                        throw ToolError.designLoaderError(error, URL(fileURLWithPath: path))
                     }
                 }
                 
                 try env.accept(frame)
             }
             
-            try env.close()
+            try env.closeAndSave()
             if env.url.scheme == nil || env.url.scheme == "file" {
                 print("Design created: \(env.url.path)")
             }

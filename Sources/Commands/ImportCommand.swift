@@ -8,6 +8,7 @@
 @preconcurrency import ArgumentParser
 import Foundation
 import PoieticCore
+import PoieticFlows
 
 // TODO: Merge with PrintCommand, use --format=id
 extension PoieticTool {
@@ -25,17 +26,18 @@ extension PoieticTool {
             let env = try ToolEnvironment(location: globalOptions.designLocation)
             let trans = try env.deriveOrCreate(options.deriveRef)
 
-            let loader = ForeignFrameLoader()
-            let foreignFrame = try readFrame(fromPath: fileName)
+            let rawDesign = try readRawDesign(fromPath: fileName)
+            let loader = RawDesignLoader(metamodel: StockFlowMetamodel, options: .nameFromID)
             do {
-                try loader.load(foreignFrame, into: trans)
+                // FIXME: [WIP] add which frame to load
+                try loader.load(rawDesign.snapshots, into: trans)
             }
             catch {
-                throw ToolError.frameLoadingError(error)
+                throw ToolError.designLoaderError(error, URL(fileURLWithPath: fileName))
             }
 
             try env.accept(trans, replacing: options.replaceRef, appendHistory: options.appendHistory)
-            try env.close()
+            try env.closeAndSave()
         }
     }
 }

@@ -32,7 +32,7 @@ extension PoieticTool {
                 env.design.removeFrame(frame)
             }
 
-            try env.close()
+            try env.closeAndSave()
             
             if count > 0 {
                 print("Removed \(count) frames.")

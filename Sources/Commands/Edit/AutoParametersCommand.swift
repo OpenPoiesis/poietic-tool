@@ -46,7 +46,7 @@ extension PoieticTool {
             }
 
             try env.accept(trans, replacing: options.replaceRef, appendHistory: options.appendHistory)
-            try env.close()
+            try env.closeAndSave()
             
             if result.added.count + result.removed.count > 0 {
                 print("Added \(result.added.count) edges and removed \(result.removed.count) edges.")

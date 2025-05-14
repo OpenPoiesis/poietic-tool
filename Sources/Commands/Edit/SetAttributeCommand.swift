@@ -47,7 +47,7 @@ extension PoieticTool {
                                        string: value)
             
             try env.accept(trans, replacing: options.replaceRef, appendHistory: options.appendHistory)
-            try env.close()
+            try env.closeAndSave()
             
             print("Property set in \(reference): \(attributeName) = \(value)")
         }

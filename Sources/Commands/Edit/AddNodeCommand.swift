@@ -68,7 +68,7 @@ poietic edit add FlowRate name=expenses formula=50
             }
 
             try env.accept(trans, replacing: options.replaceRef, appendHistory: options.appendHistory)
-            try env.close()
+            try env.closeAndSave()
 
             print("Created node \(object.id) in frame \(trans.id)")
         }
