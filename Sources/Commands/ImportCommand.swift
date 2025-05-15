@@ -19,7 +19,10 @@ extension PoieticTool {
         @OptionGroup var globalOptions: Options
         @OptionGroup var options: EditOptions
 
-        @Argument(help: "Path to a frame bundle to import")
+        // TODO: Specify which frame to import from a multi-frame file
+        // TODO: Fail on multi-frame file without current frame
+        
+        @Argument(help: "Path to a poietic design to import from")
         var fileName: String
         
         mutating func run() throws {
@@ -27,7 +30,7 @@ extension PoieticTool {
             let trans = try env.deriveOrCreate(options.deriveRef)
 
             let rawDesign = try readRawDesign(fromPath: fileName)
-            let loader = RawDesignLoader(metamodel: StockFlowMetamodel, options: .nameFromID)
+            let loader = RawDesignLoader(metamodel: StockFlowMetamodel, options: .useIDAsNameAttribute)
             do {
                 // FIXME: [WIP] add which frame to load
                 try loader.load(rawDesign.snapshots, into: trans)
