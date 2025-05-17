@@ -51,7 +51,7 @@ extension PoieticTool {
                 env.design.removeFrame(id)
             }
 
-            try env.close()
+            try env.closeAndSave()
             
             print("Removed \(toRemove.count) frames.")
         }

@@ -35,7 +35,7 @@ extension PoieticTool {
             let removed = trans.removeCascading(object.id)
 
             try env.accept(trans, replacing: options.replaceRef, appendHistory: options.appendHistory)
-            try env.close()
+            try env.closeAndSave()
 
             print("Removed object: \(object.id)")
             if !removed.isEmpty {

@@ -66,7 +66,7 @@ extension PoieticTool {
             let id = trans.create(type, structure: .edge(originObject.id, targetObject.id))
             
             try env.accept(trans, replacing: options.replaceRef, appendHistory: options.appendHistory)
-            try env.close()
+            try env.closeAndSave()
 
             print("Created edge \(id)")
         }

@@ -7,6 +7,7 @@
 
 @preconcurrency import ArgumentParser
 import PoieticCore
+import Foundation
 
 /// Width of the attribute label column for right-aligned display.
 ///
@@ -123,7 +124,9 @@ func printObjectAsText(_ object: DesignObject) {
 }
 
 func printObjectAsJSON(_ object: DesignObject) {
-    let data = try! JSONFrameWriter.objectToJSON(object)
+    let raw = RawSnapshot(object)
+    let encoder = JSONEncoder()
+    let data = try! encoder.encode(raw)
     let output = String(data: data, encoding: .utf8)!
     print(output)
 }

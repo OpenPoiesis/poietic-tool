@@ -67,7 +67,7 @@ extension PoieticTool {
             }
             
             try env.accept(trans, replacing: options.replaceRef, appendHistory: options.appendHistory)
-            try env.close()
+            try env.closeAndSave()
         }
     }
 }

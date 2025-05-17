@@ -65,7 +65,7 @@ class ToolEnvironment {
             self.design = design
         }
         else {
-            let store = MakeshiftDesignStore(url: url)
+            let store = DesignStore(url: url)
             let design: Design
             do {
                 // TODO: remove the metamodel here
@@ -239,11 +239,12 @@ class ToolEnvironment {
             }
         }
     }
-    
-    func close() throws (ToolError) {
+
+    /// Close with saving the modified design.
+    func closeAndSave() throws (ToolError) {
         precondition(isOpen, "Trying to close already closed design: \(url)")
         
-        let store = MakeshiftDesignStore(url: url)
+        let store = DesignStore(url: url)
         do {
             try store.save(design: design)
         }
@@ -252,6 +253,14 @@ class ToolEnvironment {
         }
         isOpen = false
     }
+    
+    /// Close without saving the design.
+    ///
+    func close() throws (ToolError) {
+        precondition(isOpen, "Trying to close already closed design: \(url)")
+        isOpen = false
+    }
+
 }
 
 
