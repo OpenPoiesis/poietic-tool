@@ -30,7 +30,7 @@ extension PoieticTool {
             let trans = try env.deriveOrCreate(options.deriveRef)
 
             let rawDesign = try readRawDesign(fromPath: fileName)
-            let loader = RawDesignLoader(metamodel: StockFlowMetamodel, options: .useIDAsNameAttribute)
+            let loader = DesignLoader(metamodel: StockFlowMetamodel, options: .useIDAsNameAttribute)
             do {
                 // FIXME: [WIP] add which frame to load
                 try loader.load(rawDesign.snapshots, into: trans)

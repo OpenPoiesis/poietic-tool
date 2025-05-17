@@ -26,7 +26,7 @@ enum ToolError: Error, CustomStringConvertible {
     case unableToSaveDesign(Error)
     case storeError(DesignStoreError)
     case designReaderError(RawDesignReaderError, URL?)
-    case designLoaderError(RawDesignLoaderError, URL?)
+    case designLoaderError(DesignLoaderError, URL?)
     case emptyDesign
     
     // Design errors

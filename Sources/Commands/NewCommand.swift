@@ -28,7 +28,7 @@ extension PoieticTool {
             let env = try ToolEnvironment(location: options.designLocation, design: design)
 
             if !importPaths.isEmpty {
-                let loader = RawDesignLoader(metamodel: design.metamodel, options: .useIDAsNameAttribute)
+                let loader = DesignLoader(metamodel: design.metamodel, options: .useIDAsNameAttribute)
                 let frame = design.createFrame()
 
                 for path in importPaths {

@@ -52,7 +52,7 @@ extension PoieticTool {
                 frameID = id
             }
             let frame = env.design.frame(frameID)!
-            let extractor = RawDesignExtractor()
+            let extractor = DesignExtractor()
             let snapshots: [RawSnapshot]
             if references.isEmpty {
                 snapshots = frame.snapshots.map {
