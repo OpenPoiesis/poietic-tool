@@ -21,7 +21,7 @@ extension PoieticTool {
         mutating func run() throws {
             let env = try ToolEnvironment(location: options.designLocation)
 
-            let frame: DesignFrame?
+            let frame: StableFrame?
             
             if let frameID {
                 if let id = ObjectID(frameID) {
@@ -74,8 +74,8 @@ extension PoieticTool {
                     (nil, nil),
                     ("Frame", "\(frame.id)"),
                     ("All snapshots", "\(frame.snapshots.count)"),
-                    ("Nodes", "\(frame.nodes.count)"),
-                    ("Edges", "\(frame.edges.count)"),
+                    ("Nodes", "\(frame.nodeKeys)"),
+                    ("Edges", "\(frame.edgeKeys)"),
                     ("Unstructured", "\(unstructuredCount)"),
                 ]
 

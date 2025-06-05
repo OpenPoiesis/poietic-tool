@@ -56,34 +56,35 @@ public class DotExporter {
     }
     
     /// Export nodes and edges into the output.
-    public func export(_ frame: DesignFrame) throws  {
+    public func export(_ frame: StableFrame) throws  {
         var output: String = ""
         let formatter = DotFormatter(name: name, type: .directed)
 
         output = formatter.header()
         
-        for node in frame.nodes {
+        for nodeID in frame.nodeKeys {
+            let node = frame[nodeID]
             let label: String
             
             if let attribute = labelAttribute {
-                if let value = node.attribute(forKey: attribute) {
+                if let value = node[attribute] {
                     label = String(describing: value)
                 }
                 else if let missingLabel {
                     label = missingLabel
                 }
                 else {
-                    label = node.id.stringValue
+                    label = nodeID.stringValue
                 }
             }
             else {
-                label = node.id.stringValue
+                label = nodeID.stringValue
             }
 
             var attributes = format(graph: frame, node: node)
             attributes["label"] = label
 
-            let id = "\(node.id)"
+            let id = "\(nodeID)"
             output += formatter.node(id, attributes: attributes)
         }
 
@@ -106,7 +107,7 @@ public class DotExporter {
         }
     }
     
-    public func format(graph: DesignFrame, node: DesignObject) -> [String:String] {
+    public func format(graph: StableFrame, node: ObjectSnapshot) -> [String:String] {
         var combined: [String:String] = [:]
         
         for style in style?.nodeStyles ?? [] {
@@ -122,7 +123,7 @@ public class DotExporter {
         return combined
     }
 
-    public func format(graph: DesignFrame, edge: DesignObject) -> [String:String] {
+    public func format(graph: StableFrame, edge: ObjectSnapshot) -> [String:String] {
         var combined: [String:String] = [:]
         
         for style in style?.edgeStyles ?? [] {

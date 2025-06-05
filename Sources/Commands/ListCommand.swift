@@ -85,7 +85,7 @@ extension PoieticTool {
                 return
             }
         }
-        func listObjects(_ env: ToolEnvironment, in frame: DesignFrame) throws {
+        func listObjects(_ env: ToolEnvironment, in frame: StableFrame) throws {
             let type: ObjectType?
             
             if let typeName  {
@@ -101,7 +101,7 @@ extension PoieticTool {
                 type = nil
             }
             
-            let snapshots: [DesignObject]
+            let snapshots: [ObjectSnapshot]
             if let type {
                 snapshots = frame.filter(type: type)
             }
@@ -129,7 +129,7 @@ extension PoieticTool {
     }
 }
 
-func listAll(_ snapshots: [DesignObject], in frame: some Frame) {
+func listAll(_ snapshots: [ObjectSnapshot], in frame: some Frame) {
     let sorted = snapshots.sorted { left, right in
         left.id < right.id
     }
@@ -142,7 +142,7 @@ func listAll(_ snapshots: [DesignObject], in frame: some Frame) {
         for object in unstructured {
             let name: String = object.name ?? "(unnamed)"
             let line: String = [
-                "\(object.id)",
+                "\(object.objectID)",
                 "\(object.type.name)",
                 "\(name)",
             ].joined(separator: " ")
@@ -154,7 +154,7 @@ func listAll(_ snapshots: [DesignObject], in frame: some Frame) {
         for object in nodes {
             let name: String = object.name ?? "(unnamed)"
             let line: String = [
-                "\(object.id)",
+                "\(object.objectID)",
                 "\(object.type.name)",
                 "\(name)",
             ].joined(separator: " ")
@@ -166,7 +166,7 @@ func listAll(_ snapshots: [DesignObject], in frame: some Frame) {
         for edge in edges {
             let name: String = edge.object.name ?? "(unnamed)"
             let line: String = [
-                "\(edge.object.id)",
+                "\(edge.object.objectID)",
                 "\(edge.origin)-->\(edge.target)",
                 "\(edge.object.type.name)",
                 "\(name)",
@@ -176,7 +176,7 @@ func listAll(_ snapshots: [DesignObject], in frame: some Frame) {
     }
 }
 
-func listNames(_ snapshots: [DesignObject]) {
+func listNames(_ snapshots: [ObjectSnapshot]) {
     let names: [String] = snapshots.compactMap { $0.name }
         .sorted { $0.lexicographicallyPrecedes($1)}
     
@@ -185,7 +185,7 @@ func listNames(_ snapshots: [DesignObject]) {
     }
 }
 
-func listFormulas(_ snapshots: [DesignObject]) {
+func listFormulas(_ snapshots: [ObjectSnapshot]) {
     var result: [String: String] = [:]
     
     for object in snapshots {
@@ -208,13 +208,13 @@ func listFormulas(_ snapshots: [DesignObject]) {
     }
 }
 
-func listPseudoEquations(_ frame: DesignFrame, env: ToolEnvironment) throws (ToolError) {
+func listPseudoEquations(_ frame: StableFrame, env: ToolEnvironment) throws (ToolError) {
     // FIXME: Add stocks
     let validFrame = try env.validate(frame)
     let plan: SimulationPlan = try env.compile(validFrame)
     print("Not quite equations ...")
     for stock in plan.stocks {
-        let obj = frame[stock.id]
+        let obj = frame[stock.objectID]
         // This should not happen if the model is valid, but just in case
         let name = (obj.name ?? "(unnamed)")
         var total = ""
@@ -235,7 +235,7 @@ func listPseudoEquations(_ frame: DesignFrame, env: ToolEnvironment) throws (Too
     }
 }
 
-func listGraphicalFunctions(_ frame: DesignFrame) {
+func listGraphicalFunctions(_ frame: StableFrame) {
     var result: [String: [Point]?] = [:]
     
     for object in frame.snapshots {

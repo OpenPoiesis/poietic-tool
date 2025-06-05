@@ -57,13 +57,13 @@ extension PoieticTool {
             let env = try ToolEnvironment(location: globalOptions.designLocation)
             let trans = try env.deriveOrCreate(options.deriveRef)
 
-            var objects: [MutableObject] = []
+            var objects: [TransientObject] = []
             
             for ref in references {
                 guard let object = trans.object(stringReference: ref) else {
                     throw ToolError.unknownObject(ref)
                 }
-                objects.append(trans.mutate(object.id))
+                objects.append(trans.mutate(object.objectID))
             }
 
             align(objects: objects, mode: mode, spacing: spacing)
@@ -74,8 +74,8 @@ extension PoieticTool {
     }
 }
 
-func align(objects: [MutableObject], mode: AlignmentMode, spacing: Double) {
-    let items: [(MutableObject, Point)] = objects.compactMap {
+func align(objects: [TransientObject], mode: AlignmentMode, spacing: Double) {
+    let items: [(TransientObject, Point)] = objects.compactMap {
         if let position = $0.position {
             ($0, position)
         }

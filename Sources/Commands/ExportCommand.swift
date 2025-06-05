@@ -65,9 +65,9 @@ extension PoieticTool {
                     guard let snapshot = frame.object(stringReference: ref) else {
                         throw ToolError.unknownObject(ref)
                     }
-                    validIDs.append(snapshot.id)
+                    validIDs.append(snapshot.objectID)
                 }
-                snapshots = extractor.extractPruning(snapshots: validIDs, frame: frame)
+                snapshots = extractor.extractPruning(objects: validIDs, frame: frame)
             }
 
             let rawDesign = extractor.extractStub(env.design)
@@ -75,7 +75,7 @@ extension PoieticTool {
             
             let writer = JSONDesignWriter()
             if outputPath == "-" {
-                let data = writer.write(rawDesign)
+                let data: Data = writer.write(rawDesign)
                 if let string = String(data: data, encoding: .utf8) {
                     print(string)
                 }

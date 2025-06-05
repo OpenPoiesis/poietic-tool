@@ -40,7 +40,7 @@ extension PoieticTool {
                 throw ToolError.unknownObject(reference)
             }
 
-            let mutableObject = trans.mutate(object.id)
+            let mutableObject = trans.mutate(object.objectID)
 
             try setAttributeFromString(object: mutableObject,
                                        attribute: attributeName,

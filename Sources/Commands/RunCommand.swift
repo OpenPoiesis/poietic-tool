@@ -144,7 +144,7 @@ extension PoieticTool {
                 guard let variable = plan.variable(named: key) else {
                     throw ToolError.unknownObject(key)
                 }
-                overrideConstants[variable.id] = doubleValue
+                overrideConstants[variable.objectID] = doubleValue
             }
             
             // Create and initialize the solver

@@ -198,9 +198,9 @@ enum ToolError: Error, CustomStringConvertible {
             return "Attribute assignment should be in a form: `attribute_name=value`, everything after '=' is considered a value. Ex.: `name=account`, `formula=fish * 10`."
         case .typeMismatch(_, _, _):
             return nil
-        case .designLoaderError(_):
+        case .designLoaderError(_, _):
             return "Check the metamodel version and potentially use a design doctor"
-        case .designReaderError(_):
+        case .designReaderError(_, _):
             return "Check the design source structure and format version"
         case .fileDoesNotExist(_):
             return nil
@@ -233,7 +233,7 @@ func parseValueAssignment(_ assignment: String) -> (String, String)? {
     return (String(split[0]), String(split[1]))
 }
 
-func setAttributeFromString(object: MutableObject,
+func setAttributeFromString(object: TransientObject,
                             attribute attributeName: String,
                             string: String) throws {
     let type = object.type

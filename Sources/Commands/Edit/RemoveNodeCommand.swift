@@ -32,17 +32,16 @@ extension PoieticTool {
                 throw ToolError.unknownObject(reference)
             }
 
-            let removed = trans.removeCascading(object.id)
+            let removed = trans.removeCascading(object.objectID)
 
             try env.accept(trans, replacing: options.replaceRef, appendHistory: options.appendHistory)
             try env.closeAndSave()
 
-            print("Removed object: \(object.id)")
+            print("Removed object: \(object.objectID)")
             if !removed.isEmpty {
                 let list = removed.map { $0.stringValue }.joined(separator: ", ")
                 print("Removed cascading: \(list)")
             }
-//            print("Current frame ID: \(design.currentFrame.id)")
         }
     }
 }

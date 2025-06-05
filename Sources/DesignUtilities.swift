@@ -34,7 +34,7 @@ public struct ParameterInfo {
 }
 
 // FIXME: Sync with poietic-godot and actually make cleaner, shared in PoieticFlows
-func resolveParameters(objects: [DesignObject], view: StockFlowView) -> [ObjectID:ResolvedParameters] {
+func resolveParameters(objects: [ObjectSnapshot], view: StockFlowView) -> [ObjectID:ResolvedParameters] {
     var result: [ObjectID:ResolvedParameters] = [:]
     let builtinNames = Set(BuiltinVariable.allCases.map { $0.name })
     
@@ -48,8 +48,8 @@ func resolveParameters(objects: [DesignObject], view: StockFlowView) -> [ObjectI
         }
         let variables: Set<String> = Set(formula.allVariables)
         let required = Array(variables.subtracting(builtinNames))
-        let resolved = view.resolveParameters(object.id, required: required)
-        result[object.id] = resolved
+        let resolved = view.resolveParameters(object.objectID, required: required)
+        result[object.objectID] = resolved
     }
     return result
 }
@@ -67,24 +67,24 @@ func autoConnectParameters(_ resolvedMap: [ObjectID:ResolvedParameters], in fram
             guard let paramNode = frame.object(named: name) else {
                 throw ToolError.unknownObject(name)
             }
-            let edge = frame.createEdge(.Parameter, origin: paramNode.id, target: object.id)
+            let edge = frame.createEdge(.Parameter, origin: paramNode.objectID, target: object.objectID)
             let info = ParameterInfo(parameterName: name,
-                                     parameterID: paramNode.id,
+                                     parameterID: paramNode.objectID,
                                      targetName: object.name,
-                                     targetID: object.id,
-                                     edgeID: edge.id)
+                                     targetID: object.objectID,
+                                     edgeID: edge.objectID)
             added.append(info)
         }
 
         for edge in resolved.unused {
             let node = frame.object(edge.origin)
-            frame.removeCascading(edge.id)
+            frame.removeCascading(edge.key)
             
             let info = ParameterInfo(parameterName: node.name,
-                                     parameterID: node.id,
+                                     parameterID: node.objectID,
                                      targetName: object.name,
-                                     targetID: object.id,
-                                     edgeID: edge.id)
+                                     targetID: object.objectID,
+                                     edgeID: edge.key)
             removed.append(info)
         }
     }

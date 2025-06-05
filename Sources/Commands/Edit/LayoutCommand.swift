@@ -41,16 +41,16 @@ extension PoieticTool {
             let env = try ToolEnvironment(location: globalOptions.designLocation)
             let trans = try env.deriveOrCreate(options.deriveRef)
 
-            var objects: [MutableObject] = []
+            var objects: [TransientObject] = []
             if references.isEmpty {
-                objects = trans.snapshots.map { trans.mutate($0.id) }
+                objects = trans.objectIDs.map { trans.mutate($0) }
             }
             else {
                 for ref in references {
                     guard let object = trans.object(stringReference: ref) else {
                         throw ToolError.unknownObject(ref)
                     }
-                    objects.append(trans.mutate(object.id))
+                    objects.append(trans.mutate(object.objectID))
                 }
             }
             let center = Point(100.0, 100.0)
@@ -59,7 +59,7 @@ extension PoieticTool {
             let step: Double = (2 * Double.pi) / Double(objects.count)
             
             for obj in objects {
-                let obj = trans.mutate(obj.id)
+                let obj = trans.mutate(obj.objectID)
                 let position = Point(center.x + radius * Double.cos(angle),
                                      center.y + radius * Double.sin(angle))
                 obj.position = position

@@ -63,7 +63,7 @@ extension PoieticTool {
 
             }
 
-            let id = trans.create(type, structure: .edge(originObject.id, targetObject.id))
+            let id = trans.create(type, structure: .edge(originObject.objectID, targetObject.objectID))
             
             try env.accept(trans, replacing: options.replaceRef, appendHistory: options.appendHistory)
             try env.closeAndSave()

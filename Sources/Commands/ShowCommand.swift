@@ -54,10 +54,10 @@ extension PoieticTool {
     }
 }
 
-func printObjectAsText(_ object: DesignObject) {
+func printObjectAsText(_ object: ObjectSnapshot) {
     var items: [(String?, String?)] = [
         ("Type", "\(object.type.name)"),
-        ("Object ID", "\(object.id)"),
+        ("Object ID", "\(object.objectID)"),
         ("Snapshot ID", "\(object.snapshotID)"),
         ("Structure", "\(object.structure.type)"),
     ]
@@ -123,7 +123,7 @@ func printObjectAsText(_ object: DesignObject) {
 
 }
 
-func printObjectAsJSON(_ object: DesignObject) {
+func printObjectAsJSON(_ object: ObjectSnapshot) {
     let raw = RawSnapshot(object)
     let encoder = JSONEncoder()
     let data = try! encoder.encode(raw)

@@ -83,7 +83,7 @@ class ToolEnvironment {
     ///
     /// Use this method to get a frame by user-provided reference.
     ///
-    func frame(_ reference: String) -> DesignFrame? {
+    func frame(_ reference: String) -> StableFrame? {
         if let frame = design.frame(name: reference) {
             return frame
         }
@@ -101,7 +101,7 @@ class ToolEnvironment {
     /// - Throws ``ToolError/unknownFrame(_:)`` when the frame is not found or
     ///   ``ToolError/emptyDesign`` if there are no frames in the design.
     ///
-    func existingFrame(_ reference: String? = nil) throws (ToolError) -> DesignFrame {
+    func existingFrame(_ reference: String? = nil) throws (ToolError) -> StableFrame {
         if let reference {
             if let frame = frame(reference) {
                 return frame
@@ -149,7 +149,7 @@ class ToolEnvironment {
     ///
     /// - Throws ``ToolError/unknownFrame(_:)`` when the frame is not found.
     ///
-    func frameIfPresent(_ reference: String? = nil) throws (ToolError) -> DesignFrame? {
+    func frameIfPresent(_ reference: String? = nil) throws (ToolError) -> StableFrame? {
         if let reference {
             if let id = ObjectID(reference), let frame = design.frame(id) {
                 return frame
@@ -176,7 +176,7 @@ class ToolEnvironment {
     func accept(_ frame: TransientFrame, replacing: String? = nil, appendHistory: Bool = true) throws (ToolError) {
         precondition(isOpen, "Trying to accept already closed design: \(url)")
         
-        let stableFrame: DesignFrame
+        let stableFrame: StableFrame
 
         if let name = replacing {
             do {
@@ -205,7 +205,7 @@ class ToolEnvironment {
     /// If the frame validation failed, errors are printed and a ``ToolError`` is thrown.
     ///
     @discardableResult
-    func validate(_ frame: DesignFrame) throws (ToolError) -> ValidatedFrame {
+    func validate(_ frame: StableFrame) throws (ToolError) -> ValidatedFrame {
         do {
             return try design.validate(frame)
         }
