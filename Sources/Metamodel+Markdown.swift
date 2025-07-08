@@ -15,14 +15,14 @@ extension ObjectType {
         doc.append(Heading(level: level, Text(self.label)))
         
         doc.append(Paragraph(
-            Strong(Text("Name: ")), InlineCode(self.name))
+            Strong(Text("Name:")), InlineCode(self.name))
         )
 
         if !traits.isEmpty {
             let inlined: [[InlineMarkup]] = traits.map { [InlineCode($0.name)] }
             let joined = inlined.joined(separator: [Text(", ")]).compactMap { $0 }
             doc.append(Paragraph(
-                [Strong(Text("Traits: "))] + joined
+                [Strong(Text("Traits:"))] + joined
             ))
         }
         

@@ -70,9 +70,29 @@ enum ToolError: Error, CustomStringConvertible {
         case .storeError(let error):
             return "Store error: \(error)"
         case .designReaderError(let error, let url):
-            return "Error while reading \(url.map { $0.description } ?? "(unknown location)"): \(error)"
+            if let url {
+                if url.isFileURL {
+                    return "Unable to read \(url.path()): \(error)"
+                }
+                else {
+                    return "Unable to read \(url): \(error)"
+                }
+            }
+            else {
+                return "Unable to read (from unknown source): \(error)"
+            }
         case .designLoaderError(let error, let url):
-            return "Error while loading \(url.map { $0.description } ?? "(unknown location)"): \(error)"
+            if let url {
+                if url.isFileURL {
+                    return "Unable to load \(url.path()): \(error)"
+                }
+                else {
+                    return "Unable to load \(url): \(error)"
+                }
+            }
+            else {
+                return "Unable to load (from unknown source): \(error)"
+            }
         case .emptyDesign:
             return "The design is empty"
 
