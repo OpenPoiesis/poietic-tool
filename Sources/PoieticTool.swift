@@ -29,6 +29,7 @@ struct PoieticTool: ParsableCommand {
             WriteDOT.self,
             MetamodelCommand.self,
             CreateLibrary.self,
+            ExportSVG.self,
         ]
     )
 }
