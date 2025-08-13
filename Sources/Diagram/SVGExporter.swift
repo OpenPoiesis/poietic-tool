@@ -112,10 +112,27 @@ class DiagramController {
     }
     
     func makeBlock(_ node: ObjectSnapshot) -> Block {
+        let secondaryLabel: String?
+        
+        if node.type.hasTrait(.Formula) {
+            secondaryLabel = try? node["formula"]?.stringValue()
+        }
+        else if node.type.hasTrait(.Delay) {
+            secondaryLabel = try? node["delay_duration"]?.stringValue()
+        }
+        else if node.type.hasTrait(.Smooth) {
+            secondaryLabel = try? node["window_time"]?.stringValue()
+        }
+        else {
+            secondaryLabel = nil
+        }
+
         let block = Block(
             id: node.objectID.intValue,
             position: node.position ?? .zero,
-            pictogram: pictogram(for: node)
+            pictogram: pictogram(for: node),
+            label: node.name,
+            secondaryLabel: secondaryLabel
         )
 
         return block
@@ -241,6 +258,13 @@ class SVGDiagramExporter {
     }
     
     func composeBlock(_ block: Block) {
+        let LabelFontFamily = "IBM Plex Sans"
+        let SecondaryLabelFontFamily = "IBM Plex Sans"
+        let LabelOffset: Double = 10.0
+        let SecondaryLabelOffset: Double = 20.0
+        
+        let result = SVGGroup()
+        
         guard let pictogram = block.pictogram else {
             return
         }
@@ -256,7 +280,45 @@ class SVGDiagramExporter {
         if let id = block.id {
             use.id = "\(blockIDPrefix)\(id)"
         }
-        elements.append(use)
+        
+        result.addChild(use)
+        
+        if let label = block.label {
+            let text = SVGText()
+            text.textContent = label
+            text.x = block.pictogramBoundingBox.center.x
+            // Note: Flip here when using flipped coordinates
+            text.y = block.pictogramBoundingBox.maxY + LabelOffset
+            text.fontSize = 10
+            text.textAnchor = "middle"
+            text.fontFamily = LabelFontFamily
+            text.fontWeight = "600"
+            result.addChild(text)
+        }
+        if let label = block.secondaryLabel {
+            let text = SVGText()
+            text.textContent = label
+            text.x = block.pictogramBoundingBox.center.x
+            // Note: Flip here when using flipped coordinates
+            text.y = block.pictogramBoundingBox.maxY + SecondaryLabelOffset
+            text.textAnchor = "middle"
+            text.fontSize = 8
+            text.fontFamily = SecondaryLabelFontFamily
+            text.fontStyle = "italic"
+            text.fontWeight = "200"
+            result.addChild(text)
+        }
+
+        // DEBUG
+        let origin = SVGCircle(center: block.position, radius: 5)
+        origin.setStyle(fill: "salmon", stroke: "red")
+//        result.addChild(origin)
+
+        let debugBox = SVGRectangle(rect: block.pictogramBoundingBox)
+        debugBox.setStyle(fill: "none", stroke: "red")
+//        result.addChild(debugBox)
+        
+        elements.append(result)
     }
     
     func composeConnector(_ connector: Connector) {
