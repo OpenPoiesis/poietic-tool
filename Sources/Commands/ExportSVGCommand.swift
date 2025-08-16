@@ -26,6 +26,14 @@ extension PoieticTool {
                 help: "Output file path")
         var output = "diagram.svg"
 
+        @Option(name: [.customLong("pictogram-scale")],
+                help: "Scale of pictograms")
+        var pictogramScale: Double = 0.5
+
+        @Option(name: [.customLong("pictogram-line-width")],
+                help: "Scale of pictograms")
+        var pictogramLineWidth: Double = 1.0
+
         @Option(name: [.customLong("frame")], help: "Frame ID or name")
         var frameRef: String?
         
@@ -59,8 +67,7 @@ extension PoieticTool {
             }
             
             // TODO: Move somewhere appropriate
-            let PictogramScale = 0.5
-            let scaledPictos = collection.pictograms.map { $0.scaled(PictogramScale) }
+            let scaledPictos = collection.pictograms.map { $0.scaled(pictogramScale) }
             collection.pictograms = scaledPictos
             
             print("Exporting to: \(outputURL.path())")
@@ -68,7 +75,11 @@ extension PoieticTool {
             let ctrl = DiagramController(pictograms: collection)
             ctrl.update(frame: frame)
             
-            let exporter = SVGDiagramExporter()
+            let style = SVGDiagramStyle(
+                pictogramLineWidth: pictogramLineWidth
+            )
+            
+            let exporter = SVGDiagramExporter(style: style)
             try exporter.export(diagram: ctrl.diagram, to: outputURL.path())
         }
     }

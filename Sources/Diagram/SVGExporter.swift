@@ -162,6 +162,10 @@ class DiagramController {
     }
 }
 
+struct SVGDiagramStyle {
+    var pictogramLineWidth: Double = 1.0
+}
+
 class SVGDiagramExporter {
     /// Prefix for `id` attribute of SVG symbols representing a pictogram.
     ///
@@ -184,11 +188,13 @@ class SVGDiagramExporter {
     var bbox: Rect2D
     var elements: [SVGElement]
     var symbols: [String:SVGSymbol]
+    var style: SVGDiagramStyle
     
-    init() {
+    init(style: SVGDiagramStyle = SVGDiagramStyle()) {
         self.bbox = Rect2D()
         self.elements = []
         self.symbols = [:]
+        self.style = style
     }
     
     func export(diagram: Diagram, to path: String) throws {
@@ -228,6 +234,7 @@ class SVGDiagramExporter {
         let path = SVGPath(pictogram.path)
         path.fill = "none"
         path.stroke = "black"
+        path.strokeWidth = style.pictogramLineWidth
         
         let group = SVGGroup()
         group.addChild(path)
