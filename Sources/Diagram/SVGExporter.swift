@@ -8,159 +8,6 @@
 import Diagramming
 import PoieticCore
 
-enum DiagramStyle {
-
-    static let DefaultConnector: ConnectorStyle = .thin(
-        ThinConnectorStyle(
-            headType: .none,
-            tailType: .none,
-            headSize: 0.0,
-            tailSize: 0.0,
-            lineType: .straight
-        )
-    )
-
-    static let ParameterConnector: ConnectorStyle = .thin(
-        ThinConnectorStyle(
-            headType: .stick,
-            tailType: .ball,
-            headSize: 10.0,
-            tailSize: 5.0,
-            lineType: .curved
-        )
-    )
-
-    static let FlowConnector: ConnectorStyle = .fat(
-        FatConnectorStyle(
-            headType: .regular,
-            tailType: .none,
-            headSize: 20.0,
-            tailSize: 0.0,
-            width: 10.0,
-            joinType: .round
-        )
-    )
-    
-}
-
-let DefaultPictograms: [Pictogram] = [
-    Pictogram("DefaultCircle",
-              path: BezierPath(circle: .zero, radius: 25),
-              maskShape: CollisionShape(position: .zero, shape: .circle(25.0))),
-    Pictogram("DefaultRect",
-              path: BezierPath(rect: Rect2D(x: -50, y: -25, width: 100, height: 50)),
-              maskShape: CollisionShape(position: .zero, shape: .rectangle(Vector2D(100, 50)))),
-    Pictogram("DefaultSquare",
-              path: BezierPath(rect: Rect2D(x: -25, y: -25, width: 50, height: 50)),
-              maskShape: CollisionShape(position: .zero, shape: .rectangle(Vector2D(50, 50)))),
-]
-
-let DefaultPictogramName = "DefaultCircle"
-
-let TypeToPictogramMap: [String:String] = [
-    "Stock": "DefaultRect",
-    "FlowRate": "DefaultCircle",
-    "Auxiliary": "DefaultSquare",
-    "GraphicalFunction": "DefaultCircle",
-    "Smooth": "DefaultCircle",
-    "Delay": "DefaultCircle",
-    "Cloud": "DefaultCircle",
-]
-
-
-class DiagramController {
-    let diagram: Diagram
-    let collection: PictogramCollection
-    init(pictograms: PictogramCollection? = nil) {
-        self.diagram = Diagram()
-        if let pictograms {
-            collection = pictograms
-        }
-        else {
-            collection = PictogramCollection([])
-        }
-    }
-
-    func update(frame: StableFrame) {
-        diagram.blocks.removeAll()
-        diagram.connectors.removeAll()
-        
-        let nodes = frame.nodes(withTrait: .DiagramNode)
-        for node in nodes {
-            let block = makeBlock(node)
-            diagram.insertBlock(block)
-        }
-
-        let edges = frame.edges(withTrait: .DiagramConnector)
-        for edge in edges {
-            let connector = makeConnector(edge, frame: frame)
-            diagram.insertConnector(connector)
-        }
-    }
-    
-    func pictogram(for object: ObjectSnapshot) -> Pictogram {
-        if let picto = collection.pictogram(object.type.name) {
-            return picto
-        }
-        else {
-            let name = TypeToPictogramMap[object.type.name] ?? DefaultPictogramName
-            let pictogram: Pictogram = DefaultPictograms.first {
-                $0.name == name
-            } ?? DefaultPictograms.first!
-            return pictogram
-        }
-    }
-    
-    func makeBlock(_ node: ObjectSnapshot) -> Block {
-        let block = Block(
-            id: node.objectID.intValue,
-            position: node.position ?? .zero,
-            pictogram: pictogram(for: node),
-            label: node.label,
-            secondaryLabel: node.secondaryLabel
-        )
-
-        return block
-    }
-    
-    func makeConnector(_ edge: EdgeObject, frame: StableFrame) -> Connector {
-        let origin = edge.originObject.position ?? .zero
-        let target = edge.targetObject.position ?? .zero
-        let midpoints: [Point] = (try? edge.object["midpoints"]?.pointArray()) ?? []
-
-        let style: ConnectorStyle
-        
-        switch edge.object.type.name {
-        case "Parameter": style = DiagramStyle.ParameterConnector
-        case "Flow": style = DiagramStyle.FlowConnector
-        default: style = DiagramStyle.DefaultConnector
-        }
-        
-        let connector = Connector(id: edge.key.intValue,
-                                  originPoint: origin,
-                                  targetPoint: target,
-                                  midpoints: midpoints,
-                                  style: style
-                                  )
-
-        // FIXME: This is a draft
-        guard let originBlock = diagram.blocks.first(where: { $0.id == edge.origin.intValue }) else {
-            print("No origin block with ID: \(edge.origin.intValue)")
-            return connector
-        }
-        guard let targetBlock = diagram.blocks.first(where: { $0.id == edge.target.intValue })else {
-            print("No target block with ID: \(edge.target.intValue)")
-            return connector
-        }
-        // TODO: [IMPORTANT] remove force unwrap!
-        connector.update(originShape: originBlock.pictogram!.collisionShape,
-                         originPosition: originBlock.position - originBlock.pictogram!.origin,
-                         targetShape: targetBlock.pictogram!.collisionShape,
-                         targetPosition: targetBlock.position - targetBlock.pictogram!.origin)
-
-        return connector
-    }
-}
 
 struct SVGDiagramStyle {
     var pictogramLineWidth: Double = 1.0
@@ -260,27 +107,51 @@ class SVGDiagramExporter {
         guard let pictogram = block.pictogram else {
             return
         }
+
+        // DEBUG
+        let origin = SVGCircle(center: block.position, radius: 5)
+        origin.setStyle(fill: "none", stroke: "lightblue")
+        result.addChild(origin)
+//
+//        let debugBox = SVGRectangle(rect: block.pictogramBoundingBox)
+//        debugBox.setStyle(fill: "none", stroke: "red")
+//        result.addChild(debugBox)
+//
+//        let collision = block.collisionShape.toSVGElement()
+//        collision.setStyle(fill: "lime", stroke: "green")
+//        result.addChild(collision)
+        let debug = debugGroup(pictogram,
+                               id: "debug-\(block.objectID)",
+                               position: block.position)
+        if debug.transform == nil {
+            debug.transform = SVGTransformList()
+        }
+        debug.transform?.append(
+            .translate(tx: block.position.x,
+                       ty: block.position.y)
+        )
+        result.addChild(debug)
+
+        // MAIN CONTENT
         
         let _ = symbolForPictogram(pictogram)
-        let box = pictogram.boundingBox.translated(block.position)
-        self.bbox = self.bbox.union(box)
+        let pathBox = pictogram.pathBoundingBox.translated(block.position)
+        self.bbox = self.bbox.union(pathBox)
         
         let use = SVGUse()
-        use.x = block.position.x - pictogram.origin.x
-        use.y = block.position.y - pictogram.origin.y
+        use.x = block.position.x
+        use.y = block.position.y
         use.href = "#\(pictogramSymbolIDPrefix)\(pictogram.name)"
-        if let id = block.id {
-            use.id = "\(blockIDPrefix)\(id)"
-        }
+        use.id = "\(blockIDPrefix)\(block.objectID)"
         
         result.addChild(use)
         
         if let label = block.label {
             let text = SVGText()
             text.textContent = label
-            text.x = block.pictogramBoundingBox.center.x
+            text.x = pathBox.center.x
             // Note: Flip here when using flipped coordinates
-            text.y = block.pictogramBoundingBox.maxY + LabelOffset
+            text.y = pathBox.maxY + LabelOffset
             text.fontSize = 18
             text.textAnchor = "middle"
             text.fontFamily = LabelFontFamily
@@ -290,9 +161,9 @@ class SVGDiagramExporter {
         if let label = block.secondaryLabel {
             let text = SVGText()
             text.textContent = label
-            text.x = block.pictogramBoundingBox.center.x
+            text.x = pathBox.center.x
             // Note: Flip here when using flipped coordinates
-            text.y = block.pictogramBoundingBox.maxY + SecondaryLabelOffset
+            text.y = pathBox.maxY + SecondaryLabelOffset
             text.textAnchor = "middle"
             text.fontSize = 14
             text.fontFamily = SecondaryLabelFontFamily
@@ -301,14 +172,6 @@ class SVGDiagramExporter {
             result.addChild(text)
         }
 
-        // DEBUG
-        let origin = SVGCircle(center: block.position, radius: 5)
-        origin.setStyle(fill: "salmon", stroke: "red")
-//        result.addChild(origin)
-
-        let debugBox = SVGRectangle(rect: block.pictogramBoundingBox)
-        debugBox.setStyle(fill: "none", stroke: "red")
-//        result.addChild(debugBox)
         
         elements.append(result)
     }
@@ -316,9 +179,7 @@ class SVGDiagramExporter {
     func composeConnector(_ connector: Connector) {
         let paths = connector.paths()
         let group = SVGGroup()
-        if let id = connector.id {
-            group.id = "\(connectorIDPrefix)\(id)"
-        }
+        group.id = "\(connectorIDPrefix)\(connector.objectID)"
         for path in paths {
             let svgPath = SVGPath(path)
             svgPath.fill = "none"
@@ -336,36 +197,32 @@ class SVGDiagramExporter {
         let result: SVGGroup = SVGGroup()
         result.id = "debug-\(id)-pictogram"
         
-        // Origin
-        let origin = SVGCircle()
-        origin.id = "debug-\(id)-origin"
-        origin.cx = pictogram.origin.x
-        origin.cy = pictogram.origin.y
-        origin.fill = DebugOriginFill
-        origin.stroke = DebugOriginStroke
-        origin.r = 2
-        result.addChild(origin)
-
         let bbox = SVGRectangle()
         bbox.x = box.origin.x
         bbox.y = box.origin.y
         bbox.width = box.width
         bbox.height = box.height
         bbox.fill = "none"
-        bbox.stroke = "yellow"
+        bbox.stroke = "green"
+        bbox.strokeWidth = 2.0
         result.addChild(bbox)
         
-        let shape = pictogram.collisionShape.toSVGElement()
-        bbox.fill = "none"
-        bbox.stroke = "red"
+        let mask = SVGPath(pictogram.mask)
+        mask.fill = "azure"
+        mask.stroke = "blue"
+        mask.strokeWidth = 1.0
+        result.addChild(mask)
+        
+        let shape = pictogram.collisionShape.shape.toSVGElement()
+        shape.fill = "none"
+        shape.stroke = "orange"
+        shape.strokeWidth = 4.0
+        shape.transform = SVGTransformList([
+            .translate(tx: pictogram.collisionShape.position.x,
+                       ty: pictogram.collisionShape.position.y)
+        ])
         result.addChild(shape)
         
-//        let offset = center - box.center
-//        result.transform = SVGTransformList([
-//            .translate(tx: origin.x, ty: origin.y),
-////            .translate(tx: center.x-picto.origin.x, ty: center.y-picto.origin.y),
-//            .translate(tx: offset.x, ty: offset.y),
-//        ])
         return result
     }
 }

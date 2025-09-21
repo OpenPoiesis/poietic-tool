@@ -12,6 +12,34 @@ import PoieticCore
 import PoieticFlows
 import Diagramming
 
+
+public let StockFlowConnectorStyles: [String:ConnectorStyle] = [
+    "default": .thin(ThinConnectorStyle(
+        headType: .none,
+        tailType: .none,
+        headSize: 0.0,
+        tailSize: 0.0,
+        lineType: .straight
+    )),
+
+    "Parameter": .thin(ThinConnectorStyle(
+        headType: .stick,
+        tailType: .ball,
+        headSize: 10.0,
+        tailSize: 5.0,
+        lineType: .curved
+    )),
+
+    "Flow": .fat(FatConnectorStyle(
+        headType: .regular,
+        tailType: .none,
+        headSize: 20.0,
+        tailSize: 0.0,
+        width: 10.0,
+        joinType: .round
+    ))
+]
+
 extension PoieticTool {
     struct ExportSVG: ParsableCommand {
         static let configuration
@@ -57,30 +85,34 @@ extension PoieticTool {
             }
 
             print("### EXPERIMENTAL ###")
-            let collection: PictogramCollection
+            let pictograms: PictogramCollection
             if let path = pictogramCollectionPath {
                 print("Loading pictograms from \(path)")
-                collection = try loadPictograms(path: path)
+                pictograms = try loadPictograms(path: path)
             }
             else {
-                collection = PictogramCollection()
+                pictograms = PictogramCollection()
             }
             
             // TODO: Move somewhere appropriate
-            let scaledPictos = collection.pictograms.map { $0.scaled(pictogramScale) }
-            collection.pictograms = scaledPictos
+            let scaledPictos = pictograms.pictograms.map { $0.scaled(pictogramScale) }
+            pictograms.pictograms = scaledPictos
             
             print("Exporting to: \(outputURL.path())")
             print("Creating diagram...")
-            let ctrl = DiagramController(pictograms: collection)
-            ctrl.update(frame: frame)
+            let style = DiagramStyle(
+                pictograms: pictograms,
+                connectorStyles: StockFlowConnectorStyles,
+            )
+            let presenter = DiagramComposer(style: style)
+            let diagram = presenter.createDiagram(from: frame)
             
-            let style = SVGDiagramStyle(
+            let svgStyle = SVGDiagramStyle(
                 pictogramLineWidth: pictogramLineWidth
             )
             
-            let exporter = SVGDiagramExporter(style: style)
-            try exporter.export(diagram: ctrl.diagram, to: outputURL.path())
+            let exporter = SVGDiagramExporter(style: svgStyle)
+            try exporter.export(diagram: diagram, to: outputURL.path())
         }
     }
 }
