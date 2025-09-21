@@ -107,9 +107,8 @@ extension PoieticTool {
             let presenter = DiagramComposer(style: style)
             let diagram = presenter.createDiagram(from: frame)
             
-            let svgStyle = SVGDiagramStyle(
-                pictogramLineWidth: pictogramLineWidth
-            )
+            var svgStyle = SVGDiagramStyle()
+            svgStyle.pictogramLineWidth = pictogramLineWidth
             
             let exporter = SVGDiagramExporter(style: svgStyle)
             try exporter.export(diagram: diagram, to: outputURL.path())
