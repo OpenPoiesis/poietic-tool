@@ -62,9 +62,9 @@ Note: Frame with requested IDs can not be --forced to be replaced. Remove the fr
 
         mutating func run() throws {
             let env = try ToolEnvironment(location: options.designLocation)
-            let requestedID: ObjectID?
+            let requestedID: FrameID?
             let createdRef: String
-            let derivingFrame: StableFrame?
+            let derivingFrame: DesignFrame?
             
             if let derivingRef {
                 if let frame = env.frame(derivingRef) {
@@ -78,7 +78,7 @@ Note: Frame with requested IDs can not be --forced to be replaced. Remove the fr
                 derivingFrame = nil
             }
             
-            if let ref = requestedRef, let id = ObjectID(ref) {
+            if let ref = requestedRef, let id = FrameID(ref) {
                 requestedID = id
             }
             else {

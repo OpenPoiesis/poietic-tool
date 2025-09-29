@@ -83,11 +83,11 @@ class ToolEnvironment {
     ///
     /// Use this method to get a frame by user-provided reference.
     ///
-    func frame(_ reference: String) -> StableFrame? {
+    func frame(_ reference: String) -> DesignFrame? {
         if let frame = design.frame(name: reference) {
             return frame
         }
-        else if let id = ObjectID(reference), let frame = design.frame(id) {
+        else if let id = FrameID(reference), let frame = design.frame(id) {
             return frame
         }
         else {
@@ -101,7 +101,7 @@ class ToolEnvironment {
     /// - Throws ``ToolError/unknownFrame(_:)`` when the frame is not found or
     ///   ``ToolError/emptyDesign`` if there are no frames in the design.
     ///
-    func existingFrame(_ reference: String? = nil) throws (ToolError) -> StableFrame {
+    func existingFrame(_ reference: String? = nil) throws (ToolError) -> DesignFrame {
         if let reference {
             if let frame = frame(reference) {
                 return frame
@@ -149,9 +149,9 @@ class ToolEnvironment {
     ///
     /// - Throws ``ToolError/unknownFrame(_:)`` when the frame is not found.
     ///
-    func frameIfPresent(_ reference: String? = nil) throws (ToolError) -> StableFrame? {
+    func frameIfPresent(_ reference: String? = nil) throws (ToolError) -> DesignFrame? {
         if let reference {
-            if let id = ObjectID(reference), let frame = design.frame(id) {
+            if let id = FrameID(reference), let frame = design.frame(id) {
                 return frame
             }
             else {
@@ -176,7 +176,7 @@ class ToolEnvironment {
     func accept(_ frame: TransientFrame, replacing: String? = nil, appendHistory: Bool = true) throws (ToolError) {
         precondition(isOpen, "Trying to accept already closed design: \(url)")
         
-        let stableFrame: StableFrame
+        let stableFrame: DesignFrame
 
         if let name = replacing {
             do {
@@ -205,7 +205,7 @@ class ToolEnvironment {
     /// If the frame validation failed, errors are printed and a ``ToolError`` is thrown.
     ///
     @discardableResult
-    func validate(_ frame: StableFrame) throws (ToolError) -> ValidatedFrame {
+    func validate(_ frame: DesignFrame) throws (ToolError) -> ValidatedFrame {
         do {
             return try design.validate(frame)
         }
@@ -280,22 +280,22 @@ func printObjectIssuesError(_ issues: DesignIssueCollection, in frame: some Fram
 }
 
 private func objectDetail(_ id: ObjectID, in frame: some Frame) -> String {
-    guard frame.contains(id) else {
+    guard let object = frame[id] else {
         return "\(id)"
     }
     
     var text: String = "\(id)"
-    // id
-    let object = frame[id]
+    
     
     if let name = object.name {
         text += ":\(name)"
     }
     text += ":\(object.type.name)"
     
-    if case let .edge(origin, target) = object.structure {
-        let originObject = frame[origin]
+    if case let .edge(origin, target) = object.structure,
+        let originObject = frame[origin],
         let targetObject = frame[target]
+    {
         
         text += " Edge \(origin)"
         

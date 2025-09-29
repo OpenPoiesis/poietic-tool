@@ -85,7 +85,7 @@ extension PoieticTool {
                 return
             }
         }
-        func listObjects(_ env: ToolEnvironment, in frame: StableFrame) throws {
+        func listObjects(_ env: ToolEnvironment, in frame: DesignFrame) throws {
             let type: ObjectType?
             
             if let typeName  {
@@ -208,13 +208,13 @@ func listFormulas(_ snapshots: [ObjectSnapshot]) {
     }
 }
 
-func listPseudoEquations(_ frame: StableFrame, env: ToolEnvironment) throws (ToolError) {
+func listPseudoEquations(_ frame: DesignFrame, env: ToolEnvironment) throws (ToolError) {
     // FIXME: Add stocks
     let validFrame = try env.validate(frame)
     let plan: SimulationPlan = try env.compile(validFrame)
     print("Not quite equations ...")
     for stock in plan.stocks {
-        let obj = frame[stock.objectID]
+        guard let obj = frame[stock.objectID] else { fatalError() }
         // This should not happen if the model is valid, but just in case
         let name = (obj.name ?? "(unnamed)")
         var total = ""
@@ -235,7 +235,7 @@ func listPseudoEquations(_ frame: StableFrame, env: ToolEnvironment) throws (Too
     }
 }
 
-func listGraphicalFunctions(_ frame: StableFrame) {
+func listGraphicalFunctions(_ frame: DesignFrame) {
     var result: [String: [Point]?] = [:]
     
     for object in frame.snapshots {
@@ -284,11 +284,11 @@ func listFrameIDs(_ design: Design) {
 }
 func listHistory(_ design: Design) {
     print("UNDO")
-    for id in design.undoableFrames {
+    for id in design.undoList {
         print("\(id)")
     }
     print("REDO")
-    for id in design.redoableFrames {
+    for id in design.redoList {
         print("\(id)")
     }
 }

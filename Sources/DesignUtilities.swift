@@ -62,7 +62,7 @@ func autoConnectParameters(_ resolvedMap: [ObjectID:ResolvedParameters], in fram
     
 
     for (id, resolved) in resolvedMap {
-        let object = frame[id]
+        guard let object = frame[id] else { continue }
         for name in resolved.missing {
             guard let paramNode = frame.object(named: name) else {
                 throw ToolError.unknownObject(name)
@@ -77,7 +77,7 @@ func autoConnectParameters(_ resolvedMap: [ObjectID:ResolvedParameters], in fram
         }
 
         for edge in resolved.unused {
-            let node = frame.object(edge.origin)
+            guard let node = frame.object(edge.origin) else { continue }
             frame.removeCascading(edge.key)
             
             let info = ParameterInfo(parameterName: node.name,

@@ -21,10 +21,10 @@ extension PoieticTool {
         mutating func run() throws {
             let env = try ToolEnvironment(location: options.designLocation)
 
-            let frame: StableFrame?
+            let frame: DesignFrame?
             
             if let frameID {
-                if let id = ObjectID(frameID) {
+                if let id = FrameID(frameID) {
                     if let stableFrame = env.design.frame(id) {
                         frame = stableFrame
                     }
@@ -58,13 +58,13 @@ extension PoieticTool {
             
             items += [
                 (nil, nil),
-                ("Total snapshots", "\(env.design.snapshots.count)"),
+                ("Total snapshots", "\(env.design.objectSnapshots.count)"),
 
                 (nil, nil),
                 ("Total frames", "\(env.design.frames.count)"),
                 ("History frames", "\(env.design.versionHistory.count)"),
-                ("Undoable frames", "\(env.design.undoableFrames.count)"),
-                ("Redoable frames", "\(env.design.redoableFrames.count)"),
+                ("Undoable frames", "\(env.design.undoList.count)"),
+                ("Redoable frames", "\(env.design.redoList.count)"),
                 ("Named frames", "\(env.design.namedFrames.count)"),
             ]
             

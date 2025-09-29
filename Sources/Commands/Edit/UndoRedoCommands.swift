@@ -24,7 +24,7 @@ extension PoieticTool {
                 throw ToolError.noChangesToUndo
             }
             
-            let frameID = env.design.undoableFrames.last!
+            let frameID = env.design.undoList.last!
             env.design.undo(to: frameID)
 
             try env.closeAndSave()
@@ -50,7 +50,7 @@ extension PoieticTool {
                 throw ToolError.noChangesToRedo
             }
             
-            let frameID = env.design.redoableFrames.first!
+            let frameID = env.design.redoList.first!
             env.design.redo(to: frameID)
 
             try env.closeAndSave()

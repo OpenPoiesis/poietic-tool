@@ -33,13 +33,13 @@ extension PoieticTool {
                 return
             }
 
-            var toRemove: [ObjectID] = []
+            var toRemove: [FrameID] = []
 
             for ref in references {
                 if let id = env.design.frame(name: ref)?.id {
                     toRemove.append(id)
                 }
-                else if let id = ObjectID(ref), env.design.containsFrame(id) {
+                else if let id = FrameID(ref), env.design.containsFrame(id) {
                     toRemove.append(id)
                 }
                 else {

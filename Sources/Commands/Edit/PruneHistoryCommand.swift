@@ -23,12 +23,12 @@ extension PoieticTool {
         mutating func run() throws {
             let env = try ToolEnvironment(location: options.designLocation)
 
-            let count = env.design.undoableFrames.count + env.design.redoableFrames.count
+            let count = env.design.undoList.count + env.design.redoList.count
 
-            for frame in env.design.undoableFrames {
+            for frame in env.design.undoList {
                 env.design.removeFrame(frame)
             }
-            for frame in env.design.redoableFrames {
+            for frame in env.design.redoList {
                 env.design.removeFrame(frame)
             }
 

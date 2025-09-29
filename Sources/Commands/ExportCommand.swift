@@ -32,12 +32,12 @@ extension PoieticTool {
             guard env.design.frames.count > 0 else {
                 throw ToolError.emptyDesign
             }
-            let frameID: ObjectID
+            let frameID: FrameID
             if let frameReference {
                 if let id = env.design.frame(name: frameReference)?.id {
                     frameID = id
                 }
-                else if let id = ObjectID(frameReference), env.design.containsFrame(id) {
+                else if let id = FrameID(frameReference), env.design.containsFrame(id) {
                     frameID = id
                 }
                 else {
