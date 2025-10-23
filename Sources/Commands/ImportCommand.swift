@@ -21,6 +21,19 @@ extension PoieticTool {
 
         // TODO: Specify which frame to import from a multi-frame file
         // TODO: Fail on multi-frame file without current frame
+        enum IdentityMode: String, CaseIterable, ExpressibleByArgument{
+            case require = "require" // requireProvided
+            case auto = "auto" // preserveOrCreate
+            case create = "create" // createNew
+
+            var defaultValueDescription: String { "require" }
+            
+            static var allValueStrings: [String] {
+                IdentityMode.allCases.map { $0.rawValue }
+            }
+        }
+        @Option(name: [.customLong("identity")], help: "Object identity mode")
+        var identityMode: IdentityMode = .require
         
         @Argument(help: "Path to a poietic design to import from")
         var fileName: String
@@ -31,9 +44,16 @@ extension PoieticTool {
 
             let rawDesign = try readRawDesign(fromPath: fileName)
             let loader = DesignLoader(metamodel: StockFlowMetamodel, options: .useIDAsNameAttribute)
+            let strategy: DesignLoader.IdentityStrategy
+
+            switch identityMode {
+            case .require: strategy = .requireProvided
+            case .auto: strategy = .preserveOrCreate
+            case .create: strategy = .preserveOrCreate
+            }
+
             do {
-                // FIXME: [WIP] add which frame to load
-                try loader.load(rawDesign.snapshots, into: trans)
+                try loader.load(rawDesign, into: trans, identityStrategy: strategy)
             }
             catch {
                 throw ToolError.designLoaderError(error, URL(fileURLWithPath: fileName))

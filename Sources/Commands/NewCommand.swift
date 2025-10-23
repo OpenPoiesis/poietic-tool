@@ -36,7 +36,7 @@ extension PoieticTool {
                     print("Importing from: \(path)")
                     do {
                         // FIXME: [WIP] add which frame to load
-                        try loader.load(rawDesign.snapshots, into: frame)
+                        try loader.load(rawDesign, into: frame)
                     }
                     catch {
                         throw ToolError.designLoaderError(error, URL(fileURLWithPath: path))
