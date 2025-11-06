@@ -28,14 +28,17 @@ extension PoieticTool {
             let env = try ToolEnvironment(location: globalOptions.designLocation)
             let original = try env.existingFrame(options.deriveRef)
             let trans = try env.deriveOrCreate(options.deriveRef)
-
             let validated = try env.validate(original)
-            let view = StockFlowView(validated)
-            let nodes = view.simulationNodes
-            let resolvedParams = resolveParameters(objects: nodes, view: view)
-            // TODO: Know whether there is anything to do at this point
-            let result = try autoConnectParameters(resolvedParams, in: trans)
-            
+            let systems = SystemGroup(
+                ComputationOrderSystem.self,
+                NameResolutionSystem.self,
+                ExpressionParserSystem.self,
+                ParameterResolutionSystem.self,
+            )
+
+            let runtime = RuntimeFrame(validated)
+            try systems.update(runtime)
+            let result = try autoConnectParameters(runtime: runtime, trans: trans)
             if verbose {
                 for info in result.added {
                     print("Connected parameter \(info.parameterName ?? "(unnamed)") (\(info.parameterID)) to \(info.targetName ?? "(unnamed)") (\(info.targetID)), edge: \(info.edgeID)")

@@ -210,9 +210,9 @@ class ToolEnvironment {
             return try design.validate(frame)
         }
         catch {
-            let issues = error.asDesignIssueCollection()
-            printObjectIssuesError(issues, in: frame)
-            throw .validationFailed(issues)
+            // TODO: Use runtime frame here?
+            printValidationError(error, in: frame)
+            throw .validationFailed(error)
         }
     }
     
@@ -231,9 +231,8 @@ class ToolEnvironment {
         catch {
             switch error {
             case .issues(let issues):
-                let designIssues = issues.asDesignIssueCollection()
-                printObjectIssuesError(designIssues, in: frame)
-                throw .compilationFailed(designIssues)
+                printObjectIssuesError(issues, in: frame)
+                throw .compilationFailed(issues)
             case .internalError(let error):
                 throw .internalError(error)
             }
@@ -264,16 +263,40 @@ class ToolEnvironment {
 }
 
 
-func printObjectIssuesError(_ issues: DesignIssueCollection, in frame: some Frame) {
+func printObjectIssuesError(_ issues: [ObjectID:[Issue]], in frame: some Frame) {
     print("DESIGN ISSUES:")
-    for issue in issues.designIssues {
-        print("ERROR: \(issue)")
-    }
-    for (id, objIssues) in issues.objectIssues {
+    for (id, objectIssues) in issues {
         let detail = objectDetail(id, in: frame)
         print("Object \(detail):")
-        for issue in objIssues {
-            print("      \(issue)")
+        for issue in objectIssues {
+            print("      " + issue.description)
+        }
+    }
+
+}
+func printValidationError(_ error: FrameValidationError, in frame: some Frame) {
+    print("VALIDATION FAILED:")
+    for violation in error.violations {
+        let message = "CONSTRAINT VIOLATION " + violation.constraint.name +
+                        ": " + (violation.constraint.abstract ?? "(no details)")
+        print(message)
+        for id in violation.objects {
+            let detail = objectDetail(id, in: frame)
+            print("    " + detail)
+        }
+    }
+    for (id, errors) in error.objectErrors {
+        let detail = objectDetail(id, in: frame)
+        print("OBJECT \(detail):")
+        for error in errors {
+            print("    " + error.description)
+        }
+    }
+    for (id, errors) in error.edgeRuleViolations {
+        let detail = objectDetail(id, in: frame)
+        print("OBJECT \(detail):")
+        for error in errors {
+            print("    " + error.description)
         }
     }
 

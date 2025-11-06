@@ -33,8 +33,8 @@ enum ToolError: Error, CustomStringConvertible {
     case brokenStructuralIntegrity(StructuralIntegrityError)
     case unnamedObject(ObjectID)
 
-    case validationFailed(DesignIssueCollection)   /* OK */
-    case compilationFailed(DesignIssueCollection)  /* OK */
+    case validationFailed(FrameValidationError)   /* OK */
+    case compilationFailed([ObjectID:[Issue]])  /* OK */
     
     // Simulation errors
     case unknownVariables([String])
@@ -100,31 +100,16 @@ enum ToolError: Error, CustomStringConvertible {
         case .brokenStructuralIntegrity(let error):
             return "Broken structural integrity: \(error)"
         case .validationFailed(let error):
-            var detail: String = ""
-            if !error.designIssues.isEmpty {
-                detail += "\(error.designIssues.count) design issues"
-            }
-            if !error.objectIssues.isEmpty {
-                if detail == "" {
-                    detail += " "
-                }
-                detail += "\(error.objectIssues.count) objects with errors"
-            }
-            if detail == "" {
-                detail = "unspecified validation error(s)"
-            }
-            return "Design validation failed: \(detail)"
+            let detail: String = "Constraints violated :" + String(error.violations.count)
+            + " object errors: " + String(error.objectErrors.count)
+            + " edge rule violations: " + String(error.edgeRuleViolations.count)
 
-        case .compilationFailed(let error):
+            return "Design validation failed: " + detail
+
+        case .compilationFailed(let issues):
             var detail: String = ""
-            if !error.designIssues.isEmpty {
-                detail += "\(error.designIssues.count) design issues"
-            }
-            if !error.objectIssues.isEmpty {
-                if detail == "" {
-                    detail += " "
-                }
-                detail += "\(error.objectIssues.count) objects with errors"
+            if !issues.isEmpty {
+                detail += "\(issues.count) objects with errors"
             }
             if detail == "" {
                 detail = "unspecified compilation error(s)"
