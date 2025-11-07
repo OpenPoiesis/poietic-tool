@@ -18,11 +18,10 @@ extension PoieticTool {
 
         mutating func run() throws {
             let env = try ToolEnvironment(location: options.designLocation)
-            let frame = try env.existingFrame(frameRef)
+            let frame = try env.frame(frameRef)
 
-            let validFrame = try env.validate(frame)
             print("Frame validation passed.")
-            let _ = try env.compile(validFrame)
+            let _ = try env.compile(frame)
             print("Frame compilation passed.")
         }
     }

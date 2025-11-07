@@ -19,7 +19,8 @@ enum ToolError: Error, CustomStringConvertible {
     // TODO: Go through the errors and review (marked with OK are OK)
     // FIXME: Do not have this
     case internalError(Error)
-    
+    case internalSystemError(InternalSystemError)
+
     // I/O errors
     case malformedLocation(String)
     case fileDoesNotExist(String)
@@ -33,7 +34,7 @@ enum ToolError: Error, CustomStringConvertible {
     case brokenStructuralIntegrity(StructuralIntegrityError)
     case unnamedObject(ObjectID)
 
-    case validationFailed(FrameValidationError)   /* OK */
+    case validationFailed(FrameValidationResult)   /* OK */
     case compilationFailed([ObjectID:[Issue]])  /* OK */
     
     // Simulation errors
@@ -47,6 +48,8 @@ enum ToolError: Error, CustomStringConvertible {
     case unknownFrame(String)
     case frameExists(String)
     case invalidFrameID(String)
+    case noCurrentFrame
+    
 
     // Editing errors
     case noChangesToUndo
@@ -62,7 +65,9 @@ enum ToolError: Error, CustomStringConvertible {
         switch self {
         case .internalError(let error):
             return "Internal error: \(error)"
-
+        case .internalSystemError(let error):
+            return "Internal systems error: \(error)"
+            
         case .malformedLocation(let value):
             return "Malformed location: \(value)"
         case .unableToSaveDesign(let value):
@@ -130,6 +135,8 @@ enum ToolError: Error, CustomStringConvertible {
             return "Unknown object '\(value)'"
         case .unknownFrame(let value):
             return "Unknown frame: \(value)"
+        case .noCurrentFrame:
+            return "No current frame set"
         case .frameExists(let value):
             return "Frame already exists: \(value)"
         case .invalidFrameID(let value):
@@ -161,6 +168,8 @@ enum ToolError: Error, CustomStringConvertible {
         switch self {
         case .internalError(_):
             return "Not your fault. Contact the developers with more details - what you did and what the error was"
+        case .internalSystemError(_):
+            return "Not your fault. Contact the developers with more details - what you did and what the error was"
         case .malformedLocation(_):
             return nil
         case .unableToSaveDesign(_):
@@ -184,6 +193,8 @@ enum ToolError: Error, CustomStringConvertible {
         case .unknownObject(_):
             return "See the list of available objects and their names by using the 'list' command."
         case .unknownFrame(_):
+            return nil
+        case .noCurrentFrame:
             return nil
         case .frameExists(_):
             return "Use another frame name or ID, or use force to replace existing"

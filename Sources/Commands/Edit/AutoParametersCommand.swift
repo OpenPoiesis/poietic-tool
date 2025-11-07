@@ -26,9 +26,9 @@ extension PoieticTool {
 
         mutating func run() throws {
             let env = try ToolEnvironment(location: globalOptions.designLocation)
-            let original = try env.existingFrame(options.deriveRef)
+            let original = try env.runtimeFrame(options.deriveRef)
             let trans = try env.deriveOrCreate(options.deriveRef)
-            let validated = try env.validate(original)
+            
             let systems = SystemGroup(
                 ComputationOrderSystem.self,
                 NameResolutionSystem.self,
@@ -36,9 +36,8 @@ extension PoieticTool {
                 ParameterResolutionSystem.self,
             )
 
-            let runtime = RuntimeFrame(validated)
-            try systems.update(runtime)
-            let result = try autoConnectParameters(runtime: runtime, trans: trans)
+            try systems.update(original)
+            let result = try autoConnectParameters(runtime: original, trans: trans)
             if verbose {
                 for info in result.added {
                     print("Connected parameter \(info.parameterName ?? "(unnamed)") (\(info.parameterID)) to \(info.targetName ?? "(unnamed)") (\(info.targetID)), edge: \(info.edgeID)")

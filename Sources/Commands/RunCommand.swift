@@ -52,17 +52,16 @@ extension PoieticTool {
         @Option(name: [.long, .customShort("f")], help: "Output format")
         var outputFormat: OutputFormat = .csv
 
-        // TODO: Deprecate
         @Option(name: [.customLong("variable"), .customShort("V")],
                 help: "Values to observe in the output; can be object IDs or object names.")
         var outputNames: [String] = []
 
-        // TODO: Deprecate
+        // TODO: Rename to --parameter/-p
         @Option(name: [.customLong("constant"), .customShort("c")],
                        help: "Set (override) a value of a constant node in a form 'attribute=value'")
         var overrideValues: [String] = []
 
-        @Option(name: [.customLong("frame")], help: "Frame to run")
+        @Option(name: [.customLong("frame")], help: "Frame name or ID to run")
         var frameRef: String?
 
         /// Path to the output directory.
@@ -82,15 +81,13 @@ extension PoieticTool {
         
         mutating func run() throws {
             let env = try ToolEnvironment(location: options.designLocation)
-            let stableFrame = try env.existingFrame(frameRef)
-
-            let validFrame = try env.validate(stableFrame)
+            let frame = try env.runtimeFrame(frameRef)
             
             guard let solverType = StockFlowSimulation.SolverType(rawValue: solverName) else {
                 throw ToolError.unknownSolver(solverName)
             }
 
-            let plan = try env.compile(validFrame)
+            let plan = try env.createSimulationPlan(frame)
             
             var parameters = plan.simulationParameters ?? SimulationParameters()
             

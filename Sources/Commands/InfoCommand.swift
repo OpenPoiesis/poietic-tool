@@ -8,6 +8,7 @@
 @preconcurrency import ArgumentParser
 import PoieticCore
 import PoieticFlows
+import Markdown
 
 extension PoieticTool {
     struct Info: ParsableCommand {
@@ -19,29 +20,11 @@ extension PoieticTool {
         var frameID: String?
 
         mutating func run() throws {
-            let env = try ToolEnvironment(location: options.designLocation)
-
-            let frame: DesignFrame?
-            
-            if let frameID {
-                if let id = FrameID(frameID) {
-                    if let stableFrame = env.design.frame(id) {
-                        frame = stableFrame
-                    }
-                    else {
-                        throw ToolError.unknownFrame(frameID)
-                    }
-                }
-                else {
-                    throw ToolError.unknownFrame(frameID)
-                }
-            }
-            else {
-                frame = env.design.currentFrame
-            }
+            let modeller = try ModellerTool(location: options.designLocation)
+            let frame = try modeller.frameIfPresent(frameID)
             
             var items: [(String?, String?)] = [
-                ("Design", env.url.relativeString)
+                ("Design", modeller.url.relativeString)
             ]
 
             if let info = frame?.filter(type: ObjectType.DesignInfo).first {
@@ -58,14 +41,14 @@ extension PoieticTool {
             
             items += [
                 (nil, nil),
-                ("Total snapshots", "\(env.design.objectSnapshots.count)"),
+                ("Total snapshots", "\(modeller.design.objectSnapshots.count)"),
 
                 (nil, nil),
-                ("Total frames", "\(env.design.frames.count)"),
-                ("History frames", "\(env.design.versionHistory.count)"),
-                ("Undoable frames", "\(env.design.undoList.count)"),
-                ("Redoable frames", "\(env.design.redoList.count)"),
-                ("Named frames", "\(env.design.namedFrames.count)"),
+                ("Total frames", "\(modeller.design.frames.count)"),
+                ("History frames", "\(modeller.design.versionHistory.count)"),
+                ("Undoable frames", "\(modeller.design.undoList.count)"),
+                ("Redoable frames", "\(modeller.design.redoList.count)"),
+                ("Named frames", "\(modeller.design.namedFrames.count)"),
             ]
             
             if let frame {

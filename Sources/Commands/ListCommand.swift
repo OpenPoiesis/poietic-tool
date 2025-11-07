@@ -62,38 +62,36 @@ extension PoieticTool {
         var listType: ListType = .all
 
         mutating func run() throws {
-            let env = try ToolEnvironment(location: options.designLocation)
+            let modeller = try ModellerTool(location: options.designLocation, configuration: .inspection)
             
             switch listType.entityType {
             case .frames:
-                try listFrames(env)
+                try listFrames(modeller)
             case .objects:
-                let frame = try env.existingFrame(frameRef)
-                try listObjects(env, in: frame)
+                let frame = try modeller.frame(frameRef)
+                try listObjects(modeller, in: frame)
             }
-            try env.close()
         }
-        func listFrames(_ env: ToolEnvironment) throws {
+        func listFrames(_ modeller: Modeller) throws {
             switch listType {
             case .namedFrames:
-                listNamedFrames(env.design)
+                listNamedFrames(modeller.design)
             case .frames:
-                listFrameIDs(env.design)
+                listFrameIDs(modeller.design)
             case .history:
-                listHistory(env.design)
+                listHistory(modeller.design)
             default:
                 return
             }
         }
-        func listObjects(_ env: ToolEnvironment, in frame: DesignFrame) throws {
+        func listObjects(_ modeller: Modeller, in frame: DesignFrame) throws {
             let type: ObjectType?
             
             if let typeName  {
-                if let maybeType = env.design.metamodel.objectType(name: typeName) {
+                if let maybeType = modeller.metamodel.objectType(name: typeName) {
                     type = maybeType
                 }
                 else {
-                    try env.close()
                     throw CleanExit.message("Unknown type name: \(typeName)")
                 }
             }
@@ -113,13 +111,13 @@ extension PoieticTool {
             case .all:
                 listAll(snapshots,in: frame)
             case .namedFrames:
-                listNamedFrames(env.design)
+                listNamedFrames(modeller.design)
             case .names:
                 listNames(snapshots)
             case .formulas:
                 listFormulas(snapshots)
             case .pseudoEquations:
-                try listPseudoEquations(frame, env: env)
+                try listPseudoEquations(frame, modeller: modeller)
             case .graphicalFunctions:
                 listGraphicalFunctions(frame)
             default:
@@ -129,7 +127,7 @@ extension PoieticTool {
     }
 }
 
-func listAll(_ snapshots: [ObjectSnapshot], in frame: some Frame) {
+func listAll(_ snapshots: [ObjectSnapshot], in frame: DesignFrame) {
     let sorted = snapshots.sorted { left, right in
         left.id < right.id
     }
@@ -208,34 +206,44 @@ func listFormulas(_ snapshots: [ObjectSnapshot]) {
     }
 }
 
-func listPseudoEquations(_ frame: DesignFrame, env: ToolEnvironment) throws (ToolError) {
+func listPseudoEquations(_ frame: DesignFrame, modeller: Modeller) throws (ToolError) {
     // FIXME: Add stocks
-    let validFrame = try env.validate(frame)
-    let plan: SimulationPlan = try env.compile(validFrame)
-    print("Not quite equations ...")
-    for stock in plan.stocks {
-        guard let obj = frame[stock.objectID] else { fatalError() }
-        // This should not happen if the model is valid, but just in case
-        let name = (obj.name ?? "(unnamed)")
-        var total = ""
-        
-        if !stock.inflows.isEmpty {
-            let inflows = stock.inflows.map { plan.stateVariables[$0].name }
-            total += inflows.joined(separator: " + ")
-        }
-        if !stock.outflows.isEmpty {
-            if !stock.inflows.isEmpty {
-                total += " - "
+    let runtime: RuntimeFrame
+    do {
+        runtime = try modeller.updateRuntime(frame.id)
+    }
+    catch {
+        throw .internalSystemError(error)
+    }
+
+    for (stockID, stock) in runtime.filter(StockComponent.self) {
+        let lhs = runtime.displayName(of: stockID, default: "(unnamed)")
+        var rhs = ""
+        var hasInflows: Bool = false
+
+        if !stock.inflowRates.isEmpty {
+            let inflows = stock.inflowRates.map {
+                runtime.displayName(of: $0, default: "(unnamed)")
             }
-            let outflows = stock.outflows.map { plan.stateVariables[$0].name }
-            total += outflows.joined(separator: " - ")
+            rhs += inflows.joined(separator: " + ")
+            hasInflows = true
+        }
+
+        if !stock.outflowRates.isEmpty {
+            if hasInflows {
+                rhs += " - "
+            }
+            let outflows = stock.outflowRates.map {
+                runtime.displayName(of: $0, default: "(unnamed)")
+            }
+            rhs += outflows.joined(separator: " - ")
         }
         
-        print("Δ \(name) = \(total)")
+        print("Δ \(lhs) = \(rhs)")
     }
 }
 
-func listGraphicalFunctions(_ frame: DesignFrame) {
+func listGraphicalFunctions(_ frame: some Frame) {
     var result: [String: [Point]?] = [:]
     
     for object in frame.snapshots {
@@ -262,7 +270,6 @@ func listGraphicalFunctions(_ frame: DesignFrame) {
         else {
             print("    (invalid point array representation)")
         }
-        
     }
 }
 

@@ -64,19 +64,7 @@ Note: Frame with requested IDs can not be --forced to be replaced. Remove the fr
             let env = try ToolEnvironment(location: options.designLocation)
             let requestedID: FrameID?
             let createdRef: String
-            let derivingFrame: DesignFrame?
-            
-            if let derivingRef {
-                if let frame = env.frame(derivingRef) {
-                    derivingFrame = frame
-                }
-                else {
-                    throw ToolError.unknownFrame(derivingRef)
-                }
-            }
-            else {
-                derivingFrame = nil
-            }
+            let derivingFrame = try env.frame(derivingRef)
             
             if let ref = requestedRef, let id = FrameID(ref) {
                 requestedID = id

@@ -70,7 +70,7 @@ extension PoieticTool {
 
         mutating func run() throws {
             let env = try ToolEnvironment(location: options.designLocation)
-            let frame = try env.existingFrame(frameRef)
+            let frame = try env.frame(frameRef)
 
             guard let testURL = URL(string: output) else {
                 fatalError("Invalid resource reference: \(output)")

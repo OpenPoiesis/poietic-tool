@@ -56,7 +56,7 @@ public class DotExporter {
     }
     
     /// Export nodes and edges into the output.
-    public func export(_ frame: DesignFrame) throws  {
+    public func export(_ frame: some Frame) throws  {
         var output: String = ""
         let formatter = DotFormatter(name: name, type: .directed)
 
@@ -107,7 +107,7 @@ public class DotExporter {
         }
     }
     
-    public func format(graph: DesignFrame, node: ObjectSnapshot) -> [String:String] {
+    public func format(graph: some Frame, node: ObjectSnapshot) -> [String:String] {
         var combined: [String:String] = [:]
         
         for style in style?.nodeStyles ?? [] {
@@ -123,7 +123,7 @@ public class DotExporter {
         return combined
     }
 
-    public func format(graph: DesignFrame, edge: ObjectSnapshot) -> [String:String] {
+    public func format(graph: some Frame, edge: ObjectSnapshot) -> [String:String] {
         var combined: [String:String] = [:]
         
         for style in style?.edgeStyles ?? [] {
