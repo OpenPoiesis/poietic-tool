@@ -80,7 +80,9 @@ extension PoieticTool {
         var outputPath: String = "-"
         
         mutating func run() throws {
-            let modeller = try ModellerTool(location: options.designLocation, configuration: .simulation)
+            let modeller = try ModellerTool(location: options.designLocation,
+                                            configuration: .simulation)
+
             let frame = try modeller.frame(frameRef)
             let runtime = try modeller.updateRuntime(frame.id)
             
@@ -162,9 +164,8 @@ extension PoieticTool {
                              variables: outputVariables,
                              states: simulator.result.states)
             case .gnuplot:
-                try writeGnuplotBundle(path: outputPath,
-                                       compiledModel: plan,
-                                       output: simulator.result.states)
+                let writer = GNUPlotBundleWriter()
+                try writer.write(result: simulator.result, toPath: outputPath, frame: runtime)
 //            case .json:
 //                try writeJSON(path: outputPath,
 //                              variables: outputVariables,
@@ -200,62 +201,3 @@ func writeCSV(path: String,
     
 }
 
-/// Write a Gnuplot directory bundle.
-///
-/// The function will create a directory at `path` if it does not exist and then
-/// creates the following files:
-///
-/// - `output.csv` – all the simulation states
-/// - `chart_NAME.gnuplot` – one file for every chart where the NAME is the
-///    chart object name.
-///
-/// If the path is '-' then the current directory will be used.
-///
-func writeGnuplotBundle(path: String,
-                        compiledModel: SimulationPlan,
-                        output: [SimulationState]) throws {
-    let path = if path == "-" { "." } else { path }
-    let variables = compiledModel.stateVariables
-    let fm = FileManager()
-    try fm.createDirectory(atPath: path, withIntermediateDirectories: true)
-    let dataFileName = "output.csv"
-    // Write all the output
-    try writeCSV(path: path + "/" + dataFileName,
-                 variables: compiledModel.stateVariables,
-                 states: output)
-    
-    let timeIndex = variables.firstIndex { $0.name == "time" }!
-
-    // Write chart output
-    for chart in compiledModel.charts {
-        
-        let chartName = chart.node.name!
-        // TODO: Plot all the series
-        if chart.series.count > 1 {
-            print("NOTE: Printing only the first series, multiple series is not yet supported")
-        }
-        guard let series = chart.series.first else {
-            print("WARNING: Chart '\(chart.node.name ?? "(unnamed)")' has no series.")
-            continue
-        }
-        let seriesIndex = variables.firstIndex { $0.name == series.name }!
-        let imageFile = "chart_\(chartName).png"
-        
-        let gnuplotCommand =
-        """
-        set datafile separator ',';
-        set key autotitle columnhead;
-        set terminal png;
-        set output '\(imageFile)';
-        plot '\(dataFileName)' using \(timeIndex + 1):\(seriesIndex + 1) with lines;
-        """
-
-        let gnuplotCommandPath = path + "/" + "chart_\(chartName).gnuplot"
-        let file = try FileDescriptor.open(gnuplotCommandPath,
-                                           .writeOnly,
-                                           options: [.truncate, .create],
-                                           permissions: .ownerReadWrite)
-        try file.writeAll(gnuplotCommand.utf8)
-        try file.close()
-    }
-}
