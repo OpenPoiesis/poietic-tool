@@ -95,7 +95,7 @@ public class Modeller {
     ///
     /// - SeeAlso: ``runtimeFrame``.
     ///
-    func updateRuntime() throws (InternalSystemError) {
+    func updateCurrentRuntime() throws (InternalSystemError) {
         guard let currentFrame = design.currentFrame else {
             runtimeFrame = nil
             return

@@ -31,11 +31,13 @@ enum ToolError: Error, CustomStringConvertible {
     case emptyDesign
     
     // Design errors
+    case designIssues([ObjectID:[Issue]])
+
+
     case brokenStructuralIntegrity(StructuralIntegrityError)
     case unnamedObject(ObjectID)
 
     case validationFailed(FrameValidationResult)   /* OK */
-    case compilationFailed([ObjectID:[Issue]])  /* OK */
     
     // Simulation errors
     case unknownVariables([String])
@@ -111,7 +113,7 @@ enum ToolError: Error, CustomStringConvertible {
 
             return "Design validation failed: " + detail
 
-        case .compilationFailed(let issues):
+        case .designIssues(let issues):
             var detail: String = ""
             if !issues.isEmpty {
                 detail += "\(issues.count) objects with errors"
@@ -179,7 +181,7 @@ enum ToolError: Error, CustomStringConvertible {
             return "Unfortunately the only way is to inspect the database or a foreign frame. 'doctor' command is not yet implemented."
         case .validationFailed(_):
             return "Make sure that the design is conforming to the metamodel. (In the future there will be 'doctor' command to help you.)"
-        case .compilationFailed(_):
+        case .designIssues(_):
             return "Make sure that the design is conforming to the metamodel and the rules of simulation. (In the future there will be 'doctor' command to help you.)"
 
         case .unknownSolver(_):

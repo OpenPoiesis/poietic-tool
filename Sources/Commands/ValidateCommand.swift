@@ -6,6 +6,7 @@
 //
 
 @preconcurrency import ArgumentParser
+import PoieticFlows
 
 extension PoieticTool {
     struct Validate: ParsableCommand {
@@ -17,12 +18,16 @@ extension PoieticTool {
         var frameRef: String?
 
         mutating func run() throws {
-            let env = try ToolEnvironment(location: options.designLocation)
-            let frame = try env.frame(frameRef)
+            let modeller = try ModellerTool(location: options.designLocation, configuration: .simulation)
+            let frame = try modeller.frame(frameRef)
+            let runtime = try modeller.updateRuntime(frame.id)
+            
+            guard let _ = runtime.frameComponent(SimulationPlan.self) else {
+                printIssues(runtime)
+                throw ToolError.designIssues(runtime.issues)
+            }
 
-            print("Frame validation passed.")
-            let _ = try env.compile(frame)
-            print("Frame compilation passed.")
+            print("Frame is valid.")
         }
     }
 }

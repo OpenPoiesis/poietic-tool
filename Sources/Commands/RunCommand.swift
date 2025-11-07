@@ -80,15 +80,19 @@ extension PoieticTool {
         var outputPath: String = "-"
         
         mutating func run() throws {
-            let env = try ToolEnvironment(location: options.designLocation)
-            let frame = try env.runtimeFrame(frameRef)
+            let modeller = try ModellerTool(location: options.designLocation, configuration: .simulation)
+            let frame = try modeller.frame(frameRef)
+            let runtime = try modeller.updateRuntime(frame.id)
+            
+            guard let plan = runtime.frameComponent(SimulationPlan.self) else {
+                printIssues(runtime)
+                throw ToolError.designIssues(runtime.issues)
+            }
             
             guard let solverType = StockFlowSimulation.SolverType(rawValue: solverName) else {
                 throw ToolError.unknownSolver(solverName)
             }
 
-            let plan = try env.createSimulationPlan(frame)
-            
             var parameters = plan.simulationParameters ?? SimulationParameters()
             
             if let timeDelta {
@@ -166,8 +170,6 @@ extension PoieticTool {
 //                              variables: outputVariables,
 //                              states: simulator.output)
             }
-
-            try env.close()
         }
     }
 }

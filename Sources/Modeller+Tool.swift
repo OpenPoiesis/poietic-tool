@@ -100,24 +100,51 @@ class ModellerTool: Modeller {
         return frame
     }
     
+
+    /// Get frame ID from a frame reference, which can be either frame ID or frame name.
+    ///
+    /// - Returns: Frame ID of resolved reference or `nil` if no such frame exists.
+    public func frame(required reference: String? = nil) throws (ToolError) -> FrameID? {
+        if let reference {
+            if let frameID = FrameID(reference), design.containsFrame(frameID) {
+                return frameID
+            }
+            else {
+                throw .unknownFrame(reference)
+            }
+        }
+        else {
+            return design.currentFrameID
+        }
+    }
+    
     /// Get a frame by given ID as a string or current frame.
+    ///
+    /// - If ID is provided: tries to find it, otherwise throws an error.
+    /// - If ID is not provided:
+    ///     - If current frame is set: use current frame.
+    ///     - There is only one frame: use the only frame.
+    ///     - Otherwise return nil
     ///
     /// Use this method to get a frame by user-provided reference.
     ///
     /// - Throws ``ToolError/unknownFrame(_:)`` when the frame is not found.
     ///
-    func frameIfPresent(_ reference: String? = nil) throws (ToolError) -> DesignFrame? {
-        if let reference {
-            if let id = FrameID(reference), let frame = design.frame(id) {
+    func frameIfPresent(_ requiredReference: String? = nil) throws (ToolError) -> DesignFrame? {
+        if let requiredReference {
+            if let id = FrameID(requiredReference), let frame = design.frame(id) {
                 return frame
             }
             else {
-                throw ToolError.unknownFrame(reference)
+                throw ToolError.unknownFrame(requiredReference)
             }
         }
         else {
             if let frame = design.currentFrame {
                 return frame
+            }
+            else if design.frames.count == 1 {
+                return design.frames.first!
             }
             else {
                 return nil
@@ -129,8 +156,8 @@ class ModellerTool: Modeller {
     ///
     /// - Throws: ``ToolError/unknownFrame`` if the frame does not exist.
     ///
-    public func runtimeFrame(reference: String? = nil) throws (ToolError) -> RuntimeFrame {
-        let frame = try frame(reference)
+    public func createRuntime(frameReference: String? = nil) throws (ToolError) -> RuntimeFrame {
+        let frame = try frame(frameReference)
         return RuntimeFrame(frame)
     }
     

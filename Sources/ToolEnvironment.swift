@@ -175,51 +175,51 @@ class ToolEnvironment {
         }
     }
 
-    /// Try to compile the frame.
-    ///
-    /// If the frame is successfully compiled then the simulation plan returned.
-    ///
-    /// If the frame compilation failed, errors are printed and a ``ToolError`` is thrown.
-    ///
-    @discardableResult
-    func compile(_ frame: DesignFrame) throws (ToolError) -> SimulationPlan {
-        let compiler = Compiler(frame: frame)
-        do {
-            return try compiler.compile()
-        }
-        catch {
-            switch error {
-            case .issues(let issues):
-                printObjectIssuesError(issues, in: frame)
-                throw .compilationFailed(issues)
-            case .internalError(let error):
-                throw .internalError(error)
-            }
-        }
-    }
-    
-    @discardableResult
-    func createSimulationPlan(_ runtime: RuntimeFrame) throws (ToolError) -> SimulationPlan {
-        let systems = SystemGroup()
-        systems.register(SimulationPlanningSystemGroup)
-
-        do {
-            try systems.update(runtime)
-        }
-        catch {
-            throw .internalSystemError(error)
-        }
-        
-        if runtime.hasIssues {
-            printObjectIssuesError(runtime.issues, in: runtime)
-        
-        }
-        guard let plan = runtime.frameComponent(SimulationPlan.self) else {
-            // TODO: What to do now? we should not have no issues and no plan
-            fatalError("Plan was not created")
-        }
-        return plan
-    }
+//    /// Try to compile the frame.
+//    ///
+//    /// If the frame is successfully compiled then the simulation plan returned.
+//    ///
+//    /// If the frame compilation failed, errors are printed and a ``ToolError`` is thrown.
+//    ///
+//    @discardableResult
+//    func compile(_ frame: DesignFrame) throws (ToolError) -> SimulationPlan {
+//        let compiler = Compiler(frame: frame)
+//        do {
+//            return try compiler.compile()
+//        }
+//        catch {
+//            switch error {
+//            case .issues(let issues):
+//                printObjectIssuesError(issues, in: frame)
+//                throw .compilationFailed(issues)
+//            case .internalError(let error):
+//                throw .internalError(error)
+//            }
+//        }
+//    }
+//    
+//    @discardableResult
+//    func createSimulationPlan(_ runtime: RuntimeFrame) throws (ToolError) -> SimulationPlan {
+//        let systems = SystemGroup()
+//        systems.register(SimulationPlanningSystemGroup)
+//
+//        do {
+//            try systems.update(runtime)
+//        }
+//        catch {
+//            throw .internalSystemError(error)
+//        }
+//        
+//        if runtime.hasIssues {
+//            printObjectIssuesError(runtime.issues, in: runtime)
+//        
+//        }
+//        guard let plan = runtime.frameComponent(SimulationPlan.self) else {
+//            // TODO: What to do now? we should not have no issues and no plan
+//            fatalError("Plan was not created")
+//        }
+//        return plan
+//    }
 
     /// Close with saving the modified design.
     func closeAndSave() throws (ToolError) {
@@ -245,81 +245,3 @@ class ToolEnvironment {
 }
 
 
-func printObjectIssuesError(_ issues: [ObjectID:[Issue]], in frame: some Frame) {
-    print("DESIGN ISSUES:")
-    for (id, objectIssues) in issues {
-        let detail = objectDetail(id, in: frame)
-        print("Object \(detail):")
-        for issue in objectIssues {
-            print("      " + issue.description)
-        }
-    }
-
-}
-func printValidationResult(_ result: FrameValidationResult, in frame: some Frame) {
-    print("VALIDATION FAILED:")
-    for violation in result.violations {
-        let message = "CONSTRAINT VIOLATION " + violation.constraint.name +
-                        ": " + (violation.constraint.abstract ?? "(no details)")
-        print(message)
-        for id in violation.objects {
-            let detail = objectDetail(id, in: frame)
-            print("    " + detail)
-        }
-    }
-    for (id, errors) in result.objectErrors {
-        let detail = objectDetail(id, in: frame)
-        print("OBJECT \(detail):")
-        for error in errors {
-            print("    " + error.description)
-        }
-    }
-    for (id, errors) in result.edgeRuleViolations {
-        let detail = objectDetail(id, in: frame)
-        print("OBJECT \(detail):")
-        for error in errors {
-            print("    " + error.description)
-        }
-    }
-
-}
-
-private func objectDetail(_ id: ObjectID, in frame: some Frame) -> String {
-    guard let object = frame[id] else {
-        return "\(id)"
-    }
-    
-    var text: String = "\(id)"
-    
-    
-    if let name = object.name {
-        text += ":\(name)"
-    }
-    text += ":\(object.type.name)"
-    
-    if case let .edge(origin, target) = object.structure,
-        let originObject = frame[origin],
-        let targetObject = frame[target]
-    {
-        
-        text += " Edge \(origin)"
-        
-        if let name = originObject.name {
-            text += ":\(name):\(originObject.type.name)"
-        }
-        else {
-            text += ":\(originObject.type.name)"
-        }
-
-        text += " -> \(target)"
-        if let name = targetObject.name {
-            text += ":\(name):\(targetObject.type.name)"
-        }
-        else {
-            text += ":\(targetObject.type.name)"
-        }
-        return text
-    }
-    
-    return text
-}
