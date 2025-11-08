@@ -33,8 +33,8 @@ extension PoieticTool {
 
         
         mutating func run() throws {
-            let env = try ToolEnvironment(location: globalOptions.designLocation)
-            let trans = try env.deriveOrCreate(options.deriveRef)
+            let modeller = try ModellerTool(location: globalOptions.designLocation)
+            let trans = try modeller.deriveOrCreate(options.deriveRef)
 
             guard let type = StockFlowMetamodel.objectType(name: typeName) else {
                 throw ToolError.unknownObjectType(typeName)
@@ -65,8 +65,8 @@ extension PoieticTool {
 
             let id = trans.create(type, structure: .edge(originObject.objectID, targetObject.objectID))
             
-            try env.accept(trans, replacing: options.replaceRef, appendHistory: options.appendHistory)
-            try env.closeAndSave()
+            try modeller.accept(trans, replacing: options.replaceRef, appendHistory: options.appendHistory)
+            try modeller.save()
 
             print("Created edge \(id)")
         }

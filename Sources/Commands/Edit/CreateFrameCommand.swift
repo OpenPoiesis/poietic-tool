@@ -43,16 +43,16 @@ Note: Frame with requested IDs can not be --forced to be replaced. Remove the fr
         //  - id + force
         //  - name + append-history
         //
-        @OptionGroup var options: Options
+        @OptionGroup var globalOptions: Options
+
+        @Option(name: [.customLong("derive")], help: "Derive an existing frame")
+        var derivingRef: String?
 
         @Option(help: "Create a named frame with given name")
         var name: String?
 
         @Option(name: [.customLong("id")], help: "Create a frame with given id")
         var requestedRef: String?
-
-        @Option(name: [.customLong("derive")], help: "Derive an existing frame")
-        var derivingRef: String?
 
         @Flag(name: [.customLong("force")], help: "Replace existing frame")
         var force: Bool = false
@@ -61,44 +61,53 @@ Note: Frame with requested IDs can not be --forced to be replaced. Remove the fr
         var appendHistory: Bool = false
 
         mutating func run() throws {
-            let env = try ToolEnvironment(location: options.designLocation)
+            let modeller = try ModellerTool(location: globalOptions.designLocation)
+            let design = modeller.design
             let requestedID: FrameID?
             let createdRef: String
-            let derivingFrame = try env.frame(derivingRef)
-            
-            if let ref = requestedRef, let id = FrameID(ref) {
-                requestedID = id
+            let derivingFrame = try modeller.frameIfPresent(derivingRef)
+
+            if let ref = requestedRef, let frameID = FrameID(ref) {
+                requestedID = frameID
+                guard !design.containsFrame(frameID) else {
+                    throw ToolError.frameExists(frameID.stringValue)
+                }
             }
             else {
                 requestedID = nil
             }
             
             if let name {
-                if env.design.frame(name: name) != nil && !force {
+                guard design.frame(name: name) == nil || force else {
                     throw ToolError.frameExists(name)
                 }
-                let frame = env.design.createFrame(deriving: derivingFrame)
-                try env.design.accept(frame, replacingName: name)
+                let frame = createFrame(in: design, deriving: derivingFrame)
+                try design.accept(frame, replacingName: name)
                 createdRef = name
             }
             else if let requestedID {
-                if env.design.containsFrame(requestedID) {
-                    // TODO: Allow force?
-                    throw ToolError.frameExists(requestedID.stringValue)
-                }
-                let frame = env.design.createFrame(deriving: derivingFrame, id: requestedID)
-                try env.design.accept(frame, appendHistory: appendHistory)
+                let frame = createFrame(in: design, deriving: derivingFrame, requestedID: requestedID)
+                try design.accept(frame, appendHistory: appendHistory)
                 createdRef = requestedID.stringValue
             }
             else {
-                let frame = env.design.createFrame(deriving: derivingFrame)
-                try env.design.accept(frame, appendHistory: appendHistory)
+                let frame = createFrame(in: design, deriving: derivingFrame)
+                try design.accept(frame, appendHistory: appendHistory)
                 createdRef = frame.id.stringValue
             }
 
-            try env.closeAndSave()
+            try modeller.save()
 
             print("Created frame \(createdRef)")
         }
+    }
+}
+
+func createFrame(in design: Design, deriving: DesignFrame?, requestedID: FrameID? = nil) -> TransientFrame {
+    if let deriving {
+        return design.createFrame(deriving: deriving, id: requestedID)
+    }
+    else {
+        return design.createFrame(id: requestedID)
     }
 }

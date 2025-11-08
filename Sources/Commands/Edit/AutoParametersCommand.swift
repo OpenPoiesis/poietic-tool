@@ -25,10 +25,10 @@ extension PoieticTool {
         var verbose: Bool = false
 
         mutating func run() throws {
-            let env = try ToolEnvironment(location: globalOptions.designLocation)
-            let original = try env.runtimeFrame(options.deriveRef)
-            let trans = try env.deriveOrCreate(options.deriveRef)
-            
+            let modeller = try ModellerTool(location: globalOptions.designLocation)
+            let original = try modeller.createRuntime(frameReference: options.deriveRef)
+            let trans = try modeller.deriveOrCreate(options.deriveRef)
+
             let systems = SystemGroup(
                 ComputationOrderSystem.self,
                 NameResolutionSystem.self,
@@ -48,8 +48,8 @@ extension PoieticTool {
             }
 
             if result.added.count + result.removed.count > 0 {
-                try env.accept(trans, replacing: options.replaceRef, appendHistory: options.appendHistory)
-                try env.closeAndSave()
+                try modeller.accept(trans, replacing: options.replaceRef, appendHistory: options.appendHistory)
+                try modeller.save()
                 print("Added \(result.added.count) edges and removed \(result.removed.count) edges.")
             }
             else {

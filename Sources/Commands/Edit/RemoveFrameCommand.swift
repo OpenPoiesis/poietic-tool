@@ -18,14 +18,15 @@ extension PoieticTool {
                 abstract: "Remove a frame"
             )
 
-        @OptionGroup var options: Options
+        @OptionGroup var globalOptions: Options
 
         @Argument(help: "IDs or names of frames to be removed")
         var references: [String]
         
         mutating func run() throws {
-            let env = try ToolEnvironment(location: options.designLocation)
-            guard env.design.frames.count > 0 else {
+            let modeller = try ModellerTool(location: globalOptions.designLocation)
+
+            guard modeller.design.frames.count > 0 else {
                 throw ToolError.emptyDesign
             }
             guard !references.isEmpty else {
@@ -34,12 +35,14 @@ extension PoieticTool {
             }
 
             var toRemove: [FrameID] = []
-
+            
             for ref in references {
-                if let id = env.design.frame(name: ref)?.id {
+                if let id = modeller.design.frame(name: ref)?.id {
                     toRemove.append(id)
                 }
-                else if let id = FrameID(ref), env.design.containsFrame(id) {
+                else if let id = FrameID(ref),
+                        modeller.design.containsFrame(id)
+                {
                     toRemove.append(id)
                 }
                 else {
@@ -48,11 +51,10 @@ extension PoieticTool {
             }
 
             for id in toRemove {
-                env.design.removeFrame(id)
+                modeller.design.removeFrame(id)
             }
 
-            try env.closeAndSave()
-            
+            try modeller.save()
             print("Removed \(toRemove.count) frames.")
         }
     }

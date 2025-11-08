@@ -38,8 +38,8 @@ extension PoieticTool {
         var reference: String
         
         mutating func run() throws {
-            let env = try ToolEnvironment(location: options.designLocation)
-            let frame = try env.frame(frameRef)
+            let modeller = try ModellerTool(location: options.designLocation)
+            let frame = try modeller.frame(frameRef)
             
             guard let object = frame.object(stringReference: reference) else {
                 throw ToolError.unknownObject(reference)
@@ -49,7 +49,6 @@ extension PoieticTool {
             case .text: printObjectAsText(object)
             case .json: printObjectAsJSON(object)
             }
-            try env.close()
         }
     }
 }

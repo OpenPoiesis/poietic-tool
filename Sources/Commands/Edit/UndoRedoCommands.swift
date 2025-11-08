@@ -15,19 +15,19 @@ extension PoieticTool {
                 abstract: "Undo last change"
             )
 
-        @OptionGroup var options: Options
+        @OptionGroup var globalOptions: Options
 
         mutating func run() throws {
-            let env = try ToolEnvironment(location: options.designLocation)
+            let modeller = try ModellerTool(location: globalOptions.designLocation)
 
-            if !env.design.canUndo {
+            if !modeller.design.canUndo {
                 throw ToolError.noChangesToUndo
             }
             
-            let frameID = env.design.undoList.last!
-            env.design.undo(to: frameID)
+            let frameID = modeller.design.undoList.last!
+            modeller.design.undo(to: frameID)
 
-            try env.closeAndSave()
+            try modeller.save()
             print("Did undo")
         }
     }
@@ -41,21 +41,20 @@ extension PoieticTool {
                 abstract: "Redo undone change"
             )
 
-        @OptionGroup var options: Options
+        @OptionGroup var globalOptions: Options
 
         mutating func run() throws {
-            let env = try ToolEnvironment(location: options.designLocation)
+            let modeller = try ModellerTool(location: globalOptions.designLocation)
 
-            if !env.design.canRedo {
+            if !modeller.design.canRedo {
                 throw ToolError.noChangesToRedo
             }
             
-            let frameID = env.design.redoList.first!
-            env.design.redo(to: frameID)
+            let frameID = modeller.design.redoList.first!
+            modeller.design.redo(to: frameID)
 
-            try env.closeAndSave()
+            try modeller.save()
             print("Did redo.")
         }
     }
-
 }

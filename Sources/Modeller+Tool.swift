@@ -151,7 +151,30 @@ class ModellerTool: Modeller {
             }
         }
     }
-    
+
+    /// Derive a frame from existing frame, if the reference is valid or create a new frame if
+    /// there is no current frame.
+    ///
+    /// - Throws ``ToolError/unknownFrame(_:)`` when the frame is not found or
+    ///   ``ToolError/emptyDesign`` if there are no frames in the design.
+    ///
+    func deriveOrCreate(_ reference: String? = nil) throws (ToolError) -> TransientFrame {
+        if let reference {
+            if let original = try frameIfPresent(reference) {
+                return design.createFrame(deriving: original)
+            }
+            else {
+                throw .unknownFrame(reference)
+            }
+        }
+        else if let original = design.currentFrame {
+            return design.createFrame(deriving: original)
+        }
+        else {
+            return design.createFrame()
+        }
+    }
+
     /// Get a runtime frame by named reference, if it exists.
     ///
     /// - Throws: ``ToolError/unknownFrame`` if the frame does not exist.
@@ -161,6 +184,35 @@ class ModellerTool: Modeller {
         return RuntimeFrame(frame)
     }
     
+    /// Try to accept a frame in the modeller design.
+    ///
+    /// Tries to accept the frame. If the frame contains constraint violations, then
+    /// the violations are printed out in a more human-readable format.
+    ///
+    func accept(_ trans: TransientFrame, replacing: String? = nil, appendHistory: Bool = true) throws (ToolError) {
+        do {
+            if let name = replacing {
+                try design.accept(trans, replacingName: name)
+            }
+            else {
+                try design.accept(trans, appendHistory: appendHistory)
+            }
+        }
+        catch {
+            switch error {
+            case let .brokenStructuralIntegrity(subError):
+                throw ToolError.brokenStructuralIntegrity(subError)
+            case .constraintViolation(_),
+                    .edgeRuleViolation(_, _),
+                    .objectTypeError(_, _):
+                let checker = ConstraintChecker(trans.design.metamodel)
+                let result = checker.diagnose(trans)
+                printValidationResult(result, in: trans)
+                throw ToolError.validationFailed(result)
+            }
+        }
+    }
+
     /// Save the design.
     func save() throws (ToolError) {
         let store = DesignStore(url: url)

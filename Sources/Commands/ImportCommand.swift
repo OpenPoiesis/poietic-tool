@@ -39,8 +39,8 @@ extension PoieticTool {
         var fileName: String
         
         mutating func run() throws {
-            let env = try ToolEnvironment(location: globalOptions.designLocation)
-            let trans = try env.deriveOrCreate(options.deriveRef)
+            let modeller = try ModellerTool(location: globalOptions.designLocation)
+            let trans = try modeller.deriveOrCreate(options.deriveRef)
 
             let rawDesign = try readRawDesign(fromPath: fileName)
             let loader = DesignLoader(metamodel: StockFlowMetamodel, options: .useIDAsNameAttribute)
@@ -59,8 +59,8 @@ extension PoieticTool {
                 throw ToolError.designLoaderError(error, URL(fileURLWithPath: fileName))
             }
 
-            try env.accept(trans, replacing: options.replaceRef, appendHistory: options.appendHistory)
-            try env.closeAndSave()
+            try modeller.accept(trans, replacing: options.replaceRef, appendHistory: options.appendHistory)
+            try modeller.save()
         }
     }
 }

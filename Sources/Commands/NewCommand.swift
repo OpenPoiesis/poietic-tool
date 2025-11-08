@@ -17,7 +17,7 @@ extension PoieticTool {
             abstract: "Create an empty design."
         )
         
-        @OptionGroup var options: Options
+        @OptionGroup var globalOptions: Options
 
         @Option(name: [.customLong("import"), .customShort("i")],
                 help: "Poietic frame to import into the first frame")
@@ -25,7 +25,8 @@ extension PoieticTool {
 
         mutating func run() throws {
             let design = Design(metamodel: StockFlowMetamodel)
-            let env = try ToolEnvironment(location: options.designLocation, design: design)
+            let modeller = try ModellerTool(location: globalOptions.designLocation,
+                                            design: design)
 
             if !importPaths.isEmpty {
                 let loader = DesignLoader(metamodel: design.metamodel, options: .useIDAsNameAttribute)
@@ -43,15 +44,15 @@ extension PoieticTool {
                     }
                 }
                 
-                try env.accept(frame)
+                try modeller.accept(frame)
             }
             
-            try env.closeAndSave()
-            if env.url.scheme == nil || env.url.scheme == "file" {
-                print("Design created: \(env.url.path)")
+            try modeller.save()
+            if modeller.url.scheme == nil || modeller.url.scheme == "file" {
+                print("Design created: \(modeller.url.path)")
             }
             else {
-                print("Design created: \(env.url)")
+                print("Design created: \(modeller.url)")
             }
         }
     }

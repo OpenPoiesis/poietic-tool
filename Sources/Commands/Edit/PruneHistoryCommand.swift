@@ -18,21 +18,22 @@ extension PoieticTool {
                 abstract: "Remove all frames in the undo/redo history and keep just the current frame. Other non-history related frames remain untouched."
             )
 
-        @OptionGroup var options: Options
+        @OptionGroup var globalOptions: Options
 
         mutating func run() throws {
-            let env = try ToolEnvironment(location: options.designLocation)
+            let modeller = try ModellerTool(location: globalOptions.designLocation)
+            let design = modeller.design
+            
+            let count = design.undoList.count + design.redoList.count
 
-            let count = env.design.undoList.count + env.design.redoList.count
-
-            for frame in env.design.undoList {
-                env.design.removeFrame(frame)
+            for frame in design.undoList {
+                design.removeFrame(frame)
             }
-            for frame in env.design.redoList {
-                env.design.removeFrame(frame)
+            for frame in design.redoList {
+                design.removeFrame(frame)
             }
 
-            try env.closeAndSave()
+            try modeller.save()
             
             if count > 0 {
                 print("Removed \(count) frames.")

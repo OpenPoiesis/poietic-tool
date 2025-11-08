@@ -69,8 +69,8 @@ extension PoieticTool {
         var pictogramCollectionPath: String?
 
         mutating func run() throws {
-            let env = try ToolEnvironment(location: options.designLocation)
-            let frame = try env.frame(frameRef)
+            let modeller = try ModellerTool(location: options.designLocation)
+            let frame = try modeller.frame(frameRef)
 
             guard let testURL = URL(string: output) else {
                 fatalError("Invalid resource reference: \(output)")
@@ -84,7 +84,6 @@ extension PoieticTool {
                 outputURL = testURL
             }
 
-            print("### EXPERIMENTAL ###")
             let pictograms: PictogramCollection
             if let path = pictogramCollectionPath {
                 print("Loading pictograms from \(path)")

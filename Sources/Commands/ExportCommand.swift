@@ -28,30 +28,9 @@ extension PoieticTool {
         var references: [String] = []
 
         mutating func run() throws {
-            let env = try ToolEnvironment(location: globalOptions.designLocation)
-            guard env.design.frames.count > 0 else {
-                throw ToolError.emptyDesign
-            }
-            let frameID: FrameID
-            if let frameReference {
-                if let id = env.design.frame(name: frameReference)?.id {
-                    frameID = id
-                }
-                else if let id = FrameID(frameReference), env.design.containsFrame(id) {
-                    frameID = id
-                }
-                else {
-                    throw ToolError.unknownFrame(frameReference)
+            let modeller = try ModellerTool(location: globalOptions.designLocation)
+            let frame = try modeller.frame(frameReference)
 
-                }
-            }
-            else {
-                guard let id = env.design.currentFrameID else {
-                    throw ToolError.unknownFrame("<current frame>")
-                }
-                frameID = id
-            }
-            let frame = env.design.frame(frameID)!
             let extractor = DesignExtractor()
             let snapshots: [RawSnapshot]
             if references.isEmpty {
@@ -70,7 +49,7 @@ extension PoieticTool {
                 snapshots = extractor.extractPruning(objects: validIDs, frame: frame)
             }
 
-            let rawDesign = extractor.extractStub(env.design)
+            let rawDesign = extractor.extractStub(modeller.design)
             rawDesign.snapshots = snapshots
             
             let writer = JSONDesignWriter()
@@ -86,7 +65,7 @@ extension PoieticTool {
                     try writer.write(rawDesign, toURL: url)
                 }
                 catch {
-                    // TODO Add tool error
+                    // TODO: Add tool error
                     fatalError("Unable to write to \(url): \(error)")
                 }
             }

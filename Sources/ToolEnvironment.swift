@@ -10,7 +10,7 @@ import Foundation
 import PoieticCore
 import PoieticFlows
 
-class ToolEnvironment {
+class OLD_ToolEnvironment {
     private(set) var design: Design
     let url: URL
     

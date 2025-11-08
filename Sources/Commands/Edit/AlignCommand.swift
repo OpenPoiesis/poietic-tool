@@ -54,8 +54,8 @@ extension PoieticTool {
         var references: [String]
         
         mutating func run() throws {
-            let env = try ToolEnvironment(location: globalOptions.designLocation)
-            let trans = try env.deriveOrCreate(options.deriveRef)
+            let modeller = try ModellerTool(location: globalOptions.designLocation)
+            let trans = try modeller.deriveOrCreate(options.deriveRef)
 
             var objects: [TransientObject] = []
             
@@ -68,8 +68,8 @@ extension PoieticTool {
 
             align(objects: objects, mode: mode, spacing: spacing)
             
-            try env.accept(trans, replacing: options.replaceRef, appendHistory: options.appendHistory)
-            try env.closeAndSave()
+            try modeller.accept(trans, replacing: options.replaceRef, appendHistory: options.appendHistory)
+            try modeller.save()
         }
     }
 }

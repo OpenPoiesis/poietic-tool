@@ -25,8 +25,8 @@ extension PoieticTool {
 
         
         mutating func run() throws {
-            let env = try ToolEnvironment(location: globalOptions.designLocation)
-            let trans = try env.deriveOrCreate(options.deriveRef)
+            let modeller = try ModellerTool(location: globalOptions.designLocation)
+            let trans = try modeller.deriveOrCreate(options.deriveRef)
 
             guard let object = trans.object(stringReference: reference) else {
                 throw ToolError.unknownObject(reference)
@@ -34,8 +34,8 @@ extension PoieticTool {
 
             let removed = trans.removeCascading(object.objectID)
 
-            try env.accept(trans, replacing: options.replaceRef, appendHistory: options.appendHistory)
-            try env.closeAndSave()
+            try modeller.accept(trans, replacing: options.replaceRef, appendHistory: options.appendHistory)
+            try modeller.save()
 
             print("Removed object: \(object.objectID)")
             if !removed.isEmpty {
