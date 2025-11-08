@@ -66,7 +66,7 @@ func createLibraryItem(fromDesignAt location: String) throws -> DesignLibraryIte
         url
     }
 
-    let modeller = try ModellerTool(url: actualURL)
+    let modeller = try CommandLineModeller(url: actualURL)
 
     guard let frame = modeller.design.currentFrame else {
         throw ToolError.emptyDesign

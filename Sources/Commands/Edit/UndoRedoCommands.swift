@@ -18,7 +18,7 @@ extension PoieticTool {
         @OptionGroup var globalOptions: Options
 
         mutating func run() throws {
-            let modeller = try ModellerTool(location: globalOptions.designLocation)
+            let modeller = try CommandLineModeller(location: globalOptions.designLocation)
 
             if !modeller.design.canUndo {
                 throw ToolError.noChangesToUndo
@@ -44,7 +44,7 @@ extension PoieticTool {
         @OptionGroup var globalOptions: Options
 
         mutating func run() throws {
-            let modeller = try ModellerTool(location: globalOptions.designLocation)
+            let modeller = try CommandLineModeller(location: globalOptions.designLocation)
 
             if !modeller.design.canRedo {
                 throw ToolError.noChangesToRedo

@@ -53,8 +53,7 @@ func designURL(_ location: String?) throws (ToolError) -> URL {
     }
 }
 
-
-class ModellerTool: Modeller {
+class CommandLineModeller: Modeller {
     let url: URL
     
     /// Create a new modeller given the URL and optional design.

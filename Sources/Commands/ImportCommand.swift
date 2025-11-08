@@ -39,7 +39,7 @@ extension PoieticTool {
         var fileName: String
         
         mutating func run() throws {
-            let modeller = try ModellerTool(location: globalOptions.designLocation)
+            let modeller = try CommandLineModeller(location: globalOptions.designLocation)
             let trans = try modeller.deriveOrCreate(options.deriveRef)
 
             let rawDesign = try readRawDesign(fromPath: fileName)

@@ -61,7 +61,7 @@ Note: Frame with requested IDs can not be --forced to be replaced. Remove the fr
         var appendHistory: Bool = false
 
         mutating func run() throws {
-            let modeller = try ModellerTool(location: globalOptions.designLocation)
+            let modeller = try CommandLineModeller(location: globalOptions.designLocation)
             let design = modeller.design
             let requestedID: FrameID?
             let createdRef: String

@@ -37,7 +37,7 @@ poietic edit add FlowRate name=expenses formula=50
         var attributeAssignments: [String] = []
         
         mutating func run() throws {
-            let modeller = try ModellerTool(location: globalOptions.designLocation)
+            let modeller = try CommandLineModeller(location: globalOptions.designLocation)
             let trans = try modeller.deriveOrCreate(options.deriveRef)
 
             guard let type = StockFlowMetamodel.objectType(name: typeName) else {

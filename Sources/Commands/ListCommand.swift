@@ -62,7 +62,7 @@ extension PoieticTool {
         var listType: ListType = .all
 
         mutating func run() throws {
-            let modeller = try ModellerTool(location: options.designLocation, configuration: .inspection)
+            let modeller = try CommandLineModeller(location: options.designLocation, configuration: .inspection)
             
             switch listType.entityType {
             case .frames:
@@ -207,7 +207,7 @@ func listFormulas(_ snapshots: [ObjectSnapshot]) {
 }
 
 func listPseudoEquations(_ frame: DesignFrame, modeller: Modeller) throws (ToolError) {
-    // FIXME: Add stocks
+    // TODO: Add stocks
     let runtime: RuntimeFrame
     do {
         runtime = try modeller.updateRuntime(frame.id)

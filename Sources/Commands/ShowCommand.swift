@@ -38,7 +38,7 @@ extension PoieticTool {
         var reference: String
         
         mutating func run() throws {
-            let modeller = try ModellerTool(location: options.designLocation)
+            let modeller = try CommandLineModeller(location: options.designLocation)
             let frame = try modeller.frame(frameRef)
             
             guard let object = frame.object(stringReference: reference) else {

@@ -21,7 +21,7 @@ extension PoieticTool {
         @OptionGroup var globalOptions: Options
 
         mutating func run() throws {
-            let modeller = try ModellerTool(location: globalOptions.designLocation)
+            let modeller = try CommandLineModeller(location: globalOptions.designLocation)
             let design = modeller.design
             
             let count = design.undoList.count + design.redoList.count

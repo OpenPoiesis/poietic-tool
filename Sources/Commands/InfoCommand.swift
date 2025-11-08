@@ -20,7 +20,7 @@ extension PoieticTool {
         var frameID: String?
 
         mutating func run() throws {
-            let modeller = try ModellerTool(location: options.designLocation)
+            let modeller = try CommandLineModeller(location: options.designLocation)
             let frame = try modeller.frameIfPresent(frameID)
             
             var items: [(String?, String?)] = [

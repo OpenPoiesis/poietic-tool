@@ -78,7 +78,7 @@ extension PoieticTool {
         var frameRef: String?
         
         mutating func run() throws {
-            let modeller = try ModellerTool(location: globalOptions.designLocation)
+            let modeller = try CommandLineModeller(location: globalOptions.designLocation)
             let frame = try modeller.frame(frameRef)
 
             guard let testURL = URL(string: output) else {

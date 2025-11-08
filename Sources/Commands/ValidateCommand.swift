@@ -18,7 +18,7 @@ extension PoieticTool {
         var frameRef: String?
 
         mutating func run() throws {
-            let modeller = try ModellerTool(location: options.designLocation, configuration: .simulation)
+            let modeller = try CommandLineModeller(location: options.designLocation, configuration: .simulation)
             let frame = try modeller.frame(frameRef)
             let runtime = try modeller.updateRuntime(frame.id)
             

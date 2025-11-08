@@ -43,10 +43,7 @@ repository.
 
 ## Tool Overview
 
-The Poietic Flows includes a command-line tool to create, edit and run
-Stock and Flow models called `poietic`.
-
-See the [Command Line Tool documentation](Docs/Tool.md).
+Detailed documentation can be found here: [Command Line Tool documentation](Docs/Tool.md).
 
 Command summary:
 
@@ -70,7 +67,13 @@ Command summary:
 - `metamodel`: Describe the metamodel (supports: text, markdown and HTML output)
 - `create-library` Create a library of multiple models.
 
+Experimental commands:
+- `experimental-export-svg`: Export design as a SVG diagram. Requires pictograms from [poietic-assets](https://github.com/openpoiesis/poietic-assets)
+
 Use `--help` with a desired command to learn more.
+
+_Developer's note: At the moment of writing this, I know how to include resources with a
+command-line tool in a Swift package. That is why the SVG feature is "experimental"._
 
 ### Pseudo-REPL
 

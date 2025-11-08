@@ -25,7 +25,7 @@ extension PoieticTool {
 
         mutating func run() throws {
             let design = Design(metamodel: StockFlowMetamodel)
-            let modeller = try ModellerTool(location: globalOptions.designLocation,
+            let modeller = try CommandLineModeller(location: globalOptions.designLocation,
                                             design: design)
 
             if !importPaths.isEmpty {
@@ -36,7 +36,6 @@ extension PoieticTool {
                     let rawDesign = try readRawDesign(fromPath: path)
                     print("Importing from: \(path)")
                     do {
-                        // FIXME: [WIP] add which frame to load
                         try loader.load(rawDesign, into: frame)
                     }
                     catch {

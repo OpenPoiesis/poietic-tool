@@ -24,7 +24,7 @@ extension PoieticTool {
         var references: [String]
         
         mutating func run() throws {
-            let modeller = try ModellerTool(location: globalOptions.designLocation)
+            let modeller = try CommandLineModeller(location: globalOptions.designLocation)
 
             guard modeller.design.frames.count > 0 else {
                 throw ToolError.emptyDesign

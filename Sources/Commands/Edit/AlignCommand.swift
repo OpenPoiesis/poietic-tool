@@ -54,7 +54,7 @@ extension PoieticTool {
         var references: [String]
         
         mutating func run() throws {
-            let modeller = try ModellerTool(location: globalOptions.designLocation)
+            let modeller = try CommandLineModeller(location: globalOptions.designLocation)
             let trans = try modeller.deriveOrCreate(options.deriveRef)
 
             var objects: [TransientObject] = []

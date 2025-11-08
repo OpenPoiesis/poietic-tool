@@ -80,7 +80,7 @@ extension PoieticTool {
         var outputPath: String = "-"
         
         mutating func run() throws {
-            let modeller = try ModellerTool(location: options.designLocation,
+            let modeller = try CommandLineModeller(location: options.designLocation,
                                             configuration: .simulation)
 
             let frame = try modeller.frame(frameRef)
