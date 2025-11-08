@@ -16,7 +16,6 @@ let DesignEnvironmentVariable = "POIETIC_DESIGN"
 /// Error thrown by the command-line tool.
 ///
 enum ToolError: Error, CustomStringConvertible {
-    // TODO: Go through the errors and review (marked with OK are OK)
     case internalSystemError(InternalSystemError)
 
     // I/O errors
@@ -30,26 +29,20 @@ enum ToolError: Error, CustomStringConvertible {
     
     // Design errors
     case designIssues([ObjectID:[Issue]])
-
-
     case brokenStructuralIntegrity(StructuralIntegrityError)
-    case unnamedObject(ObjectID)
 
-    case validationFailed(FrameValidationResult)   /* OK */
+    case validationFailed(FrameValidationResult)
     
     // Simulation errors
     case unknownVariables([String])
     case unknownSolver(String)
     
     // Query errors
-    case malformedObjectReference(String)
     case unknownObject(String)
     case nodeExpected(String)
     case unknownFrame(String)
     case frameExists(String)
-    case invalidFrameID(String)
     case noCurrentFrame
-    
 
     // Editing errors
     case noChangesToUndo
@@ -119,16 +112,11 @@ enum ToolError: Error, CustomStringConvertible {
             }
             return "Design compilation failed: \(detail)"
 
-
-        case .unnamedObject(let id):
-            return "Object \(id) has no name"
         case .unknownSolver(let value):
             return "Unknown solver '\(value)'"
         case .unknownVariables(let names):
             let varlist = names.joined(separator: ", ")
             return "Unknown variables: \(varlist)"
-        case .malformedObjectReference(let value):
-            return "Malformed object reference '\(value). Use either object ID or object identifier."
         case .unknownObject(let value):
             return "Unknown object '\(value)'"
         case .unknownFrame(let value):
@@ -137,8 +125,6 @@ enum ToolError: Error, CustomStringConvertible {
             return "No current frame set"
         case .frameExists(let value):
             return "Frame already exists: \(value)"
-        case .invalidFrameID(let value):
-            return "Invalid frame ID: \(value)"
         case .noChangesToUndo:
             return "No changes to undo"
         case .noChangesToRedo:
@@ -182,10 +168,6 @@ enum ToolError: Error, CustomStringConvertible {
             return "Check the list of available solvers by running the 'info' command."
         case .unknownVariables(_):
             return "See the list of available simulation variables using the 'list' command."
-        case .unnamedObject(_):
-            return "Set object's attribute 'name'"
-        case .malformedObjectReference(_):
-            return "Use either object ID or object identifier."
         case .unknownObject(_):
             return "See the list of available objects and their names by using the 'list' command."
         case .unknownFrame(_):
@@ -194,8 +176,6 @@ enum ToolError: Error, CustomStringConvertible {
             return nil
         case .frameExists(_):
             return "Use another frame name or ID, or use force to replace existing"
-        case .invalidFrameID(_):
-            return "The frame ID is malformed. If you are trying to remove a named frame, use the --name flag"
         case .noChangesToUndo:
             return nil
         case .noChangesToRedo:
@@ -340,4 +320,3 @@ func formatLabelledList(_ items: [(String?, String?)],
     
     return result
 }
-
