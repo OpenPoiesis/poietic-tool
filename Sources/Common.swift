@@ -17,8 +17,6 @@ let DesignEnvironmentVariable = "POIETIC_DESIGN"
 ///
 enum ToolError: Error, CustomStringConvertible {
     // TODO: Go through the errors and review (marked with OK are OK)
-    // FIXME: Do not have this
-    case internalError(Error)
     case internalSystemError(InternalSystemError)
 
     // I/O errors
@@ -65,8 +63,6 @@ enum ToolError: Error, CustomStringConvertible {
     
     public var description: String {
         switch self {
-        case .internalError(let error):
-            return "Internal error: \(error)"
         case .internalSystemError(let error):
             return "Internal systems error: \(error)"
             
@@ -168,8 +164,6 @@ enum ToolError: Error, CustomStringConvertible {
         //       covered.
         
         switch self {
-        case .internalError(_):
-            return "Not your fault. Contact the developers with more details - what you did and what the error was"
         case .internalSystemError(_):
             return "Not your fault. Contact the developers with more details - what you did and what the error was"
         case .malformedLocation(_):
