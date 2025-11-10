@@ -7,7 +7,7 @@
 
 import PoieticCore
 
-func printIssues(_ runtime: RuntimeFrame) {
+func printIssues(_ runtime: AugmentedFrame) {
     printIssues(runtime.issues, frame: runtime)
 }
 func printIssues(_ issues: [ObjectID:[Issue]], frame: some Frame) {

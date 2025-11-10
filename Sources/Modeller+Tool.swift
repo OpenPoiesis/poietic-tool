@@ -178,9 +178,9 @@ class CommandLineModeller: Modeller {
     ///
     /// - Throws: ``ToolError/unknownFrame`` if the frame does not exist.
     ///
-    public func createRuntime(frameReference: String? = nil) throws (ToolError) -> RuntimeFrame {
+    public func createRuntime(frameReference: String? = nil) throws (ToolError) -> AugmentedFrame {
         let frame = try frame(frameReference)
-        return RuntimeFrame(frame)
+        return AugmentedFrame(frame)
     }
     
     /// Try to accept a frame in the modeller design.

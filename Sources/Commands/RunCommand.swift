@@ -86,7 +86,7 @@ extension PoieticTool {
             let frame = try modeller.frame(frameRef)
             let runtime = try modeller.updateRuntime(frame.id)
             
-            guard let plan = runtime.frameComponent(SimulationPlan.self) else {
+            guard let plan: SimulationPlan = runtime.component(for: .Frame) else {
                 printIssues(runtime)
                 throw ToolError.designIssues(runtime.issues)
             }

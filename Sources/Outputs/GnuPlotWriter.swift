@@ -60,8 +60,8 @@ class GNUPlotBundleWriter {
         self.dataFileName = dataFileName
     }
     
-    public func write(result: SimulationResult, toPath path: String, frame: RuntimeFrame) throws {
-        guard let plan = frame.frameComponent(SimulationPlan.self) else {
+    public func write(result: SimulationResult, toPath path: String, frame: AugmentedFrame) throws {
+        guard let plan: SimulationPlan = frame.component(for: .Frame) else {
             return
         }
         let fm = FileManager()

@@ -208,7 +208,7 @@ func listFormulas(_ snapshots: [ObjectSnapshot]) {
 
 func listPseudoEquations(_ frame: DesignFrame, modeller: Modeller) throws (ToolError) {
     // TODO: Add stocks
-    let runtime: RuntimeFrame
+    let runtime: AugmentedFrame
     do {
         runtime = try modeller.updateRuntime(frame.id)
     }

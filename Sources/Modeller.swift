@@ -5,6 +5,10 @@
 //  Created by Stefan Urbanek on 07/11/2025.
 //
 
+// NOTE: This is a sketch.
+// NOTE: This is a test of ergonomics and necessity.
+// NOTE: The Modeller might stay or might go away.
+
 // TODO: Move the Modeller to PoieticCore once happy; we are prototyping it here.
 
 import PoieticCore
@@ -27,7 +31,7 @@ public class Modeller {
     public var currentFrame: DesignFrame? { design.currentFrame }
 
     /// Runtime frame for current frame.
-    public private(set) var runtimeFrame: RuntimeFrame?
+    public private(set) var runtimeFrame: AugmentedFrame?
     
     /// Create a new modeller for a given design using given runtime systems.
     ///
@@ -102,18 +106,18 @@ public class Modeller {
         }
         // TODO: Reuse previous runtime once we decide to reuse runtimes.
         // TODO: Store runtime once we decide to cache them here.
-        let runtime = RuntimeFrame(currentFrame)
+        let runtime = AugmentedFrame(currentFrame)
         try systems.update(runtime)
         runtimeFrame = runtime
     }
 
     /// Update runtime of given frame.
     ///
-    func updateRuntime(_ frameID: FrameID) throws (InternalSystemError) -> RuntimeFrame {
+    func updateRuntime(_ frameID: FrameID) throws (InternalSystemError) -> AugmentedFrame {
         guard let frame = design.frame(frameID) else { preconditionFailure("Frame does not exist") }
         // TODO: Reuse previous runtime once we decide to reuse runtimes.
         // TODO: Store runtime once we decide to cache them here.
-        let runtime = RuntimeFrame(frame)
+        let runtime = AugmentedFrame(frame)
         try systems.update(runtime)
         return runtime
     }

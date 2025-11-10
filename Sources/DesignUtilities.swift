@@ -36,12 +36,12 @@ public struct ParameterInfo {
 /// Automatically connect parameters in a frame.
 ///
 
-func autoConnectParameters(runtime: RuntimeFrame, trans: TransientFrame)
+func autoConnectParameters(runtime: AugmentedFrame, trans: TransientFrame)
 throws -> (added: [ParameterInfo], removed: [ParameterInfo]) {
     var added: [ParameterInfo] = []
     var removed: [ParameterInfo] = []
 
-    guard let component = runtime.frameComponent(SimulationNameLookupComponent.self) else {
+    guard let component: SimulationNameLookupComponent = runtime.component(for: .Frame) else {
         return (added: [], removed:[])
     }
 
