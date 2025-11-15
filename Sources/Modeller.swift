@@ -31,13 +31,16 @@ public class Modeller {
     public var currentFrame: DesignFrame? { design.currentFrame }
 
     /// Runtime frame for current frame.
-    public private(set) var runtimeFrame: AugmentedFrame?
+//    public private(set) var runtimeFrame: AugmentedFrame?
+    
+    public var runtimes: [FrameID:AugmentedFrame]
     
     /// Create a new modeller for a given design using given runtime systems.
     ///
     init(design: Design, systems: SystemGroup) {
         self.design = design
         self.systems = systems
+        self.runtimes = [:]
     }
     
     // MARK: - Authoring
@@ -77,7 +80,6 @@ public class Modeller {
     ///
     public func accept(_ frame: TransientFrame) throws (FrameValidationError) {
         try design.accept(frame)
-        invalidateRuntime()
     }
     
     /// Discard editing changes.
@@ -90,40 +92,27 @@ public class Modeller {
     
     // MARK: - Runtime
     
-    /// Updates runtime frame by running systems on current frame, if current frame is set.
-    ///
-    /// If no error was thrown, the runtime frame will be updated with components and object issues.
-    ///
-    /// - Throws: ``InternalSystemError`` when the systems fail. It is considered a programming
-    ///   error when this happens.
-    ///
-    /// - SeeAlso: ``runtimeFrame``.
-    ///
-    func updateCurrentRuntime() throws (InternalSystemError) {
-        guard let currentFrame = design.currentFrame else {
-            runtimeFrame = nil
-            return
+    func createRuntime(_ frameID: FrameID) throws (InternalSystemError) -> AugmentedFrame {
+        let runtime: AugmentedFrame
+        
+        if let existing = runtimes[frameID] {
+            runtime = existing
         }
-        // TODO: Reuse previous runtime once we decide to reuse runtimes.
-        // TODO: Store runtime once we decide to cache them here.
-        let runtime = AugmentedFrame(currentFrame)
-        try systems.update(runtime)
-        runtimeFrame = runtime
+        else {
+            guard let frame = design.frame(frameID) else { preconditionFailure("Frame does not exist") }
+            runtime = AugmentedFrame(frame)
+            runtimes[frameID] = runtime
+        }
+        return runtime
     }
 
     /// Update runtime of given frame.
     ///
+    @discardableResult
     func updateRuntime(_ frameID: FrameID) throws (InternalSystemError) -> AugmentedFrame {
-        guard let frame = design.frame(frameID) else { preconditionFailure("Frame does not exist") }
-        // TODO: Reuse previous runtime once we decide to reuse runtimes.
-        // TODO: Store runtime once we decide to cache them here.
-        let runtime = AugmentedFrame(frame)
+        let runtime = try createRuntime(frameID)
         try systems.update(runtime)
         return runtime
-    }
-
-    private func invalidateRuntime() {
-        runtimeFrame = nil
     }
 }
 

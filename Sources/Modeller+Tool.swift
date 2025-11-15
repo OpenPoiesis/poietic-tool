@@ -8,17 +8,29 @@
 import PoieticCore
 import PoieticFlows
 import Foundation
+import Diagramming
 
 enum SystemConfiguration {
     case inspection
     case planning
     case simulation
+    case diagram
     
     var systemGroup: SystemGroup {
         switch self {
-        case .inspection: return SystemGroup(PoieticFlows.ModelInspectionSystemGroup)
-        case .planning: return SystemGroup(PoieticFlows.SimulationPlanningSystemGroup)
-        case .simulation: return SystemGroup(PoieticFlows.SimulationPresentationSystemGroup)
+        case .inspection:
+            return SystemGroup(PoieticFlows.ModelInspectionSystemGroup)
+        case .planning:
+            return SystemGroup(PoieticFlows.SimulationPlanningSystemGroup)
+        case .simulation:
+            return SystemGroup(PoieticFlows.SimulationPresentationSystemGroup)
+        case .diagram:
+            let diagramCompositionSystems: [System.Type] = [
+                BlockCreationSystem.self,
+                TraitConnectorCreationSystem.self,
+                ConnectorGeometrySystem.self
+            ]
+            return SystemGroup(diagramCompositionSystems)
         }
         
     }
