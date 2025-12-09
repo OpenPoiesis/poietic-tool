@@ -33,8 +33,8 @@ extension PoieticTool {
 
         
         mutating func run() throws {
-            let env = try ToolEnvironment(location: globalOptions.designLocation)
-            let trans = try env.deriveOrCreate(options.deriveRef)
+            let modeller = try CommandLineModeller(location: globalOptions.designLocation)
+            let trans = try modeller.deriveOrCreate(options.deriveRef)
 
             guard let object = trans.object(stringReference: reference) else {
                 throw ToolError.unknownObject(reference)
@@ -46,9 +46,9 @@ extension PoieticTool {
                                        attribute: attributeName,
                                        string: value)
             
-            try env.accept(trans, replacing: options.replaceRef, appendHistory: options.appendHistory)
-            try env.closeAndSave()
-            
+            try modeller.accept(trans, replacing: options.replaceRef, appendHistory: options.appendHistory)
+            try modeller.save()
+
             print("Property set in \(reference): \(attributeName) = \(value)")
         }
     }

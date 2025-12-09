@@ -20,7 +20,7 @@ extension PoieticTool {
                 abstract: "Show information about the metamodel and object types"
             )
 
-        @OptionGroup var options: Options
+        @OptionGroup var globalOptions: Options
 
         enum OutputFormat: String, CaseIterable, ExpressibleByArgument{
             case text = "text"
@@ -39,8 +39,8 @@ extension PoieticTool {
         var objectType: String?
 
         mutating func run() throws {
-            let env = try ToolEnvironment(location: options.designLocation)
-            let metamodel = env.design.metamodel
+            let modeller = try CommandLineModeller(location: globalOptions.designLocation)
+            let metamodel = modeller.design.metamodel
             
             if let typeName = objectType {
                 guard let type = metamodel.objectType(name: typeName) else {
@@ -52,7 +52,6 @@ extension PoieticTool {
             else {
                 printAll(metamodel, format: outputFormat)
             }
-            try env.closeAndSave()
         }
         
         func printType(_ type: ObjectType,

@@ -25,17 +25,19 @@ extension PoieticTool {
         var verbose: Bool = false
 
         mutating func run() throws {
-            let env = try ToolEnvironment(location: globalOptions.designLocation)
-            let original = try env.existingFrame(options.deriveRef)
-            let trans = try env.deriveOrCreate(options.deriveRef)
+            let modeller = try CommandLineModeller(location: globalOptions.designLocation)
+            let original = try modeller.createRuntime(frameReference: options.deriveRef)
+            let trans = try modeller.deriveOrCreate(options.deriveRef)
 
-            let validated = try env.validate(original)
-            let view = StockFlowView(validated)
-            let nodes = view.simulationNodes
-            let resolvedParams = resolveParameters(objects: nodes, view: view)
-            // TODO: Know whether there is anything to do at this point
-            let result = try autoConnectParameters(resolvedParams, in: trans)
-            
+            let systems = SystemGroup(
+                ComputationOrderSystem.self,
+                NameResolutionSystem.self,
+                ExpressionParserSystem.self,
+                ParameterResolutionSystem.self,
+            )
+
+            try systems.update(original)
+            let result = try autoConnectParameters(runtime: original, trans: trans)
             if verbose {
                 for info in result.added {
                     print("Connected parameter \(info.parameterName ?? "(unnamed)") (\(info.parameterID)) to \(info.targetName ?? "(unnamed)") (\(info.targetID)), edge: \(info.edgeID)")
@@ -45,10 +47,9 @@ extension PoieticTool {
                 }
             }
 
-            try env.accept(trans, replacing: options.replaceRef, appendHistory: options.appendHistory)
-            try env.closeAndSave()
-            
             if result.added.count + result.removed.count > 0 {
+                try modeller.accept(trans, replacing: options.replaceRef, appendHistory: options.appendHistory)
+                try modeller.save()
                 print("Added \(result.added.count) edges and removed \(result.removed.count) edges.")
             }
             else {

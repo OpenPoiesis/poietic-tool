@@ -33,60 +33,64 @@ public struct ParameterInfo {
     let edgeID: ObjectID
 }
 
-// FIXME: Sync with poietic-godot and actually make cleaner, shared in PoieticFlows
-func resolveParameters(objects: [ObjectSnapshot], view: StockFlowView) -> [ObjectID:ResolvedParameters] {
-    var result: [ObjectID:ResolvedParameters] = [:]
-    let builtinNames = Set(BuiltinVariable.allCases.map { $0.name })
-    
-    for object in objects {
-        guard let formulaText = try? object["formula"]?.stringValue() else {
-            continue
-        }
-        let parser = ExpressionParser(string: formulaText)
-        guard let formula = try? parser.parse() else {
-            continue
-        }
-        let variables: Set<String> = Set(formula.allVariables)
-        let required = Array(variables.subtracting(builtinNames))
-        let resolved = view.resolveParameters(object.objectID, required: required)
-        result[object.objectID] = resolved
-    }
-    return result
-}
-
 /// Automatically connect parameters in a frame.
 ///
-func autoConnectParameters(_ resolvedMap: [ObjectID:ResolvedParameters], in frame: TransientFrame) throws -> (added: [ParameterInfo], removed: [ParameterInfo]) {
+
+func autoConnectParameters(runtime: AugmentedFrame, trans: TransientFrame)
+throws -> (added: [ParameterInfo], removed: [ParameterInfo]) {
     var added: [ParameterInfo] = []
     var removed: [ParameterInfo] = []
+
+    guard let component: SimulationNameLookupComponent = runtime.component(for: .Frame) else {
+        return (added: [], removed:[])
+    }
+
+    for (id, comp) in runtime.filter(ResolvedParametersComponent.self) {
+        guard let object = trans[id] else { continue }
+        let result = autoConnect(object,
+                                 missing: comp.missing,
+                                 unused: comp.unused,
+                                 nameLookup: component.namedObjects,
+                                 in: trans)
+        added += result.added
+        removed += result.removed
+    }
+    return (added: added, removed: removed)
+}
+func autoConnect(_ object: ObjectSnapshot,
+                 missing: [String],
+                 unused: [ObjectID],
+                 nameLookup: [String:ObjectID],
+                 in trans: TransientFrame)
+-> (added: [ParameterInfo], removed: [ParameterInfo]) {
+    var added: [ParameterInfo] = []
+    var removed: [ParameterInfo] = []
+
+    for edgeID in unused {
+        guard let edge = trans.edge(edgeID) else {continue}
+        trans.removeCascading(edge.key)
+        
+        let info = ParameterInfo(parameterName: edge.originObject.name,
+                                 parameterID: edge.origin,
+                                 targetName: edge.targetObject.name,
+                                 targetID: edge.target,
+                                 edgeID: edge.key)
+        removed.append(info)
+    }
     
-
-    for (id, resolved) in resolvedMap {
-        guard let object = frame[id] else { continue }
-        for name in resolved.missing {
-            guard let paramNode = frame.object(named: name) else {
-                throw ToolError.unknownObject(name)
-            }
-            let edge = frame.createEdge(.Parameter, origin: paramNode.objectID, target: object.objectID)
-            let info = ParameterInfo(parameterName: name,
-                                     parameterID: paramNode.objectID,
-                                     targetName: object.name,
-                                     targetID: object.objectID,
-                                     edgeID: edge.objectID)
-            added.append(info)
+    for name in missing {
+        guard let parameterID = nameLookup[name],
+              let parameter = trans[parameterID]
+        else {
+            continue // gracefully
         }
-
-        for edge in resolved.unused {
-            guard let node = frame.object(edge.origin) else { continue }
-            frame.removeCascading(edge.key)
-            
-            let info = ParameterInfo(parameterName: node.name,
-                                     parameterID: node.objectID,
-                                     targetName: object.name,
-                                     targetID: object.objectID,
-                                     edgeID: edge.key)
-            removed.append(info)
-        }
+        let edge = trans.createEdge(.Parameter, origin: parameter.objectID, target: object.objectID)
+        let info = ParameterInfo(parameterName: name,
+                                 parameterID: parameterID,
+                                 targetName: object.name,
+                                 targetID: object.objectID,
+                                 edgeID: edge.objectID)
+        added.append(info)
     }
 
     return (added: added, removed: removed)

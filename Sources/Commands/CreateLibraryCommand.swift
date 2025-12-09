@@ -66,9 +66,9 @@ func createLibraryItem(fromDesignAt location: String) throws -> DesignLibraryIte
         url
     }
 
-    let env = try ToolEnvironment(url: actualURL)
+    let modeller = try CommandLineModeller(url: actualURL)
 
-    guard let frame = env.design.currentFrame else {
+    guard let frame = modeller.design.currentFrame else {
         throw ToolError.emptyDesign
     }
 
@@ -82,8 +82,6 @@ func createLibraryItem(fromDesignAt location: String) throws -> DesignLibraryIte
         name = actualURL.lastPathComponent
     }
 
-    try env.close()
-    
     return DesignLibraryItem(
         url: actualURL,
         name: name,

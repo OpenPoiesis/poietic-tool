@@ -56,7 +56,7 @@ extension PoieticTool {
         static let configuration
             = CommandConfiguration(abstract: "Write a Graphviz DOT file.")
 
-        @OptionGroup var options: Options
+        @OptionGroup var globalOptions: Options
         
         @Option(name: [.long, .customShort("n")],
                 help: "Name of the graph in the output file")
@@ -78,8 +78,8 @@ extension PoieticTool {
         var frameRef: String?
         
         mutating func run() throws {
-            let env = try ToolEnvironment(location: options.designLocation)
-            let frame = try env.existingFrame(frameRef)
+            let modeller = try CommandLineModeller(location: globalOptions.designLocation)
+            let frame = try modeller.frame(frameRef)
 
             guard let testURL = URL(string: output) else {
                 fatalError("Invalid resource reference: \(output)")

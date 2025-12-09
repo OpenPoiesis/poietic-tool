@@ -13,33 +13,6 @@ import PoieticFlows
 import Diagramming
 
 
-public let StockFlowConnectorStyles: [String:ConnectorStyle] = [
-    "default": .thin(ThinConnectorStyle(
-        headType: .none,
-        tailType: .none,
-        headSize: 0.0,
-        tailSize: 0.0,
-        lineType: .straight
-    )),
-
-    "Parameter": .thin(ThinConnectorStyle(
-        headType: .stick,
-        tailType: .ball,
-        headSize: 10.0,
-        tailSize: 5.0,
-        lineType: .curved
-    )),
-
-    "Flow": .fat(FatConnectorStyle(
-        headType: .regular,
-        tailType: .none,
-        headSize: 20.0,
-        tailSize: 0.0,
-        width: 10.0,
-        joinType: .round
-    ))
-]
-
 extension PoieticTool {
     struct ExportSVG: ParsableCommand {
         static let configuration
@@ -69,8 +42,9 @@ extension PoieticTool {
         var pictogramCollectionPath: String?
 
         mutating func run() throws {
-            let env = try ToolEnvironment(location: options.designLocation)
-            let frame = try env.existingFrame(frameRef)
+            let modeller = try CommandLineModeller(location: options.designLocation, configuration: .diagram)
+            let frame = try modeller.frame(frameRef)
+            let runtime = try modeller.createRuntime(frame.id)
 
             guard let testURL = URL(string: output) else {
                 fatalError("Invalid resource reference: \(output)")
@@ -84,7 +58,6 @@ extension PoieticTool {
                 outputURL = testURL
             }
 
-            print("### EXPERIMENTAL ###")
             let pictograms: PictogramCollection
             if let path = pictogramCollectionPath {
                 print("Loading pictograms from \(path)")
@@ -93,25 +66,35 @@ extension PoieticTool {
             else {
                 pictograms = PictogramCollection()
             }
-            
-            // TODO: Move somewhere appropriate
+        
+            // TODO: Move somewhere more appropriate
             let scaledPictos = pictograms.pictograms.map { $0.scaled(pictogramScale) }
             pictograms.pictograms = scaledPictos
             
             print("Exporting to: \(outputURL.path())")
             print("Creating diagram...")
-            let style = DiagramStyle(
-                pictograms: pictograms,
-                connectorStyles: StockFlowConnectorStyles,
+
+            // 1. Configure the notation
+            //
+            let notation = Notation(
+                pictograms: pictograms.pictograms,
+                defaultPictogramName: "Unknown",
+                connectorGlyphs: DefaultStockFlowConnectorGlyphs,
+                defaultConnectorGlyphName: "default"
             )
-            let presenter = DiagramComposer(style: style)
-            let diagram = presenter.createDiagram(from: frame)
+            runtime.setComponent(notation, for: .Frame)
+
+            // 2. Update the runtime
+            //
+            try modeller.updateRuntime(frame.id)
             
+            // 3. Export SVG from the runtime components
+            //
             var svgStyle = SVGDiagramStyle()
             svgStyle.pictogramLineWidth = pictogramLineWidth
             
             let exporter = SVGDiagramExporter(style: svgStyle)
-            try exporter.export(diagram: diagram, to: outputURL.path())
+            try exporter.export(frame: runtime, to: outputURL.path())
         }
     }
 }

@@ -16,10 +16,8 @@ let DesignEnvironmentVariable = "POIETIC_DESIGN"
 /// Error thrown by the command-line tool.
 ///
 enum ToolError: Error, CustomStringConvertible {
-    // TODO: Go through the errors and review (marked with OK are OK)
-    // FIXME: Do not have this
-    case internalError(Error)
-    
+    case internalSystemError(InternalSystemError)
+
     // I/O errors
     case malformedLocation(String)
     case fileDoesNotExist(String)
@@ -30,23 +28,21 @@ enum ToolError: Error, CustomStringConvertible {
     case emptyDesign
     
     // Design errors
+    case designIssues([ObjectID:[Issue]])
     case brokenStructuralIntegrity(StructuralIntegrityError)
-    case unnamedObject(ObjectID)
 
-    case validationFailed(DesignIssueCollection)   /* OK */
-    case compilationFailed(DesignIssueCollection)  /* OK */
+    case validationFailed(FrameValidationResult)
     
     // Simulation errors
     case unknownVariables([String])
     case unknownSolver(String)
     
     // Query errors
-    case malformedObjectReference(String)
     case unknownObject(String)
     case nodeExpected(String)
     case unknownFrame(String)
     case frameExists(String)
-    case invalidFrameID(String)
+    case noCurrentFrame
 
     // Editing errors
     case noChangesToUndo
@@ -60,9 +56,9 @@ enum ToolError: Error, CustomStringConvertible {
     
     public var description: String {
         switch self {
-        case .internalError(let error):
-            return "Internal error: \(error)"
-
+        case .internalSystemError(let error):
+            return "Internal systems error: \(error)"
+            
         case .malformedLocation(let value):
             return "Malformed location: \(value)"
         case .unableToSaveDesign(let value):
@@ -100,55 +96,35 @@ enum ToolError: Error, CustomStringConvertible {
         case .brokenStructuralIntegrity(let error):
             return "Broken structural integrity: \(error)"
         case .validationFailed(let error):
-            var detail: String = ""
-            if !error.designIssues.isEmpty {
-                detail += "\(error.designIssues.count) design issues"
-            }
-            if !error.objectIssues.isEmpty {
-                if detail == "" {
-                    detail += " "
-                }
-                detail += "\(error.objectIssues.count) objects with errors"
-            }
-            if detail == "" {
-                detail = "unspecified validation error(s)"
-            }
-            return "Design validation failed: \(detail)"
+            let detail: String = "Constraints violated :" + String(error.violations.count)
+            + " object errors: " + String(error.objectErrors.count)
+            + " edge rule violations: " + String(error.edgeRuleViolations.count)
 
-        case .compilationFailed(let error):
+            return "Design validation failed: " + detail
+
+        case .designIssues(let issues):
             var detail: String = ""
-            if !error.designIssues.isEmpty {
-                detail += "\(error.designIssues.count) design issues"
-            }
-            if !error.objectIssues.isEmpty {
-                if detail == "" {
-                    detail += " "
-                }
-                detail += "\(error.objectIssues.count) objects with errors"
+            if !issues.isEmpty {
+                detail += "\(issues.count) objects with errors"
             }
             if detail == "" {
                 detail = "unspecified compilation error(s)"
             }
             return "Design compilation failed: \(detail)"
 
-
-        case .unnamedObject(let id):
-            return "Object \(id) has no name"
         case .unknownSolver(let value):
             return "Unknown solver '\(value)'"
         case .unknownVariables(let names):
             let varlist = names.joined(separator: ", ")
             return "Unknown variables: \(varlist)"
-        case .malformedObjectReference(let value):
-            return "Malformed object reference '\(value). Use either object ID or object identifier."
         case .unknownObject(let value):
             return "Unknown object '\(value)'"
         case .unknownFrame(let value):
             return "Unknown frame: \(value)"
+        case .noCurrentFrame:
+            return "No current frame set"
         case .frameExists(let value):
             return "Frame already exists: \(value)"
-        case .invalidFrameID(let value):
-            return "Invalid frame ID: \(value)"
         case .noChangesToUndo:
             return "No changes to undo"
         case .noChangesToRedo:
@@ -174,7 +150,7 @@ enum ToolError: Error, CustomStringConvertible {
         //       covered.
         
         switch self {
-        case .internalError(_):
+        case .internalSystemError(_):
             return "Not your fault. Contact the developers with more details - what you did and what the error was"
         case .malformedLocation(_):
             return nil
@@ -185,25 +161,21 @@ enum ToolError: Error, CustomStringConvertible {
             return "Unfortunately the only way is to inspect the database or a foreign frame. 'doctor' command is not yet implemented."
         case .validationFailed(_):
             return "Make sure that the design is conforming to the metamodel. (In the future there will be 'doctor' command to help you.)"
-        case .compilationFailed(_):
+        case .designIssues(_):
             return "Make sure that the design is conforming to the metamodel and the rules of simulation. (In the future there will be 'doctor' command to help you.)"
 
         case .unknownSolver(_):
             return "Check the list of available solvers by running the 'info' command."
         case .unknownVariables(_):
             return "See the list of available simulation variables using the 'list' command."
-        case .unnamedObject(_):
-            return "Set object's attribute 'name'"
-        case .malformedObjectReference(_):
-            return "Use either object ID or object identifier."
         case .unknownObject(_):
             return "See the list of available objects and their names by using the 'list' command."
         case .unknownFrame(_):
             return nil
+        case .noCurrentFrame:
+            return nil
         case .frameExists(_):
             return "Use another frame name or ID, or use force to replace existing"
-        case .invalidFrameID(_):
-            return "The frame ID is malformed. If you are trying to remove a named frame, use the --name flag"
         case .noChangesToUndo:
             return nil
         case .noChangesToRedo:
@@ -348,4 +320,3 @@ func formatLabelledList(_ items: [(String?, String?)],
     
     return result
 }
-
