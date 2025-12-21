@@ -68,13 +68,13 @@ func autoConnect(_ object: ObjectSnapshot,
 
     for edgeID in unused {
         guard let edge = trans.edge(edgeID) else {continue}
-        trans.removeCascading(edge.key)
+        trans.removeCascading(edge.id)
         
         let info = ParameterInfo(parameterName: edge.originObject.name,
                                  parameterID: edge.origin,
                                  targetName: edge.targetObject.name,
                                  targetID: edge.target,
-                                 edgeID: edge.key)
+                                 edgeID: edge.id)
         removed.append(info)
     }
     

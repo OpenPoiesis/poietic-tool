@@ -132,7 +132,7 @@ func listAll(_ snapshots: [ObjectSnapshot], in frame: DesignFrame) {
         left.id < right.id
     }
     let nodes = sorted.filter { $0.structure.type == .node }
-    let edges = sorted.compactMap { EdgeObject($0,in: frame) }
+    let edges = sorted.compactMap { DesignObjectEdge($0,in: frame) }
     let unstructured = sorted.filter { $0.structure.type == .unstructured }
 
     if unstructured.count > 0 {
