@@ -9,30 +9,15 @@ import PoieticCore
 import PoieticFlows
 import Foundation
 
-func writeToCSV(path: String,
-                result: SimulationResult,
-                plan: SimulationPlan,
-                ids: [PoieticCore.ObjectID])
-throws {
-    var variableIndices: [Int] = []
-    variableIndices.append(plan.builtins.step)
-    variableIndices.append(plan.builtins.time)
-    
-    if ids.isEmpty {
-        variableIndices += Array(plan.stateVariables.indices)
-    }
-    else {
-        variableIndices += ids.compactMap { plan.variableIndex($0) }
-    }
-
+func writeToCSV(path: String, result: SimulationResult, plan: SimulationPlan) throws {
     let writer: CSVWriter = try CSVWriter(path: path)
-    let header: [String] = variableIndices.map { plan.stateVariables[$0].name }
+    let header: [String] = plan.stateVariables.map { $0.name }
 
     try writer.write(row: header)
     
     for state in result.states {
         var row: [String] = []
-        for index in variableIndices {
+        for index in plan.stateVariables.indices {
             let value: PoieticCore.Variant = state[index]
             row.append(try value.stringValue())
         }
@@ -67,13 +52,7 @@ class GNUPlotBundleWriter {
         let fm = FileManager()
         try fm.createDirectory(atPath: path, withIntermediateDirectories: true)
         
-        let objectIDs = plan.simulationObjects.compactMap(\.objectID)
-        
-        try writeToCSV(
-            path: path + "/" + dataFileName,
-            result: result,
-            plan: plan,
-            ids: objectIDs)
+        try writeToCSV(path: path + "/" + dataFileName, result: result, plan: plan)
 
         for (chartID, chart) in world.query(ChartComponent.self) {
             let chartName = chart.name ?? "unnamed_\(chartID)"
@@ -118,3 +97,4 @@ class GNUPlotBundleWriter {
 
     }
 }
+

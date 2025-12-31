@@ -41,8 +41,9 @@ extension PoieticTool {
 
         enum OutputFormat: String, CaseIterable, ExpressibleByArgument{
             case csv = "csv"
-//            case json = "json"
             case gnuplot = "gnuplot"
+            // case json = "json"
+
             var defaultValueDescription: String { "csv" }
             
             static var allValueStrings: [String] {
@@ -81,8 +82,6 @@ extension PoieticTool {
         
         mutating func run() throws {
             let editor = try DesignEditor(location: options.designLocation)
-
-            let frame = try editor.frame(frameRef)
             let world = editor.world
             // FIXME: [REFACTORING] Make simulation a system
             try world.run(schedule: SimulateSchedule.self)

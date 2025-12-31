@@ -64,10 +64,13 @@ public struct ParameterProposal: Component {
 /// ```
 
 public class ParameterConnectionProposalSystem: System {
+    nonisolated(unsafe) public static let dependencies: [SystemDependency] = [
+        .after(NameResolutionSystem.self),
+        .after(ParameterResolutionSystem.self), // We need variable names
+    ]
     public required init() {}
     public func update(_ world: World) throws (InternalSystemError) {
-        guard let frame = world.frame,
-              let lookup: SimulationNameLookupComponent = world.singleton()
+        guard let lookup: SimulationNameLookupComponent = world.singleton()
         else { return }
         
         var toRemove: [ObjectID] = []
