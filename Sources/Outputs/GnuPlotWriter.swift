@@ -22,7 +22,7 @@ throws {
         variableIndices += Array(plan.stateVariables.indices)
     }
     else {
-        variableIndices += ids.compactMap { plan.variableIndex(of: $0) }
+        variableIndices += ids.compactMap { plan.variableIndex($0) }
     }
 
     let writer: CSVWriter = try CSVWriter(path: path)
@@ -60,8 +60,8 @@ class GNUPlotBundleWriter {
         self.dataFileName = dataFileName
     }
     
-    public func write(result: SimulationResult, toPath path: String, frame: AugmentedFrame) throws {
-        guard let plan: SimulationPlan = frame.component(for: .Frame) else {
+    public func write(result: SimulationResult, toPath path: String, world: World) throws {
+        guard let plan: SimulationPlan = world.singleton() else {
             return
         }
         let fm = FileManager()
@@ -75,7 +75,7 @@ class GNUPlotBundleWriter {
             plan: plan,
             ids: objectIDs)
 
-        for (chartID, chart) in frame.filter(ChartComponent.self) {
+        for (chartID, chart) in world.query(ChartComponent.self) {
             let chartName = chart.name ?? "unnamed_\(chartID)"
             let gnuplotCommand = chartCommand(chart: chart, plan: plan)
             let gnuplotCommandPath = path + "/" + "chart_\(chartName).gnuplot"
@@ -107,7 +107,7 @@ class GNUPlotBundleWriter {
         var commands: [String] = []
         let timeIndex = plan.builtins.time
         for series in chart.series {
-            guard let seriesIndex = plan.variableIndex(of: series.objectID) else {
+            guard let seriesIndex = plan.variableIndex(series.objectID) else {
                 continue // We continue gracefully, not user's fault
             }
             let label = series.name ?? "unnamed"

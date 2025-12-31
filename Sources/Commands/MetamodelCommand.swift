@@ -39,8 +39,8 @@ extension PoieticTool {
         var objectType: String?
 
         mutating func run() throws {
-            let modeller = try CommandLineModeller(location: globalOptions.designLocation)
-            let metamodel = modeller.design.metamodel
+            let editor = try DesignEditor(location: globalOptions.designLocation)
+            let metamodel = editor.design.metamodel
             
             if let typeName = objectType {
                 guard let type = metamodel.objectType(name: typeName) else {

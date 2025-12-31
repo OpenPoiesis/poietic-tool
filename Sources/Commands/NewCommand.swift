@@ -25,8 +25,7 @@ extension PoieticTool {
 
         mutating func run() throws {
             let design = Design(metamodel: StockFlowMetamodel)
-            let modeller = try CommandLineModeller(location: globalOptions.designLocation,
-                                            design: design)
+            let editor = try DesignEditor(location: globalOptions.designLocation, design: design)
 
             if !importPaths.isEmpty {
                 let loader = DesignLoader(metamodel: design.metamodel, options: .useIDAsNameAttribute)
@@ -43,15 +42,15 @@ extension PoieticTool {
                     }
                 }
                 
-                try modeller.accept(frame)
+                try editor.accept(frame)
             }
             
-            try modeller.save()
-            if modeller.url.scheme == nil || modeller.url.scheme == "file" {
-                print("Design created: \(modeller.url.path)")
+            try editor.save()
+            if editor.url.scheme == nil || editor.url.scheme == "file" {
+                print("Design created: \(editor.url.path)")
             }
             else {
-                print("Design created: \(modeller.url)")
+                print("Design created: \(editor.url)")
             }
         }
     }

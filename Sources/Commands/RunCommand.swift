@@ -80,15 +80,16 @@ extension PoieticTool {
         var outputPath: String = "-"
         
         mutating func run() throws {
-            let modeller = try CommandLineModeller(location: options.designLocation,
-                                            configuration: .simulation)
+            let editor = try DesignEditor(location: options.designLocation)
 
-            let frame = try modeller.frame(frameRef)
-            let runtime = try modeller.updateRuntime(frame.id)
+            let frame = try editor.frame(frameRef)
+            let world = editor.world
+            // FIXME: [REFACTORING] Make simulation a system
+            try world.run(schedule: SimulateSchedule.self)
             
-            guard let plan: SimulationPlan = runtime.component(for: .Frame) else {
-                printIssues(runtime)
-                throw ToolError.designIssues(runtime.issues)
+            guard let plan: SimulationPlan = world.singleton() else {
+                printIssues(world)
+                throw ToolError.designIssues(world.issues)
             }
             
             guard let solverType = StockFlowSimulation.SolverType(rawValue: solverName) else {
@@ -165,7 +166,7 @@ extension PoieticTool {
                              states: simulator.result.states)
             case .gnuplot:
                 let writer = GNUPlotBundleWriter()
-                try writer.write(result: simulator.result, toPath: outputPath, frame: runtime)
+                try writer.write(result: simulator.result, toPath: outputPath, world: world)
 //            case .json:
 //                try writeJSON(path: outputPath,
 //                              variables: outputVariables,

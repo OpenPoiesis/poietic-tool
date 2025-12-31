@@ -78,8 +78,8 @@ extension PoieticTool {
         var frameRef: String?
         
         mutating func run() throws {
-            let modeller = try CommandLineModeller(location: globalOptions.designLocation)
-            let frame = try modeller.frame(frameRef)
+            let editor = try DesignEditor(location: globalOptions.designLocation)
+            let frame = try editor.frame(frameRef)
 
             guard let testURL = URL(string: output) else {
                 fatalError("Invalid resource reference: \(output)")

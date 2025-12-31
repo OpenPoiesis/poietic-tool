@@ -10,31 +10,11 @@ import PoieticFlows
 import Foundation
 import Diagramming
 
-enum SystemConfiguration {
-    case inspection
-    case planning
-    case simulation
-    case diagram
-    
-    var systemGroup: SystemGroup {
-        switch self {
-        case .inspection:
-            return SystemGroup(PoieticFlows.ModelInspectionSystemGroup)
-        case .planning:
-            return SystemGroup(PoieticFlows.SimulationPlanningSystemGroup)
-        case .simulation:
-            return SystemGroup(PoieticFlows.SimulationPresentationSystemGroup)
-        case .diagram:
-            let diagramCompositionSystems: [System.Type] = [
-                BlockCreationSystem.self,
-                TraitConnectorCreationSystem.self,
-                ConnectorGeometrySystem.self
-            ]
-            return SystemGroup(diagramCompositionSystems)
-        }
-        
-    }
-}
+/// Systems to create a simulation plan.
+enum PlanSchedule: ScheduleLabel {}
+/// Systems to perform simulation and create presentation of results.
+enum SimulateSchedule: ScheduleLabel {}
+enum DiagramSchedule: ScheduleLabel {}
 
 /// Get the design URL. The database location can be specified by options,
 /// environment variable or as a default name, in respective order
@@ -65,10 +45,13 @@ func designURL(_ location: String?) throws (ToolError) -> URL {
     }
 }
 
-class CommandLineModeller: Modeller {
-    let url: URL
-    
-    /// Create a new modeller given the URL and optional design.
+// TODO: Rename to Laboratory
+public class DesignEditor {
+    public let url: URL
+    public let design: Design
+    public let world: World
+
+    /// Create a new editor given the URL and optional design.
     ///
     /// If the design is provided, then it is used and the URL is assigned as a storage URL
     /// of the design.
@@ -78,7 +61,7 @@ class CommandLineModeller: Modeller {
     /// - Warning: If both the design and URL are provided, the provided design will potentially
     ///            overwrite the design currently present at the URL.
     ///
-    init(url: URL, design: Design? = nil, configuration: SystemConfiguration = .inspection) throws (ToolError) {
+    init(url: URL, design: Design? = nil) throws (ToolError) {
         self.url = url
         let useDesign: Design
         if let design {
@@ -94,10 +77,26 @@ class CommandLineModeller: Modeller {
                 throw ToolError.storeError(error)
             }
         }
-        super.init(design: useDesign, systems: configuration.systemGroup)
+        self.design = useDesign
+        if let frame = self.design.currentFrame {
+            self.world = World(frame: frame)
+        }
+        else {
+            self.world = World(design: self.design)
+        }
+        self.world.setSystems(schedule: PlanSchedule.self,
+                              systems: SystemGroup(PoieticFlows.SimulationPlanningSystems))
+        self.world.setSystems(schedule: SimulateSchedule.self,
+                              systems: SystemGroup(PoieticFlows.SimulationPresentationSystems))
+        let diagramCompositionSystems: SystemGroup = SystemGroup(
+            BlockCreationSystem.self,
+            TraitConnectorCreationSystem.self,
+            ConnectorGeometrySystem.self
+        )
+        self.world.setSystems(schedule: DiagramSchedule.self, systems: diagramCompositionSystems)
     }
-    convenience init(location: String?, design: Design? = nil, configuration: SystemConfiguration = .inspection) throws (ToolError) {
-        try self.init(url: try designURL(location), design: design, configuration: configuration)
+    convenience init(location: String?, design: Design? = nil) throws (ToolError) {
+        try self.init(url: try designURL(location), design: design)
     }
     
     /// Get a frame by its name or an ID reference.
@@ -115,7 +114,7 @@ class CommandLineModeller: Modeller {
     /// Get frame ID from a frame reference, which can be either frame ID or frame name.
     ///
     /// - Returns: Frame ID of resolved reference or `nil` if no such frame exists.
-    public func frame(required reference: String? = nil) throws (ToolError) -> FrameID? {
+    func frame(required reference: String? = nil) throws (ToolError) -> FrameID? {
         if let reference {
             if let frameID = FrameID(reference), design.containsFrame(frameID) {
                 return frameID
@@ -186,15 +185,6 @@ class CommandLineModeller: Modeller {
         }
     }
 
-    /// Get a runtime frame by named reference, if it exists.
-    ///
-    /// - Throws: ``ToolError/unknownFrame`` if the frame does not exist.
-    ///
-    public func createRuntime(frameReference: String? = nil) throws (ToolError) -> AugmentedFrame {
-        let frame = try frame(frameReference)
-        return AugmentedFrame(frame)
-    }
-    
     /// Try to accept a frame in the modeller design.
     ///
     /// Tries to accept the frame. If the frame contains constraint violations, then

@@ -20,78 +20,74 @@
 import PoieticFlows
 import PoieticCore
 
-public struct ParameterInfo {
-    /// Name of the parameter
-    let parameterName: String?
-    /// ID of the parameter node
-    let parameterID: ObjectID
-    /// Name of node using the parameter
-    let targetName: String?
-    /// ID of node using the parameter
-    let targetID: ObjectID
-    /// ID of the edge from the parameter to the target
-    let edgeID: ObjectID
-}
-
-/// Automatically connect parameters in a frame.
+/// Component that proposes parameter edges to be created or removed.
 ///
-
-func autoConnectParameters(runtime: AugmentedFrame, trans: TransientFrame)
-throws -> (added: [ParameterInfo], removed: [ParameterInfo]) {
-    var added: [ParameterInfo] = []
-    var removed: [ParameterInfo] = []
-
-    guard let component: SimulationNameLookupComponent = runtime.component(for: .Frame) else {
-        return (added: [], removed:[])
+/// The component is created by the ``ParameterConnectionProposalSystem`` and is typically
+/// set as a singleton component.
+///
+public struct ParameterProposal: Component {
+    public struct EdgeProposal {
+        public let origin: ObjectID
+        public let target: ObjectID
     }
-
-    for (id, comp) in runtime.filter(ResolvedParametersComponent.self) {
-        guard let object = trans[id] else { continue }
-        let result = autoConnect(object,
-                                 missing: comp.missing,
-                                 unused: comp.unused,
-                                 nameLookup: component.namedObjects,
-                                 in: trans)
-        added += result.added
-        removed += result.removed
-    }
-    return (added: added, removed: removed)
+    public let toRemove: [ObjectID]
+    public let toAdd: [EdgeProposal]
 }
-func autoConnect(_ object: ObjectSnapshot,
-                 missing: [String],
-                 unused: [ObjectID],
-                 nameLookup: [String:ObjectID],
-                 in trans: TransientFrame)
--> (added: [ParameterInfo], removed: [ParameterInfo]) {
-    var added: [ParameterInfo] = []
-    var removed: [ParameterInfo] = []
 
-    for edgeID in unused {
-        guard let edge = trans.edge(edgeID) else {continue}
-        trans.removeCascading(edge.id)
+/// System that proposes parameter edges to be added and to be removed. The proposal is based on
+/// the parameter names used in parsed expressions (typically from `formula` attribute) and
+///
+/// - **Input:** Singleton ``SimulationNameLookupComponent``
+///   and objects with ``ResolvedParametersComponent``
+/// - **Output:** ``ParameterProposal`` singleton.
+/// - **Forgiveness:** Nothing is proposed if the singleton is missing.
+/// - **Issues:** No issues created.
+///
+/// After updating the world using the system, one can remove and create parameter edges
+/// as follows:
+///
+/// ```swift
+/// // Assume the world and trans are given as:
+/// let world: World
+/// let trans: TransientFrame
+///
+/// let proposal: ParameterProposal = world.singleton()!
+///
+/// for id in proposal.toRemove {
+///     trans.removeCascading(id)
+/// }
+/// for edgeProposal in proposal.toAdd {
+///     trans.createEdge(.Parameter,
+///                      origin: edgeProposal.origin,
+///                      target: edgeProposal.target)
+/// }
+/// ```
+
+public class ParameterConnectionProposalSystem: System {
+    public required init() {}
+    public func update(_ world: World) throws (InternalSystemError) {
+        guard let frame = world.frame,
+              let lookup: SimulationNameLookupComponent = world.singleton()
+        else { return }
         
-        let info = ParameterInfo(parameterName: edge.originObject.name,
-                                 parameterID: edge.origin,
-                                 targetName: edge.targetObject.name,
-                                 targetID: edge.target,
-                                 edgeID: edge.id)
-        removed.append(info)
-    }
-    
-    for name in missing {
-        guard let parameterID = nameLookup[name],
-              let parameter = trans[parameterID]
-        else {
-            continue // gracefully
+        var toRemove: [ObjectID] = []
+        var toAdd: [ParameterProposal.EdgeProposal] = []
+        
+        for (entityID, resolution) in world.query(ResolvedParametersComponent.self) {
+            guard let objectID = world.entityToObject(entityID)
+            else { continue }
+            
+            toRemove += resolution.unused
+            
+            for name in resolution.missing {
+                guard let parameterID = lookup.namedObjects[name]
+                else { continue }
+                
+                let edge = ParameterProposal.EdgeProposal(origin: parameterID, target: objectID)
+                toAdd.append(edge)
+            }
         }
-        let edge = trans.createEdge(.Parameter, origin: parameter.objectID, target: object.objectID)
-        let info = ParameterInfo(parameterName: name,
-                                 parameterID: parameterID,
-                                 targetName: object.name,
-                                 targetID: object.objectID,
-                                 edgeID: edge.objectID)
-        added.append(info)
+        let proposal = ParameterProposal(toRemove: toRemove, toAdd: toAdd)
+        world.setSingleton(proposal)
     }
-
-    return (added: added, removed: removed)
 }

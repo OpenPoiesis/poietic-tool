@@ -24,9 +24,9 @@ extension PoieticTool {
         var references: [String]
         
         mutating func run() throws {
-            let modeller = try CommandLineModeller(location: globalOptions.designLocation)
+            let editor = try DesignEditor(location: globalOptions.designLocation)
 
-            guard modeller.design.frames.count > 0 else {
+            guard editor.design.frames.count > 0 else {
                 throw ToolError.emptyDesign
             }
             guard !references.isEmpty else {
@@ -37,11 +37,11 @@ extension PoieticTool {
             var toRemove: [FrameID] = []
             
             for ref in references {
-                if let id = modeller.design.frame(name: ref)?.id {
+                if let id = editor.design.frame(name: ref)?.id {
                     toRemove.append(id)
                 }
                 else if let id = FrameID(ref),
-                        modeller.design.containsFrame(id)
+                        editor.design.containsFrame(id)
                 {
                     toRemove.append(id)
                 }
@@ -51,10 +51,10 @@ extension PoieticTool {
             }
 
             for id in toRemove {
-                modeller.design.removeFrame(id)
+                editor.design.removeFrame(id)
             }
 
-            try modeller.save()
+            try editor.save()
             print("Removed \(toRemove.count) frames.")
         }
     }
