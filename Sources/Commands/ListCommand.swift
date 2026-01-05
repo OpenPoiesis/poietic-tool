@@ -63,8 +63,6 @@ extension PoieticTool {
 
         mutating func run() throws {
             let editor = try DesignEditor(location: options.designLocation)
-            // FIXME: [IMPORTANT] We need to run the systems here
-            fatalError("Broken")
             switch listType.entityType {
             case .frames:
                 try listFrames(editor.design)
