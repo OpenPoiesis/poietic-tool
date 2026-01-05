@@ -68,22 +68,14 @@ extension PoieticTool {
                 }
             }
             
-            for id in proposal.toRemove {
-                trans.removeCascading(id)
-            }
-            for edgeProposal in proposal.toAdd {
-                trans.createEdge(.Parameter,
-                                 origin: edgeProposal.origin,
-                                 target: edgeProposal.target)
-            }
 
-            if proposal.toAdd.count + proposal.toRemove.count > 0 {
+            if proposal.isEmpty {
+                print("All parameter connections seem to be ok.")
+            }
+            else {
                 try editor.accept(trans, replacing: options.replaceRef, appendHistory: options.appendHistory)
                 try editor.save()
                 print("Added \(proposal.toAdd.count) edges and removed \(proposal.toRemove.count) edges.")
-            }
-            else {
-                print("All parameter connections seem to be ok.")
             }
         }
     }
