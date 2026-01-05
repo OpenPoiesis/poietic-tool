@@ -63,7 +63,7 @@ extension PoieticTool {
                 ]
 
                 if let obj = frame.first(trait: .Simulation) {
-                    let params = SimulationParameters(fromObject: obj)
+                    let params = SimulationSettings(fromObject: obj)
                     items += [
                         (nil, nil),
                         ("Simulation Parameters", nil),

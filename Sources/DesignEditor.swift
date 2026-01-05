@@ -88,6 +88,7 @@ public class DesignEditor {
                               systems: SystemGroup(PoieticFlows.SimulationPlanningSystems))
         self.world.setSystems(schedule: SimulateSchedule.self,
                               systems: SystemGroup(PoieticFlows.SimulationPlanningSystems
+                                                   + PoieticFlows.SimulationRunningSystems
                                                    + PoieticFlows.SimulationPresentationSystems))
         let diagramCompositionSystems: SystemGroup = SystemGroup(
             BlockCreationSystem.self,
