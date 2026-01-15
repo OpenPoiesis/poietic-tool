@@ -31,15 +31,17 @@ extension PoieticTool {
             let editor = try DesignEditor(location: globalOptions.designLocation)
             let world = editor.world
 
-            let systems = SystemGroup(
-                ComputationOrderSystem.self,
-                NameResolutionSystem.self,
-                ExpressionParserSystem.self,
-                ParameterResolutionSystem.self,
-                ParameterConnectionProposalSystem.self,
+            let schedule = Schedule(
+                label: ParameterResolutionSchedule.self,
+                systems:
+                    ComputationOrderSystem.self,
+                    NameResolutionSystem.self,
+                    ExpressionParserSystem.self,
+                    ParameterResolutionSystem.self,
+                    ParameterConnectionProposalSystem.self,
             )
             
-            world.setSystems(schedule: ParameterResolutionSchedule.self, systems: systems)
+            world.addSchedule(schedule)
             try world.run(schedule: ParameterResolutionSchedule.self)
 
             let proposal: ParameterProposal = world.singleton()!

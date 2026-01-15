@@ -84,18 +84,24 @@ public class DesignEditor {
         else {
             self.world = World(design: self.design)
         }
-        self.world.setSystems(schedule: PlanSchedule.self,
-                              systems: SystemGroup(PoieticFlows.SimulationPlanningSystems))
-        self.world.setSystems(schedule: SimulateSchedule.self,
-                              systems: SystemGroup(PoieticFlows.SimulationPlanningSystems
-                                                   + PoieticFlows.SimulationRunningSystems
-                                                   + PoieticFlows.SimulationPresentationSystems))
-        let diagramCompositionSystems: SystemGroup = SystemGroup(
-            BlockCreationSystem.self,
-            TraitConnectorCreationSystem.self,
-            ConnectorGeometrySystem.self
-        )
-        self.world.setSystems(schedule: DiagramSchedule.self, systems: diagramCompositionSystems)
+        self.world.addSchedule(Schedule(
+            label: PlanSchedule.self,
+            systems: PoieticFlows.SimulationPlanningSystems
+        ))
+        self.world.addSchedule(Schedule(
+            label: SimulateSchedule.self,
+            systems: PoieticFlows.SimulationPlanningSystems
+                     + PoieticFlows.SimulationRunningSystems
+                     + PoieticFlows.SimulationPresentationSystems
+        ))
+        
+        self.world.addSchedule(Schedule(
+            label: DiagramSchedule.self,
+            systems:
+                BlockCreationSystem.self,
+                TraitConnectorCreationSystem.self,
+                ConnectorGeometrySystem.self
+        ))
     }
     convenience init(location: String?, design: Design? = nil) throws (ToolError) {
         try self.init(url: try designURL(location), design: design)
