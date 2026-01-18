@@ -87,7 +87,7 @@ extension PoieticTool {
                 throw ToolError.designIssues(world.issues)
             }
             
-            var settings = plan.simulationParameters ?? SimulationSettings()
+            var settings = plan.simulationSettings ?? SimulationSettings()
             
             if let startTime {
                 settings.initialTime = startTime
