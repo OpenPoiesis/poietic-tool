@@ -20,11 +20,11 @@ extension PoieticTool {
         var frameID: String?
 
         mutating func run() throws {
-            let modeller = try CommandLineModeller(location: options.designLocation)
-            let frame = try modeller.frameIfPresent(frameID)
+            let editor = try DesignEditor(location: options.designLocation)
+            let frame = try editor.frameIfPresent(frameID)
             
             var items: [(String?, String?)] = [
-                ("Design", modeller.url.relativeString)
+                ("Design", editor.url.relativeString)
             ]
 
             if let info = frame?.filter(type: ObjectType.DesignInfo).first {
@@ -41,14 +41,14 @@ extension PoieticTool {
             
             items += [
                 (nil, nil),
-                ("Total snapshots", "\(modeller.design.objectSnapshots.count)"),
+                ("Total snapshots", "\(editor.design.objectSnapshots.count)"),
 
                 (nil, nil),
-                ("Total frames", "\(modeller.design.frames.count)"),
-                ("History frames", "\(modeller.design.versionHistory.count)"),
-                ("Undoable frames", "\(modeller.design.undoList.count)"),
-                ("Redoable frames", "\(modeller.design.redoList.count)"),
-                ("Named frames", "\(modeller.design.namedFrames.count)"),
+                ("Total frames", "\(editor.design.frames.count)"),
+                ("History frames", "\(editor.design.versionHistory.count)"),
+                ("Undoable frames", "\(editor.design.undoList.count)"),
+                ("Redoable frames", "\(editor.design.redoList.count)"),
+                ("Named frames", "\(editor.design.namedFrames.count)"),
             ]
             
             if let frame {
@@ -63,7 +63,7 @@ extension PoieticTool {
                 ]
 
                 if let obj = frame.first(trait: .Simulation) {
-                    let params = SimulationParameters(fromObject: obj)
+                    let params = SimulationSettings(fromObject: obj)
                     items += [
                         (nil, nil),
                         ("Simulation Parameters", nil),

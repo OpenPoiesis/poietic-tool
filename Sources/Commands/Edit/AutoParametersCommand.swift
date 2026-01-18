@@ -9,6 +9,9 @@
 import PoieticCore
 import PoieticFlows
 
+enum ParameterResolutionSchedule: ScheduleLabel {}
+
+
 extension PoieticTool {
     struct AutoParameters: ParsableCommand {
         static let configuration
@@ -25,35 +28,56 @@ extension PoieticTool {
         var verbose: Bool = false
 
         mutating func run() throws {
-            let modeller = try CommandLineModeller(location: globalOptions.designLocation)
-            let original = try modeller.createRuntime(frameReference: options.deriveRef)
-            let trans = try modeller.deriveOrCreate(options.deriveRef)
+            let editor = try DesignEditor(location: globalOptions.designLocation)
+            let world = editor.world
 
-            let systems = SystemGroup(
-                ComputationOrderSystem.self,
-                NameResolutionSystem.self,
-                ExpressionParserSystem.self,
-                ParameterResolutionSystem.self,
+            let schedule = Schedule(
+                label: ParameterResolutionSchedule.self,
+                systems:
+                    ComputationOrderSystem.self,
+                    NameResolutionSystem.self,
+                    ExpressionParserSystem.self,
+                    ParameterResolutionSystem.self,
+                    ParameterConnectionProposalSystem.self,
             )
+            
+            world.addSchedule(schedule)
+            try world.run(schedule: ParameterResolutionSchedule.self)
 
-            try systems.update(original)
-            let result = try autoConnectParameters(runtime: original, trans: trans)
-            if verbose {
-                for info in result.added {
-                    print("Connected parameter \(info.parameterName ?? "(unnamed)") (\(info.parameterID)) to \(info.targetName ?? "(unnamed)") (\(info.targetID)), edge: \(info.edgeID)")
+            let proposal: ParameterProposal = world.singleton()!
+            
+            let trans = try editor.deriveOrCreate(options.deriveRef)
+
+            for id in proposal.toRemove {
+                if verbose,
+                   let object = trans[id],
+                   let edge = DesignObjectEdge(object, in: trans)
+                {
+                    let originName = trans[edge.origin]?.name ?? "(unnamed)"
+                    let targetName = trans[edge.target]?.name ?? "(unnamed)"
+                    print("Disconnected parameter \(originName) (\(edge.origin)) from \(targetName) (\(edge.target)), edge: \(edge.id)")
                 }
-                for info in result.removed {
-                    print("Disconnected parameter \(info.parameterName ?? "(unnamed)") (\(info.parameterID)) from \(info.targetName ?? "(unnamed)") (\(info.targetID)), edge: \(info.edgeID)")
+                trans.removeCascading(id)
+            }
+            for edgeProposal in proposal.toAdd {
+                let edge = trans.createEdge(.Parameter,
+                                            origin: edgeProposal.origin,
+                                            target: edgeProposal.target)
+                if verbose {
+                    let originName = trans[edgeProposal.origin]?.name ?? "(unnamed)"
+                    let targetName = trans[edgeProposal.target]?.name ?? "(unnamed)"
+                    print("Connected parameter \(originName) (\(edgeProposal.origin)) to \(targetName) (\(edgeProposal.target)), edge: \(edge.objectID)")
                 }
             }
+            
 
-            if result.added.count + result.removed.count > 0 {
-                try modeller.accept(trans, replacing: options.replaceRef, appendHistory: options.appendHistory)
-                try modeller.save()
-                print("Added \(result.added.count) edges and removed \(result.removed.count) edges.")
+            if proposal.isEmpty {
+                print("All parameter connections seem to be ok.")
             }
             else {
-                print("All parameter connections seem to be ok.")
+                try editor.accept(trans, replacing: options.replaceRef, appendHistory: options.appendHistory)
+                try editor.save()
+                print("Added \(proposal.toAdd.count) edges and removed \(proposal.toRemove.count) edges.")
             }
         }
     }

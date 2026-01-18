@@ -37,8 +37,8 @@ poietic edit add FlowRate name=expenses formula=50
         var attributeAssignments: [String] = []
         
         mutating func run() throws {
-            let modeller = try CommandLineModeller(location: globalOptions.designLocation)
-            let trans = try modeller.deriveOrCreate(options.deriveRef)
+            let editor = try DesignEditor(location: globalOptions.designLocation)
+            let trans = try editor.deriveOrCreate(options.deriveRef)
 
             guard let type = StockFlowMetamodel.objectType(name: typeName) else {
                 throw ToolError.unknownObjectType(typeName)
@@ -67,8 +67,8 @@ poietic edit add FlowRate name=expenses formula=50
 
             }
 
-            try modeller.accept(trans, replacing: options.replaceRef, appendHistory: options.appendHistory)
-            try modeller.save()
+            try editor.accept(trans, replacing: options.replaceRef, appendHistory: options.appendHistory)
+            try editor.save()
 
             print("Created node \(object.objectID) in frame \(trans.id)")
         }

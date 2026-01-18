@@ -9,30 +9,15 @@ import PoieticCore
 import PoieticFlows
 import Foundation
 
-func writeToCSV(path: String,
-                result: SimulationResult,
-                plan: SimulationPlan,
-                ids: [PoieticCore.ObjectID])
-throws {
-    var variableIndices: [Int] = []
-    variableIndices.append(plan.builtins.step)
-    variableIndices.append(plan.builtins.time)
-    
-    if ids.isEmpty {
-        variableIndices += Array(plan.stateVariables.indices)
-    }
-    else {
-        variableIndices += ids.compactMap { plan.variableIndex(of: $0) }
-    }
-
+func writeToCSV(path: String, result: SimulationResult, plan: SimulationPlan) throws {
     let writer: CSVWriter = try CSVWriter(path: path)
-    let header: [String] = variableIndices.map { plan.stateVariables[$0].name }
+    let header: [String] = plan.stateVariables.map { $0.name }
 
     try writer.write(row: header)
     
     for state in result.states {
         var row: [String] = []
-        for index in variableIndices {
+        for index in plan.stateVariables.indices {
             let value: PoieticCore.Variant = state[index]
             row.append(try value.stringValue())
         }
@@ -60,22 +45,16 @@ class GNUPlotBundleWriter {
         self.dataFileName = dataFileName
     }
     
-    public func write(result: SimulationResult, toPath path: String, frame: AugmentedFrame) throws {
-        guard let plan: SimulationPlan = frame.component(for: .Frame) else {
+    public func write(result: SimulationResult, toPath path: String, world: World) throws {
+        guard let plan: SimulationPlan = world.singleton() else {
             return
         }
         let fm = FileManager()
         try fm.createDirectory(atPath: path, withIntermediateDirectories: true)
         
-        let objectIDs = plan.simulationObjects.compactMap(\.objectID)
-        
-        try writeToCSV(
-            path: path + "/" + dataFileName,
-            result: result,
-            plan: plan,
-            ids: objectIDs)
+        try writeToCSV(path: path + "/" + dataFileName, result: result, plan: plan)
 
-        for (chartID, chart) in frame.filter(ChartComponent.self) {
+        for (chartID, chart) in world.query(ChartComponent.self) {
             let chartName = chart.name ?? "unnamed_\(chartID)"
             let gnuplotCommand = chartCommand(chart: chart, plan: plan)
             let gnuplotCommandPath = path + "/" + "chart_\(chartName).gnuplot"
@@ -107,7 +86,7 @@ class GNUPlotBundleWriter {
         var commands: [String] = []
         let timeIndex = plan.builtins.time
         for series in chart.series {
-            guard let seriesIndex = plan.variableIndex(of: series.objectID) else {
+            guard let seriesIndex = plan.variableIndex(series.objectID) else {
                 continue // We continue gracefully, not user's fault
             }
             let label = series.name ?? "unnamed"
@@ -118,3 +97,4 @@ class GNUPlotBundleWriter {
 
     }
 }
+

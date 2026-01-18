@@ -18,16 +18,16 @@ extension PoieticTool {
         @OptionGroup var globalOptions: Options
 
         mutating func run() throws {
-            let modeller = try CommandLineModeller(location: globalOptions.designLocation)
+            let editor = try DesignEditor(location: globalOptions.designLocation)
 
-            if !modeller.design.canUndo {
+            if !editor.design.canUndo {
                 throw ToolError.noChangesToUndo
             }
             
-            let frameID = modeller.design.undoList.last!
-            modeller.design.undo(to: frameID)
+            let frameID = editor.design.undoList.last!
+            editor.design.undo(to: frameID)
 
-            try modeller.save()
+            try editor.save()
             print("Did undo")
         }
     }
@@ -44,16 +44,16 @@ extension PoieticTool {
         @OptionGroup var globalOptions: Options
 
         mutating func run() throws {
-            let modeller = try CommandLineModeller(location: globalOptions.designLocation)
+            let editor = try DesignEditor(location: globalOptions.designLocation)
 
-            if !modeller.design.canRedo {
+            if !editor.design.canRedo {
                 throw ToolError.noChangesToRedo
             }
             
-            let frameID = modeller.design.redoList.first!
-            modeller.design.redo(to: frameID)
+            let frameID = editor.design.redoList.first!
+            editor.design.redo(to: frameID)
 
-            try modeller.save()
+            try editor.save()
             print("Did redo.")
         }
     }

@@ -28,8 +28,8 @@ extension PoieticTool {
         var references: [String] = []
 
         mutating func run() throws {
-            let modeller = try CommandLineModeller(location: globalOptions.designLocation)
-            let frame = try modeller.frame(frameReference)
+            let editor = try DesignEditor(location: globalOptions.designLocation)
+            let frame = try editor.frame(frameReference)
 
             let extractor = DesignExtractor()
             let snapshots: [RawSnapshot]
@@ -49,7 +49,7 @@ extension PoieticTool {
                 snapshots = extractor.extractPruning(objects: validIDs, frame: frame)
             }
 
-            let rawDesign = extractor.extractStub(modeller.design)
+            let rawDesign = extractor.extractStub(editor.design)
             rawDesign.snapshots = snapshots
             
             let writer = JSONDesignWriter()

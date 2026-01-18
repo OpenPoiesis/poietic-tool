@@ -36,6 +36,7 @@ enum ToolError: Error, CustomStringConvertible {
     // Simulation errors
     case unknownVariables([String])
     case unknownSolver(String)
+    case simulationFailed(String)
     
     // Query errors
     case unknownObject(String)
@@ -142,6 +143,9 @@ enum ToolError: Error, CustomStringConvertible {
             return "Type mismatch in \(subject) value '\(value)', expected type: \(expected)"
         case .fileDoesNotExist(let file):
             return "File '\(file)' not found"
+            
+        case .simulationFailed(let message):
+            return "Simulation failed: \(message)"
         }
     }
     
@@ -200,6 +204,8 @@ enum ToolError: Error, CustomStringConvertible {
             return nil
         case .emptyDesign:
             return "Design has no frames, create a frame"
+        case .simulationFailed(_):
+            return nil
         }
     }
 

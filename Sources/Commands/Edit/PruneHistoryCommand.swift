@@ -21,8 +21,8 @@ extension PoieticTool {
         @OptionGroup var globalOptions: Options
 
         mutating func run() throws {
-            let modeller = try CommandLineModeller(location: globalOptions.designLocation)
-            let design = modeller.design
+            let editor = try DesignEditor(location: globalOptions.designLocation)
+            let design = editor.design
             
             let count = design.undoList.count + design.redoList.count
 
@@ -33,7 +33,7 @@ extension PoieticTool {
                 design.removeFrame(frame)
             }
 
-            try modeller.save()
+            try editor.save()
             
             if count > 0 {
                 print("Removed \(count) frames.")

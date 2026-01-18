@@ -18,13 +18,14 @@ extension PoieticTool {
         var frameRef: String?
 
         mutating func run() throws {
-            let modeller = try CommandLineModeller(location: options.designLocation, configuration: .simulation)
-            let frame = try modeller.frame(frameRef)
-            let runtime = try modeller.updateRuntime(frame.id)
+            let editor = try DesignEditor(location: options.designLocation)
+            let frame = try editor.frame(frameRef)
+            let world = editor.world
+            try world.run(schedule: PlanSchedule.self)
             
-            guard let _: SimulationPlan = runtime.component(for: .Frame) else {
-                printIssues(runtime)
-                throw ToolError.designIssues(runtime.issues)
+            guard let _: SimulationPlan = world.singleton() else {
+                printIssues(world)
+                throw ToolError.designIssues(world.issues)
             }
 
             print("Frame is valid.")

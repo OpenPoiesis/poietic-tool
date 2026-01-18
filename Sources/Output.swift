@@ -7,8 +7,9 @@
 
 import PoieticCore
 
-func printIssues(_ runtime: AugmentedFrame) {
-    printIssues(runtime.issues, frame: runtime)
+func printIssues(_ world: World) {
+    guard let frame = world.frame else { return }
+    printIssues(world.issues, frame: frame)
 }
 func printIssues(_ issues: [ObjectID:[Issue]], frame: some Frame) {
     // FIXME: Use stderr

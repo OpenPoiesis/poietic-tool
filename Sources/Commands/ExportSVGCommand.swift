@@ -42,10 +42,9 @@ extension PoieticTool {
         var pictogramCollectionPath: String?
 
         mutating func run() throws {
-            let modeller = try CommandLineModeller(location: options.designLocation, configuration: .diagram)
-            let frame = try modeller.frame(frameRef)
-            let runtime = try modeller.createRuntime(frame.id)
-
+            let editor = try DesignEditor(location: options.designLocation)
+            let world = editor.world
+            
             guard let testURL = URL(string: output) else {
                 fatalError("Invalid resource reference: \(output)")
             }
@@ -82,11 +81,11 @@ extension PoieticTool {
                 connectorGlyphs: DefaultStockFlowConnectorGlyphs,
                 defaultConnectorGlyphName: "default"
             )
-            runtime.setComponent(notation, for: .Frame)
+            world.setSingleton(notation)
 
             // 2. Update the runtime
             //
-            try modeller.updateRuntime(frame.id)
+            try world.run(schedule: DiagramSchedule.self)
             
             // 3. Export SVG from the runtime components
             //
@@ -94,7 +93,7 @@ extension PoieticTool {
             svgStyle.pictogramLineWidth = pictogramLineWidth
             
             let exporter = SVGDiagramExporter(style: svgStyle)
-            try exporter.export(frame: runtime, to: outputURL.path())
+            try exporter.export(world: world, to: outputURL.path())
         }
     }
 }

@@ -23,13 +23,9 @@ extension PoieticTool {
                 help: "Initial time, overrides design-specified initial time")
         var startTime: Double?
 
-        @Option(name: [.customLong("end-time")],
-                help: "Final time, overrides design-specified end time")
-        var endTime: Double?
-
         @Option(name: [.long, .customShort("s")],
                 help: "Maximum number of steps to run, before end-time is reached")
-        var steps: Int?
+        var steps: UInt?
         
         @Option(name: [.long, .customShort("t")],
                 help: "Time delta, overrides design-specified time delta")
@@ -41,8 +37,9 @@ extension PoieticTool {
 
         enum OutputFormat: String, CaseIterable, ExpressibleByArgument{
             case csv = "csv"
-//            case json = "json"
             case gnuplot = "gnuplot"
+            // case json = "json"
+
             var defaultValueDescription: String { "csv" }
             
             static var allValueStrings: [String] {
@@ -80,38 +77,32 @@ extension PoieticTool {
         var outputPath: String = "-"
         
         mutating func run() throws {
-            let modeller = try CommandLineModeller(location: options.designLocation,
-                                            configuration: .simulation)
+            let editor = try DesignEditor(location: options.designLocation)
+            let world = editor.world
 
-            let frame = try modeller.frame(frameRef)
-            let runtime = try modeller.updateRuntime(frame.id)
+            try world.run(schedule: PlanSchedule.self)
             
-            guard let plan: SimulationPlan = runtime.component(for: .Frame) else {
-                printIssues(runtime)
-                throw ToolError.designIssues(runtime.issues)
+            guard let plan: SimulationPlan = world.singleton() else {
+                printIssues(world)
+                throw ToolError.designIssues(world.issues)
             }
             
-            guard let solverType = StockFlowSimulation.SolverType(rawValue: solverName) else {
-                throw ToolError.unknownSolver(solverName)
-            }
-
-            var parameters = plan.simulationParameters ?? SimulationParameters()
-            
-            if let timeDelta {
-                parameters.timeDelta = timeDelta
-            }
-            
-            if let endTime {
-                parameters.endTime = endTime
-            }
+            var settings = plan.simulationSettings ?? SimulationSettings()
             
             if let startTime {
-                parameters.initialTime = startTime
+                settings.initialTime = startTime
+            }
+
+            if let timeDelta {
+                settings.timeDelta = timeDelta
             }
             
-            let simulation = StockFlowSimulation(plan, solver: solverType)
-            let simulator = Simulator(simulation: simulation, parameters: parameters)
+            if let steps {
+                settings.steps = steps
+            }
 
+            settings.solverType = solverName
+            
             // Collect names of nodes to be observed
             // -------------------------------------------------------------
             var outputVariables: [StateVariable] = []
@@ -135,7 +126,7 @@ extension PoieticTool {
             // TODO: Add JSON for controls
             // Collect constants to be overridden during initialization.
             // -------------------------------------------------------------
-            var overrideConstants: [ObjectID: Double] = [:]
+            var scenarioParams: [ObjectID: Variant] = [:]
             for item in overrideValues {
                 guard let split = parseValueAssignment(item) else {
                     throw ToolError.invalidAttributeAssignment(item)
@@ -147,25 +138,32 @@ extension PoieticTool {
                 guard let variable = plan.variable(named: key) else {
                     throw ToolError.unknownObject(key)
                 }
-                overrideConstants[variable.objectID] = doubleValue
+                scenarioParams[variable.objectID] = Variant(doubleValue)
             }
+            let scenario = ScenarioParameters(initialValues: scenarioParams)
             
             // Create and initialize the solver
             // -------------------------------------------------------------
-            try simulator.initializeState(override: overrideConstants)
+            world.setSingleton(settings)
+            world.setSingleton(scenario)
             
             // Run the simulation
             // -------------------------------------------------------------
-            try simulator.run(steps)
-
+            try world.run(schedule: SimulateSchedule.self)
+            
+            guard let result: SimulationResult = world.singleton() else {
+                // FIXME: Handle simulation failed error
+                throw ToolError.simulationFailed("No simulation result")
+            }
+            
             switch outputFormat {
             case .csv:
                 try writeCSV(path: outputPath,
                              variables: outputVariables,
-                             states: simulator.result.states)
+                             states: result.states)
             case .gnuplot:
                 let writer = GNUPlotBundleWriter()
-                try writer.write(result: simulator.result, toPath: outputPath, frame: runtime)
+                try writer.write(result: result, toPath: outputPath, world: world)
 //            case .json:
 //                try writeJSON(path: outputPath,
 //                              variables: outputVariables,

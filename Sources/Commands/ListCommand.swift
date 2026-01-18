@@ -62,33 +62,32 @@ extension PoieticTool {
         var listType: ListType = .all
 
         mutating func run() throws {
-            let modeller = try CommandLineModeller(location: options.designLocation, configuration: .inspection)
-            
+            let editor = try DesignEditor(location: options.designLocation)
             switch listType.entityType {
             case .frames:
-                try listFrames(modeller)
+                try listFrames(editor.design)
             case .objects:
-                let frame = try modeller.frame(frameRef)
-                try listObjects(modeller, in: frame)
+                let frame = try editor.frame(frameRef)
+                try listObjects(editor.world, in: frame)
             }
         }
-        func listFrames(_ modeller: Modeller) throws {
+        func listFrames(_ design: Design) throws {
             switch listType {
             case .namedFrames:
-                listNamedFrames(modeller.design)
+                listNamedFrames(design)
             case .frames:
-                listFrameIDs(modeller.design)
+                listFrameIDs(design)
             case .history:
-                listHistory(modeller.design)
+                listHistory(design)
             default:
                 return
             }
         }
-        func listObjects(_ modeller: Modeller, in frame: DesignFrame) throws {
+        func listObjects(_ world: World, in frame: DesignFrame) throws {
             let type: ObjectType?
             
             if let typeName  {
-                if let maybeType = modeller.metamodel.objectType(name: typeName) {
+                if let maybeType = frame.design.metamodel.objectType(name: typeName) {
                     type = maybeType
                 }
                 else {
@@ -110,14 +109,12 @@ extension PoieticTool {
             switch listType {
             case .all:
                 listAll(snapshots,in: frame)
-            case .namedFrames:
-                listNamedFrames(modeller.design)
             case .names:
                 listNames(snapshots)
             case .formulas:
                 listFormulas(snapshots)
             case .pseudoEquations:
-                try listPseudoEquations(frame, modeller: modeller)
+                try listPseudoEquations(frame, world: world)
             case .graphicalFunctions:
                 listGraphicalFunctions(frame)
             default:
@@ -132,7 +129,7 @@ func listAll(_ snapshots: [ObjectSnapshot], in frame: DesignFrame) {
         left.id < right.id
     }
     let nodes = sorted.filter { $0.structure.type == .node }
-    let edges = sorted.compactMap { EdgeObject($0,in: frame) }
+    let edges = sorted.compactMap { DesignObjectEdge($0,in: frame) }
     let unstructured = sorted.filter { $0.structure.type == .unstructured }
 
     if unstructured.count > 0 {
@@ -206,24 +203,24 @@ func listFormulas(_ snapshots: [ObjectSnapshot]) {
     }
 }
 
-func listPseudoEquations(_ frame: DesignFrame, modeller: Modeller) throws (ToolError) {
+func listPseudoEquations(_ frame: DesignFrame, world: World) throws (ToolError) {
     // TODO: Add stocks
-    let runtime: AugmentedFrame
     do {
-        runtime = try modeller.updateRuntime(frame.id)
+        try world.run(schedule: PlanSchedule.self)
     }
     catch {
         throw .internalSystemError(error)
     }
 
-    for (stockID, stock) in runtime.filter(StockComponent.self) {
-        let lhs = runtime.displayName(of: stockID, default: "(unnamed)")
+    for (stockEntity, stock) in world.query(StockComponent.self) {
+        guard let stockID = world.entityToObject(stockEntity) else { continue }
+        let lhs = world.displayName(of: stockID, default: "(unnamed)")
         var rhs = ""
         var hasInflows: Bool = false
 
         if !stock.inflowRates.isEmpty {
             let inflows = stock.inflowRates.map {
-                runtime.displayName(of: $0, default: "(unnamed)")
+                world.displayName(of: $0, default: "(unnamed)")
             }
             rhs += inflows.joined(separator: " + ")
             hasInflows = true
@@ -234,7 +231,7 @@ func listPseudoEquations(_ frame: DesignFrame, modeller: Modeller) throws (ToolE
                 rhs += " - "
             }
             let outflows = stock.outflowRates.map {
-                runtime.displayName(of: $0, default: "(unnamed)")
+                world.displayName(of: $0, default: "(unnamed)")
             }
             rhs += outflows.joined(separator: " - ")
         }
