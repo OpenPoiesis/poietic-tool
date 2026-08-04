@@ -17,24 +17,28 @@ extension PoieticTool {
     struct ExportSVG: ParsableCommand {
         static let configuration
             = CommandConfiguration(
-                commandName: "experimental-export-svg",
                 abstract: "Export design as a SVG diagram"
             )
 
+        // TODO: Option for secondary label: formula, value
+        // TODO: Option for simulation step (combine with `run` command)
+        // TODO: Option for indicators (value, error)
+        // TODO: Option for SVG style
+
         @OptionGroup var options: Options
         
-        @Option(name: [.long, .customShort("o")],
-                help: "Output file path")
+        @Option(name: [.long, .customShort("o")], help: "Output file path")
         var output = "diagram.svg"
 
-        @Option(name: [.customLong("pictogram-scale")],
-                help: "Scale of pictograms")
+        @Option(name: [.customLong("pictogram-scale")], help: "Scale of pictograms")
         var pictogramScale: Double = 0.5
 
-        @Option(name: [.customLong("pictogram-line-width")],
-                help: "Scale of pictograms")
+        @Option(name: [.customLong("pictogram-line-width")], help: "Scale of pictograms")
         var pictogramLineWidth: Double = 1.0
 
+        @Option(name: [.customLong("zoom")], help: "Zoom level in %")
+        var zoom: Double = 100.0
+        
         @Option(name: [.customLong("frame")], help: "Frame ID or name")
         var frameRef: String?
         
@@ -83,17 +87,28 @@ extension PoieticTool {
             )
             world.setSingleton(notation)
 
-            // 2. Update the runtime
+            // 2. Update the world
             //
             try world.run(schedule: DiagramSchedule.self)
             
-            // 3. Export SVG from the runtime components
+            // 3. Create Diagram
             //
-            var svgStyle = SVGDiagramStyle()
-            svgStyle.pictogramLineWidth = pictogramLineWidth
+            var svgStyle = SVGDiagramStyle.Default
+            svgStyle.classes[.pictogram]?.strokeWidth = pictogramLineWidth
             
-            let exporter = SVGDiagramExporter(style: svgStyle)
-            try exporter.export(world: world, to: outputURL.path())
+            let composer = DiagramSceneComposer(world: world)
+            let diagram = composer.createDiagramFromAll()
+
+            // 4. Create scene
+            let scene = composer.createScene(diagram: diagram, viewport: ViewportState(zoom: zoom / 100.0))
+            
+            // 5. Layout blocks
+            
+            // 6. Update connector geometry
+            composer.layout(scene: scene, layout: svgStyle)
+            composer.updateGeometry(scene: scene)
+            let renderer = SVGDiagramSceneRenderer(world: world)
+            try renderer.render(scene, style: svgStyle, to: outputURL.path())
         }
     }
 }

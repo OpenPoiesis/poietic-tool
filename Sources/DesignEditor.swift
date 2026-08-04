@@ -92,15 +92,14 @@ public class DesignEditor {
             label: SimulateSchedule.self,
             systems: PoieticFlows.SimulationPlanningSystems
                      + PoieticFlows.SimulationRunningSystems
-                     + PoieticFlows.SimulationPresentationSystems
+                     + [PoieticFlows.NewChartResolutionSystem.self]
         ))
         
         self.world.addSchedule(Schedule(
             label: DiagramSchedule.self,
             systems:
-                BlockCreationSystem.self,
-                TraitConnectorCreationSystem.self,
-                ConnectorGeometrySystem.self
+                DiagramObjectsFromTraitsSystem.self,
+//                ConnectorGeometrySystem.self
         ))
     }
     convenience init(location: String?, design: Design? = nil) throws (ToolError) {

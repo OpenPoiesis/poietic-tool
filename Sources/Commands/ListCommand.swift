@@ -212,16 +212,14 @@ func listPseudoEquations(_ frame: DesignFrame, world: World) throws (ToolError) 
         throw .internalSystemError(error)
     }
 
-    for (stockEntity, stock) in world.query(StockComponent.self) {
-        guard let stockID = world.entityToObject(stockEntity) else { continue }
-        let lhs = world.displayName(of: stockID, default: "(unnamed)")
+    for (entity, stock) in world.query(StockComponent.self) {
+        let lhs = entity.displayName(default: "(unnamed)")
         var rhs = ""
         var hasInflows: Bool = false
 
         if !stock.inflowRates.isEmpty {
-            let inflows = stock.inflowRates.map {
-                world.displayName(of: $0, default: "(unnamed)")
-            }
+            let inflows = stock.inflowRates.compactMap { world.entity($0) }
+                .map { $0.displayName(default: "(unnamed)") }
             rhs += inflows.joined(separator: " + ")
             hasInflows = true
         }
@@ -230,9 +228,8 @@ func listPseudoEquations(_ frame: DesignFrame, world: World) throws (ToolError) 
             if hasInflows {
                 rhs += " - "
             }
-            let outflows = stock.outflowRates.map {
-                world.displayName(of: $0, default: "(unnamed)")
-            }
+            let outflows = stock.outflowRates.compactMap { world.entity($0) }
+                .map { $0.displayName(default: "(unnamed)") }
             rhs += outflows.joined(separator: " - ")
         }
         

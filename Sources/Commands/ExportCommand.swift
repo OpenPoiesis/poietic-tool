@@ -15,7 +15,7 @@ extension PoieticTool {
     struct Export: ParsableCommand {
         static let configuration
             = CommandConfiguration(abstract: "Export current frame or a collection of objects")
-        
+
         @OptionGroup var globalOptions: Options
 
         @Option(name: [.customLong("frame")], help: "Frame to be exported. Default: current frame.")
