@@ -98,7 +98,7 @@ public class DesignEditor {
         self.world.addSchedule(Schedule(
             label: DiagramSchedule.self,
             systems:
-                DiagramObjectsFromTraitsSystem.self,
+                TraitsToDiagramObjectsSystem.self,
 //                ConnectorGeometrySystem.self
         ))
     }

@@ -96,17 +96,17 @@ extension PoieticTool {
             var svgStyle = SVGDiagramStyle.Default
             svgStyle.classes[.pictogram]?.strokeWidth = pictogramLineWidth
             
-            let composer = DiagramSceneComposer(world: world)
-            let diagram = composer.createDiagramFromAll()
+            let diagram = DiagramSceneComposer.createDiagramFromAll(world: world)
 
-            // 4. Create scene
+            // 4. Create scene and update layout
+            let composer = DiagramSceneComposer(world: world)
+            
             let scene = composer.createScene(diagram: diagram, viewport: ViewportState(zoom: zoom / 100.0))
-            
-            // 5. Layout blocks
-            
-            // 6. Update connector geometry
-            composer.layout(scene: scene, layout: svgStyle)
-            composer.updateGeometry(scene: scene)
+            scene.setComponent(SceneLayoutProvider(provider: svgStyle))
+            let system = SceneCompositionSystem(world)
+            try system.update(world)
+
+            // Export
             let renderer = SVGDiagramSceneRenderer(world: world)
             try renderer.render(scene, style: svgStyle, to: outputURL.path())
         }
