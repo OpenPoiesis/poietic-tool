@@ -14,35 +14,35 @@ import PoieticCore
 
 let DefaultDOTStyle = DotStyle(
     nodes: [
-        DotNodeStyle(predicate: AnyPredicate(),
+        DotNodeStyle(predicate: .any,
                      attributes: [
                         "labelloc": "b",
                      ]),
-        DotNodeStyle(predicate: IsTypePredicate(ObjectType.FlowRate),
+        DotNodeStyle(predicate: .isType(ObjectType.FlowRate),
                      attributes: [
                         "shape": "ellipse",
                         "style": "bold",
 
                      ]),
-        DotNodeStyle(predicate: IsTypePredicate(ObjectType.Stock),
+        DotNodeStyle(predicate: .isType(ObjectType.Stock),
                      attributes: [
                         "style": "bold",
                         "shape": "box",
                      ]),
-        DotNodeStyle(predicate: IsTypePredicate(ObjectType.Auxiliary),
+        DotNodeStyle(predicate: .isType(ObjectType.Auxiliary),
                      attributes: [
                         "shape": "ellipse",
                         "style": "dotted",
                      ]),
     ],
     edges: [
-        DotEdgeStyle(predicate: IsTypePredicate(ObjectType.Flow),
+        DotEdgeStyle(predicate: .isType(ObjectType.Flow),
                      attributes: [
                         "color": "blue:white:blue",
                         "arrowhead": "empty",
                         "arrowsize": "2",
                      ]),
-        DotEdgeStyle(predicate: IsTypePredicate(ObjectType.Parameter),
+        DotEdgeStyle(predicate: .isType(ObjectType.Parameter),
                      attributes: [
                         "arrowhead": "open",
                         "color": "red",
