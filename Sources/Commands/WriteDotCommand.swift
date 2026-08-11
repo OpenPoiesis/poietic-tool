@@ -5,7 +5,6 @@
 //  Created by Stefan Urbanek on 27/06/2023.
 //
 
-import SystemPackage
 import Foundation
 @preconcurrency import ArgumentParser
 
@@ -93,7 +92,7 @@ extension PoieticTool {
                 outputURL = testURL
             }
 
-            let exporter = DotExporter(path: FilePath(outputURL.path),
+            let exporter = DotExporter(path: outputURL.path,
                                        name: name,
                                        labelAttribute: labelAttribute,
                                        missingLabel: missingLabel,

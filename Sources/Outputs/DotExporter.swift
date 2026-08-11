@@ -5,7 +5,7 @@
 //  Created by Stefan Urbanek on 2021/10/21.
 //
 
-import SystemPackage
+import Foundation
 import PoieticCore
 
 // NOTE: This is simple one-use exporter.
@@ -15,7 +15,7 @@ import PoieticCore
 /// dot language file.
 public class DotExporter {
     /// Path of the file to be exported to.
-    let path: FilePath
+    let path: String
 
     /// Name of the graph in the output file.
     let name: String
@@ -43,7 +43,7 @@ public class DotExporter {
     ///     - style: style of the graph
     ///     - missingLabel: text to be used when a label attribute is not present
     ///
-    public init(path: FilePath,
+    public init(path: String,
                 name: String,
                 labelAttribute: String? = nil,
                 missingLabel: String? = nil,
@@ -98,13 +98,8 @@ public class DotExporter {
         }
 
         output += formatter.footer()
-        
-        let file = try FileDescriptor.open(path, .writeOnly,
-                                           options: [.truncate, .create],
-                                           permissions: .ownerReadWrite)
-        try file.closeAfter {
-          _ = try file.writeAll(output.utf8)
-        }
+       
+        try output.write(toFile: path, atomically: true, encoding: .utf8)
     }
     
     public func format(graph: some Frame, node: ObjectSnapshot) -> [String:String] {
