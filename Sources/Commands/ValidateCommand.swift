@@ -14,7 +14,7 @@ extension PoieticTool {
             = CommandConfiguration(abstract: "Get information about the design")
         @OptionGroup var options: Options
 
-        @Argument(help: "Frame ID or name to validate (current if not provided)")
+        @Argument(help: "Plane ID or name to validate (current if not provided)")
         var frameRef: String?
 
         mutating func run() throws {

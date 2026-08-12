@@ -11,7 +11,7 @@ func printIssues(_ world: World) {
     guard let frame = world.frame else { return }
     printIssues(world.issues, frame: frame)
 }
-func printIssues(_ issues: [ObjectID:[Issue]], frame: some Frame) {
+func printIssues(_ issues: [ObjectID:[Issue]], frame: some Plane) {
     // FIXME: Use stderr
     print("DESIGN ISSUES:")
     for (objectID, objectIssues) in issues {
@@ -19,7 +19,7 @@ func printIssues(_ issues: [ObjectID:[Issue]], frame: some Frame) {
     }
 }
 
-func printObjectIssues(_ objectID: ObjectID, issues: [Issue], frame: some Frame) {
+func printObjectIssues(_ objectID: ObjectID, issues: [Issue], frame: some Plane) {
     /*
      [1234] Stock (ProductionRate):
      error: Cycle detected in flow network
@@ -51,7 +51,7 @@ func printObjectIssues(_ objectID: ObjectID, issues: [Issue], frame: some Frame)
         print(indent + line)
     }
 }
-func printDesignIssues(_ issues: [Issue], frame: some Frame) {
+func printDesignIssues(_ issues: [Issue], frame: some Plane) {
     print("[design]")
     
     for issue in issues {
@@ -62,7 +62,7 @@ func printDesignIssues(_ issues: [Issue], frame: some Frame) {
     }
 }
 
-func printValidationResult(_ result: FrameValidationResult, in frame: some Frame) {
+func printValidationResult(_ result: FrameValidationResult, in frame: some Plane) {
     printDesignIssues(result.violationsAsIssues(), frame: frame)
     printIssues(result.objectIssues(), frame: frame)
 }

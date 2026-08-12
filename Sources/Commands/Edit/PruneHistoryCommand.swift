@@ -15,7 +15,7 @@ extension PoieticTool {
         static let configuration
             = CommandConfiguration(
                 commandName: "prune-history",
-                abstract: "Remove all frames in the undo/redo history and keep just the current frame. Other non-history related frames remain untouched."
+                abstract: "Remove all planes in the undo/redo history and keep just the current plane. Other non-history related frames remain untouched."
             )
 
         @OptionGroup var globalOptions: Options
@@ -27,16 +27,16 @@ extension PoieticTool {
             let count = design.undoList.count + design.redoList.count
 
             for frame in design.undoList {
-                design.removeFrame(frame)
+                design.removePlane(frame)
             }
             for frame in design.redoList {
-                design.removeFrame(frame)
+                design.removePlane(frame)
             }
 
             try editor.save()
             
             if count > 0 {
-                print("Removed \(count) frames.")
+                print("Removed \(count) planes.")
             }
             else {
                 print("History is empty, nothing removed.")

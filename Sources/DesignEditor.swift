@@ -78,7 +78,7 @@ public class DesignEditor {
             }
         }
         self.design = useDesign
-        if let frame = self.design.currentFrame {
+        if let frame = self.design.currentPlane {
             self.world = World(frame: frame)
         }
         else {
@@ -106,11 +106,11 @@ public class DesignEditor {
         try self.init(url: try designURL(location), design: design)
     }
     
-    /// Get a frame by its name or an ID reference.
+    /// Get a plane by its name or an ID reference.
     ///
-    /// Use this method to get a frame by user-provided reference.
+    /// Use this method to get a plane by user-provided reference.
     ///
-    func frame(_ reference: String? = nil) throws (ToolError) -> DesignFrame {
+    func frame(_ reference: String? = nil) throws (ToolError) -> DesignPlane {
         guard let frame = try frameIfPresent(reference) else {
             throw .noCurrentFrame
         }
@@ -118,12 +118,12 @@ public class DesignEditor {
     }
     
 
-    /// Get frame ID from a frame reference, which can be either frame ID or frame name.
+    /// Get plane ID from a plane reference, which can be either plane ID or plane name.
     ///
-    /// - Returns: Frame ID of resolved reference or `nil` if no such frame exists.
-    func frame(required reference: String? = nil) throws (ToolError) -> FrameID? {
+    /// - Returns: Plane ID of resolved reference or `nil` if no such plane exists.
+    func frame(required reference: String? = nil) throws (ToolError) -> PlaneID? {
         if let reference {
-            if let frameID = FrameID(reference), design.containsFrame(frameID) {
+            if let frameID = PlaneID(reference), design.containsPlane(frameID) {
                 return frameID
             }
             else {
@@ -131,25 +131,25 @@ public class DesignEditor {
             }
         }
         else {
-            return design.currentFrameID
+            return design.currentPlaneID
         }
     }
     
-    /// Get a frame by given ID as a string or current frame.
+    /// Get a plane by given ID as a string or current plane.
     ///
     /// - If ID is provided: tries to find it, otherwise throws an error.
     /// - If ID is not provided:
-    ///     - If current frame is set: use current frame.
-    ///     - There is only one frame: use the only frame.
+    ///     - If current plane is set: use current plane.
+    ///     - There is only one plane: use the only plane.
     ///     - Otherwise return nil
     ///
-    /// Use this method to get a frame by user-provided reference.
+    /// Use this method to get a plane by user-provided reference.
     ///
-    /// - Throws ``ToolError/unknownFrame(_:)`` when the frame is not found.
+    /// - Throws ``ToolError/unknownFrame(_:)`` when the plane is not found.
     ///
-    func frameIfPresent(_ requiredReference: String? = nil) throws (ToolError) -> DesignFrame? {
+    func frameIfPresent(_ requiredReference: String? = nil) throws (ToolError) -> DesignPlane? {
         if let requiredReference {
-            if let id = FrameID(requiredReference), let frame = design.frame(id) {
+            if let id = PlaneID(requiredReference), let frame = design.frame(id) {
                 return frame
             }
             else {
@@ -157,11 +157,11 @@ public class DesignEditor {
             }
         }
         else {
-            if let frame = design.currentFrame {
+            if let frame = design.currentPlane {
                 return frame
             }
-            else if design.frames.count == 1 {
-                return design.frames.first!
+            else if design.planes.count == 1 {
+                return design.planes.first!
             }
             else {
                 return nil
@@ -169,35 +169,35 @@ public class DesignEditor {
         }
     }
 
-    /// Derive a frame from existing frame, if the reference is valid or create a new frame if
-    /// there is no current frame.
+    /// Derive a plane from existing plane, if the reference is valid or create a new plane if
+    /// there is no current plane.
     ///
-    /// - Throws ``ToolError/unknownFrame(_:)`` when the frame is not found or
+    /// - Throws ``ToolError/unknownFrame(_:)`` when the plane is not found or
     ///   ``ToolError/emptyDesign`` if there are no frames in the design.
     ///
-    func deriveOrCreate(_ reference: String? = nil) throws (ToolError) -> TransientFrame {
+    func deriveOrCreate(_ reference: String? = nil) throws (ToolError) -> TransientPlane {
         if let reference {
             if let original = try frameIfPresent(reference) {
-                return design.createFrame(deriving: original)
+                return design.createPlane(deriving: original)
             }
             else {
                 throw .unknownFrame(reference)
             }
         }
-        else if let original = design.currentFrame {
-            return design.createFrame(deriving: original)
+        else if let original = design.currentPlane {
+            return design.createPlane(deriving: original)
         }
         else {
-            return design.createFrame()
+            return design.createPlane()
         }
     }
 
-    /// Try to accept a frame in the modeller design.
+    /// Try to accept a plane in the modeller design.
     ///
-    /// Tries to accept the frame. If the frame contains constraint violations, then
+    /// Tries to accept the plane. If the plane contains constraint violations, then
     /// the violations are printed out in a more human-readable format.
     ///
-    func accept(_ trans: TransientFrame, replacing: String? = nil, appendHistory: Bool = true) throws (ToolError) {
+    func accept(_ trans: TransientPlane, replacing: String? = nil, appendHistory: Bool = true) throws (ToolError) {
         do {
             if let name = replacing {
                 try design.accept(trans, replacingName: name)

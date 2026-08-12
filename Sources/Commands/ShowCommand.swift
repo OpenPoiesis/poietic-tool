@@ -31,7 +31,7 @@ extension PoieticTool {
         @Option(name: [.long, .customShort("f")], help: "Output format")
         var outputFormat: OutputFormat = .text
 
-        @Option(name: [.customLong("frame")], help: "Frame to get object from")
+        @Option(name: [.customLong("plane")], help: "Frame to get object from")
         var frameRef: String?
         
         @Argument(help: "ID of an object to be described")

@@ -8,13 +8,13 @@
 @preconcurrency import ArgumentParser
 
 struct EditOptions: ParsableArguments {
-    @Option(name: [.customLong("derive")], help: "Frame ID or name to derive from. If not provided, current is used")
+    @Option(name: [.customLong("derive")], help: "Plane ID or name to derive from. If not provided, current is used")
     var deriveRef: String?
 
-    @Option(name: [.customLong("replace")], help: "Frame name to replace")
+    @Option(name: [.customLong("replace")], help: "Plane name to replace")
     var replaceRef: String?
 
-    @Flag(name: [.customLong("append-history")], inversion:.prefixedNo, help: "If true, then the frame will be added to history (if not named)")
+    @Flag(name: [.customLong("append-history")], inversion:.prefixedNo, help: "If true, then the plane will be added to history (if not named)")
     var appendHistory: Bool = true
 }
 

@@ -120,11 +120,11 @@ enum ToolError: Error, CustomStringConvertible {
         case .unknownObject(let value):
             return "Unknown object '\(value)'"
         case .unknownFrame(let value):
-            return "Unknown frame: \(value)"
+            return "Unknown plane: \(value)"
         case .noCurrentFrame:
-            return "No current frame set"
+            return "No current plane set"
         case .frameExists(let value):
-            return "Frame already exists: \(value)"
+            return "Plane already exists: \(value)"
         case .noChangesToUndo:
             return "No changes to undo"
         case .noChangesToRedo:
@@ -161,7 +161,7 @@ enum ToolError: Error, CustomStringConvertible {
             return "Check whether the location is correct and that you have permissions for writing."
 
         case .brokenStructuralIntegrity(_):
-            return "Unfortunately the only way is to inspect the database or a foreign frame. 'doctor' command is not yet implemented."
+            return "Unfortunately the only way is to inspect the database or a foreign plane. 'doctor' command is not yet implemented."
         case .validationFailed(_):
             return "Make sure that the design is conforming to the metamodel. (In the future there will be 'doctor' command to help you.)"
         case .designIssues(_):
@@ -178,7 +178,7 @@ enum ToolError: Error, CustomStringConvertible {
         case .noCurrentFrame:
             return nil
         case .frameExists(_):
-            return "Use another frame name or ID, or use force to replace existing"
+            return "Use another plane name or ID, or use force to replace existing"
         case .noChangesToUndo:
             return nil
         case .noChangesToRedo:
@@ -202,7 +202,7 @@ enum ToolError: Error, CustomStringConvertible {
         case .storeError(_):
             return nil
         case .emptyDesign:
-            return "Design has no frames, create a frame"
+            return "Design has no planes, create a plane"
         case .simulationFailed(_):
             return nil
         }
@@ -248,7 +248,7 @@ func setAttributeFromString(object: TransientObject,
 }
 
 
-// Frame reading
+// Plane reading
 // ====================================================================
 
 func makeFileURL(fromPath path: String) throws (ToolError) -> URL {

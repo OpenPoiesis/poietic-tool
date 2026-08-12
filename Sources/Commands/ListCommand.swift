@@ -23,7 +23,7 @@ extension PoieticTool {
         
         enum ListType: String, CaseIterable, ExpressibleByArgument{
             case all = "all"
-            case namedFrames = "named-frames"
+            case namedFrames = "named-planes"
             case frames
             case history
             case names = "names"
@@ -52,7 +52,7 @@ extension PoieticTool {
             }
         }
         
-        @Option(name: [.customLong("frame")], help: "List objects in frame (ID or name). If not provided, current is used.")
+        @Option(name: [.customLong("plane")], help: "List objects in frame (ID or name). If not provided, current is used.")
         var frameRef: String?
 
         @Option(name: [.customLong("type")], help: "Filter list objects by type (when applicable)")
@@ -83,7 +83,7 @@ extension PoieticTool {
                 return
             }
         }
-        func listObjects(_ world: World, in frame: DesignFrame) throws {
+        func listObjects(_ world: World, in frame: DesignPlane) throws {
             let type: ObjectType?
             
             if let typeName  {
@@ -124,7 +124,7 @@ extension PoieticTool {
     }
 }
 
-func listAll(_ snapshots: [ObjectSnapshot], in frame: DesignFrame) {
+func listAll(_ snapshots: [ObjectSnapshot], in frame: DesignPlane) {
     let sorted = snapshots.sorted { left, right in
         left.id < right.id
     }
@@ -203,7 +203,7 @@ func listFormulas(_ snapshots: [ObjectSnapshot]) {
     }
 }
 
-func listPseudoEquations(_ frame: DesignFrame, world: World) throws (ToolError) {
+func listPseudoEquations(_ frame: DesignPlane, world: World) throws (ToolError) {
     // TODO: Add stocks
     do {
         try world.run(schedule: PlanSchedule.self)
@@ -237,7 +237,7 @@ func listPseudoEquations(_ frame: DesignFrame, world: World) throws (ToolError) 
     }
 }
 
-func listGraphicalFunctions(_ frame: some Frame) {
+func listGraphicalFunctions(_ frame: some Plane) {
     var result: [String: [Point]?] = [:]
     
     for object in frame.snapshots {
@@ -268,18 +268,18 @@ func listGraphicalFunctions(_ frame: some Frame) {
 }
 
 func listNamedFrames(_ design: Design) {
-    let names = design.namedFrames.keys
+    let names = design.namedPlanes.keys
     let sorted = names.sorted {
         $0.localizedLowercase.lexicographicallyPrecedes($1.localizedLowercase)
     }
     for name in sorted {
-        let frame = design.frame(name: name)!
+        let frame = design.plane(name: name)!
         print("\(name) \(frame.id)")
     }
 }
 
 func listFrameIDs(_ design: Design) {
-    for frame in design.frames {
+    for frame in design.planes {
         print("\(frame.id)")
     }
 }

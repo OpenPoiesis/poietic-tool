@@ -16,7 +16,7 @@ extension PoieticTool {
             = CommandConfiguration(abstract: "Get information about the design")
         @OptionGroup var options: Options
 
-        @Argument(help: "Frame ID (current if not provided)")
+        @Argument(help: "Plane ID (current if not provided)")
         var frameID: String?
 
         mutating func run() throws {
@@ -44,18 +44,18 @@ extension PoieticTool {
                 ("Total snapshots", "\(editor.design.objectSnapshots.count)"),
 
                 (nil, nil),
-                ("Total frames", "\(editor.design.frames.count)"),
-                ("History frames", "\(editor.design.versionHistory.count)"),
-                ("Undoable frames", "\(editor.design.undoList.count)"),
-                ("Redoable frames", "\(editor.design.redoList.count)"),
-                ("Named frames", "\(editor.design.namedFrames.count)"),
+                ("Total planes", "\(editor.design.planes.count)"),
+                ("History planes", "\(editor.design.versionHistory.count)"),
+                ("Undoable planes", "\(editor.design.undoList.count)"),
+                ("Redoable planes", "\(editor.design.redoList.count)"),
+                ("Named planes", "\(editor.design.namedPlanes.count)"),
             ]
             
             if let frame {
                 let unstructuredCount = frame.filter { $0.structure.type == .unstructured }.count
                 items += [
                     (nil, nil),
-                    ("Frame", "\(frame.id)"),
+                    ("Plane", "\(frame.id)"),
                     ("All snapshots", "\(frame.snapshots.count)"),
                     ("Nodes", "\(frame.nodeKeys)"),
                     ("Edges", "\(frame.edgeKeys)"),
@@ -76,7 +76,7 @@ extension PoieticTool {
             else {
                 items += [
                     (nil, nil),
-                    ("Current frame", "no current frame"),
+                    ("Current plane", "no current plane"),
                 ]
             }
             

@@ -73,7 +73,7 @@ extension PoieticTool {
                 help: "Label used if the node has no label attribute")
         var missingLabel = "(none)"
         
-        @Option(name: [.customLong("frame")], help: "Frame ID or name")
+        @Option(name: [.customLong("plane")], help: "Plane ID or name")
         var frameRef: String?
         
         mutating func run() throws {

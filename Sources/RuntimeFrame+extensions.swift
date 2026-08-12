@@ -12,7 +12,7 @@ extension RuntimeEntity {
     /// Get default display name of an object. Try to get simulation object name, then try to fall
     /// back to object name property, then use the default value.
     ///
-    /// - Precondition: Object must exist in the frame.
+    /// - Precondition: Object must exist in the plane.
     ///
     public func displayName(default defaultName: String = "(unnamed)") -> String {
         if let component: SimulationObjectNameComponent = self.component() {

@@ -15,22 +15,22 @@ extension PoieticTool {
     struct CreateFrame: ParsableCommand {
         static let configuration
             = CommandConfiguration(
-                commandName: "create-frame",
-                abstract: "Create a new frame",
+                commandName: "create-plane",
+                abstract: "Create a new plane",
                 usage: """
-Create a new frame and make it the current frame, previous frame is added to the history:
+Create a new plane and make it the current plane, previous plane is added to the history:
 
-    poietic edit create-frame
+    poietic edit create-plane
 
-Create a named frame, not added to the history. Frame with given name must not exist.
+Create a named plane, not added to the history. Plane with given name must not exist.
 
-    poietic edit create-frame --name settings
+    poietic edit create-plane --name settings
 
-Create a named frame, replacing existing named frame:
+Create a named plane, replacing existing named plane:
 
-    poietic edit create-frame --force --name settings
+    poietic edit create-plane --force --name settings
 
-Note: Frame with requested IDs can not be --forced to be replaced. Remove the frame first.
+Note: Plane with requested IDs can not be --forced to be replaced. Remove the plane first.
 
 """
             )
@@ -45,31 +45,31 @@ Note: Frame with requested IDs can not be --forced to be replaced. Remove the fr
         //
         @OptionGroup var globalOptions: Options
 
-        @Option(name: [.customLong("derive")], help: "Derive an existing frame")
+        @Option(name: [.customLong("derive")], help: "Derive an existing plane")
         var derivingRef: String?
 
-        @Option(help: "Create a named frame with given name")
+        @Option(help: "Create a named plane with given name")
         var name: String?
 
-        @Option(name: [.customLong("id")], help: "Create a frame with given id")
+        @Option(name: [.customLong("id")], help: "Create a plane with given id")
         var requestedRef: String?
 
-        @Flag(name: [.customLong("force")], help: "Replace existing frame")
+        @Flag(name: [.customLong("force")], help: "Replace existing plane")
         var force: Bool = false
 
-        @Flag(name: [.customLong("append-history")], help: "Append frame to the undo history")
+        @Flag(name: [.customLong("append-history")], help: "Append plane to the undo history")
         var appendHistory: Bool = false
 
         mutating func run() throws {
             let editor = try DesignEditor(location: globalOptions.designLocation)
             let design = editor.design
-            let requestedID: FrameID?
+            let requestedID: PlaneID?
             let createdRef: String
             let derivingFrame = try editor.frameIfPresent(derivingRef)
 
-            if let ref = requestedRef, let frameID = FrameID(ref) {
+            if let ref = requestedRef, let frameID = PlaneID(ref) {
                 requestedID = frameID
-                guard !design.containsFrame(frameID) else {
+                guard !design.containsPlane(frameID) else {
                     throw ToolError.frameExists(frameID.stringValue)
                 }
             }
@@ -78,7 +78,7 @@ Note: Frame with requested IDs can not be --forced to be replaced. Remove the fr
             }
             
             if let name {
-                guard design.frame(name: name) == nil || force else {
+                guard design.plane(name: name) == nil || force else {
                     throw ToolError.frameExists(name)
                 }
                 let frame = createFrame(in: design, deriving: derivingFrame)
@@ -98,16 +98,16 @@ Note: Frame with requested IDs can not be --forced to be replaced. Remove the fr
 
             try editor.save()
 
-            print("Created frame \(createdRef)")
+            print("Created plane \(createdRef)")
         }
     }
 }
 
-func createFrame(in design: Design, deriving: DesignFrame?, requestedID: FrameID? = nil) -> TransientFrame {
+func createFrame(in design: Design, deriving: DesignPlane?, requestedID: PlaneID? = nil) -> TransientPlane {
     if let deriving {
-        return design.createFrame(deriving: deriving, id: requestedID)
+        return design.createPlane(deriving: deriving, id: requestedID)
     }
     else {
-        return design.createFrame(id: requestedID)
+        return design.createPlane(id: requestedID)
     }
 }
