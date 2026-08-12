@@ -78,8 +78,8 @@ public class DesignEditor {
             }
         }
         self.design = useDesign
-        if let frame = self.design.currentPlane {
-            self.world = World(frame: frame)
+        if let plane = self.design.currentPlane {
+            self.world = World(plane: plane)
         }
         else {
             self.world = World(design: self.design)

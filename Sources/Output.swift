@@ -8,7 +8,7 @@
 import PoieticCore
 
 func printIssues(_ world: World) {
-    guard let frame = world.frame else { return }
+    guard let frame = world.plane else { return }
     printIssues(world.issues, frame: frame)
 }
 func printIssues(_ issues: [ObjectID:[Issue]], frame: some Plane) {

@@ -52,7 +52,7 @@ extension PoieticTool {
             }
         }
         
-        @Option(name: [.customLong("plane")], help: "List objects in frame (ID or name). If not provided, current is used.")
+        @Option(name: [.customLong("plane")], help: "List objects in plane (ID or name). If not provided, current is used.")
         var frameRef: String?
 
         @Option(name: [.customLong("type")], help: "Filter list objects by type (when applicable)")
