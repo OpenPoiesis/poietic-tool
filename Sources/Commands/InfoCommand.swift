@@ -52,7 +52,7 @@ extension PoieticTool {
             ]
             
             if let frame {
-                let unstructuredCount = frame.filter { $0.structure.type == .unstructured }.count
+                let unstructuredCount = frame.filter { $0.topology.type == .unstructured }.count
                 items += [
                     (nil, nil),
                     ("Plane", "\(frame.id)"),

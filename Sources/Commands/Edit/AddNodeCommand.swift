@@ -46,14 +46,14 @@ poietic edit add FlowRate name=expenses formula=50
 
             let object: TransientObject
             
-            switch type.structuralType {
+            switch type.topologyType {
             case .unstructured:
                 object = trans.create(type)
             case .node:
-                object = trans.create(type, structure: .node)
+                object = trans.create(type, topology: .node)
             default:
                 throw ToolError.structuralTypeMismatch("node or unstructured",
-                                                       type.structuralType.rawValue)
+                                                       type.topologyType.rawValue)
             }
             
             for item in attributeAssignments {

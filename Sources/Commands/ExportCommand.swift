@@ -29,24 +29,24 @@ extension PoieticTool {
 
         mutating func run() throws {
             let editor = try DesignEditor(location: globalOptions.designLocation)
-            let frame = try editor.frame(frameReference)
+            let plane = try editor.frame(frameReference)
 
             let extractor = DesignExtractor()
             let snapshots: [RawSnapshot]
             if references.isEmpty {
-                snapshots = frame.snapshots.map {
+                snapshots = plane.snapshots.map {
                     extractor.extract($0)
                 }
             }
             else {
                 var validIDs: [ObjectID] = []
                 for ref in references {
-                    guard let snapshot = frame.object(stringReference: ref) else {
+                    guard let snapshot = plane.object(stringReference: ref) else {
                         throw ToolError.unknownObject(ref)
                     }
                     validIDs.append(snapshot.objectID)
                 }
-                snapshots = extractor.extractPruning(objects: validIDs, frame: frame)
+                snapshots = extractor.extractPruning(objects: validIDs, plane: plane)
             }
 
             let rawDesign = extractor.extractStub(editor.design)

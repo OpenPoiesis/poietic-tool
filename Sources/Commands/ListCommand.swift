@@ -128,9 +128,9 @@ func listAll(_ snapshots: [ObjectSnapshot], in frame: DesignPlane) {
     let sorted = snapshots.sorted { left, right in
         left.id < right.id
     }
-    let nodes = sorted.filter { $0.structure.type == .node }
+    let nodes = sorted.filter { $0.topology.type == .node }
     let edges = sorted.compactMap { DesignObjectEdge($0,in: frame) }
-    let unstructured = sorted.filter { $0.structure.type == .unstructured }
+    let unstructured = sorted.filter { $0.topology.type == .unstructured }
 
     if unstructured.count > 0 {
         print("UNSTRUCTURED OBJECTS")

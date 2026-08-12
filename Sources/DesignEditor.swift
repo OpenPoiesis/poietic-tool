@@ -149,7 +149,7 @@ public class DesignEditor {
     ///
     func frameIfPresent(_ requiredReference: String? = nil) throws (ToolError) -> DesignPlane? {
         if let requiredReference {
-            if let id = PlaneID(requiredReference), let frame = design.frame(id) {
+            if let id = PlaneID(requiredReference), let frame = design.plane(id) {
                 return frame
             }
             else {

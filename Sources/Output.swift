@@ -35,7 +35,7 @@ func printObjectIssues(_ objectID: ObjectID, issues: [Issue], frame: some Plane)
     let name: String = object.name.map { " (\($0))" } ?? ""
     let structure: String
     
-    switch object.structure {
+    switch object.topology {
     case .unstructured, .node:          structure = ""
     case .edge(let origin, let target): structure = "[\(origin) → \(target)]"
     case .orderedSet(let owner, _):         structure = "[↕︎\(owner)]"
@@ -62,7 +62,7 @@ func printDesignIssues(_ issues: [Issue], frame: some Plane) {
     }
 }
 
-func printValidationResult(_ result: FrameValidationResult, in frame: some Plane) {
+func printValidationResult(_ result: PlaneValidationResult, in frame: some Plane) {
     printDesignIssues(result.violationsAsIssues(), frame: frame)
     printIssues(result.objectIssues(), frame: frame)
 }

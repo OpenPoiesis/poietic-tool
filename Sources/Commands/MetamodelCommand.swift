@@ -95,7 +95,7 @@ func printAllAsText(_ metamodel: Metamodel) {
 }
 
 func printTypeAsText(_ type: ObjectType) {
-    print("\(type.name) (\(type.structuralType))")
+    print("\(type.name) (\(type.topologyType))")
 
     if type.traits.isEmpty {
         print("    (no components)")

@@ -30,7 +30,7 @@ enum ToolError: Error, CustomStringConvertible {
     case designIssues([ObjectID:[Issue]])
     case brokenStructuralIntegrity(StructuralIntegrityError)
 
-    case validationFailed(FrameValidationResult)
+    case validationFailed(PlaneValidationResult)
     
     // Simulation errors
     case unknownVariables([String])
@@ -277,7 +277,7 @@ func makeFileURL(fromPath path: String) throws (ToolError) -> URL {
 }
 
 func readRawDesign(fromPath path: String) throws (ToolError) -> RawDesign {
-    let reader = JSONDesignReader(variantCoding: .dictionaryWithFallback)
+    let reader = JSONDesignReader()
     let design: RawDesign
     let url = try makeFileURL(fromPath: path)
     
