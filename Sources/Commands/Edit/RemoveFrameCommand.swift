@@ -15,18 +15,18 @@ extension PoieticTool {
     struct RemoveFrame: ParsableCommand {
         static let configuration
             = CommandConfiguration(
-                abstract: "Remove a frame"
+                abstract: "Remove a plane"
             )
 
         @OptionGroup var globalOptions: Options
 
-        @Argument(help: "IDs or names of frames to be removed")
+        @Argument(help: "IDs or names of planes to be removed")
         var references: [String]
         
         mutating func run() throws {
             let editor = try DesignEditor(location: globalOptions.designLocation)
 
-            guard editor.design.frames.count > 0 else {
+            guard editor.design.planes.count > 0 else {
                 throw ToolError.emptyDesign
             }
             guard !references.isEmpty else {
@@ -34,14 +34,14 @@ extension PoieticTool {
                 return
             }
 
-            var toRemove: [FrameID] = []
+            var toRemove: [PlaneID] = []
             
             for ref in references {
-                if let id = editor.design.frame(name: ref)?.id {
+                if let id = editor.design.plane(name: ref)?.id {
                     toRemove.append(id)
                 }
-                else if let id = FrameID(ref),
-                        editor.design.containsFrame(id)
+                else if let id = PlaneID(ref),
+                        editor.design.containsPlane(id)
                 {
                     toRemove.append(id)
                 }
@@ -51,11 +51,11 @@ extension PoieticTool {
             }
 
             for id in toRemove {
-                editor.design.removeFrame(id)
+                editor.design.removePlane(id)
             }
 
             try editor.save()
-            print("Removed \(toRemove.count) frames.")
+            print("Removed \(toRemove.count) planes.")
         }
     }
 }

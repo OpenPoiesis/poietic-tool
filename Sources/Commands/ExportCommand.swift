@@ -14,39 +14,39 @@ import PoieticFlows
 extension PoieticTool {
     struct Export: ParsableCommand {
         static let configuration
-            = CommandConfiguration(abstract: "Export current frame or a collection of objects")
+            = CommandConfiguration(abstract: "Export current plane or a collection of objects")
 
         @OptionGroup var globalOptions: Options
 
-        @Option(name: [.customLong("frame")], help: "Frame to be exported. Default: current frame.")
+        @Option(name: [.customLong("plane")], help: "Plane to be exported. Default: current plane.")
         var frameReference: String?
 
         @Option(name: [.customLong("output"), .customShort("o")], help: "Output path. Default or '-' is standard output.")
         var outputPath: String = "-"
 
-        @Argument(help: "List of references of objects to be exported. Default: all objects in a frame.")
+        @Argument(help: "List of references of objects to be exported. Default: all objects in a plane.")
         var references: [String] = []
 
         mutating func run() throws {
             let editor = try DesignEditor(location: globalOptions.designLocation)
-            let frame = try editor.frame(frameReference)
+            let plane = try editor.frame(frameReference)
 
             let extractor = DesignExtractor()
             let snapshots: [RawSnapshot]
             if references.isEmpty {
-                snapshots = frame.snapshots.map {
+                snapshots = plane.snapshots.map {
                     extractor.extract($0)
                 }
             }
             else {
                 var validIDs: [ObjectID] = []
                 for ref in references {
-                    guard let snapshot = frame.object(stringReference: ref) else {
+                    guard let snapshot = plane.object(stringReference: ref) else {
                         throw ToolError.unknownObject(ref)
                     }
                     validIDs.append(snapshot.objectID)
                 }
-                snapshots = extractor.extractPruning(objects: validIDs, frame: frame)
+                snapshots = extractor.extractPruning(objects: validIDs, plane: plane)
             }
 
             let rawDesign = extractor.extractStub(editor.design)

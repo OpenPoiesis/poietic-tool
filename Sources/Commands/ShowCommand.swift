@@ -21,7 +21,6 @@ extension PoieticTool {
 
         enum OutputFormat: String, CaseIterable, ExpressibleByArgument{
             case text = "text"
-            case json = "json"
             var defaultValueDescription: String { "text" }
             
             static var allValueStrings: [String] {
@@ -31,7 +30,7 @@ extension PoieticTool {
         @Option(name: [.long, .customShort("f")], help: "Output format")
         var outputFormat: OutputFormat = .text
 
-        @Option(name: [.customLong("frame")], help: "Frame to get object from")
+        @Option(name: [.customLong("plane")], help: "Frame to get object from")
         var frameRef: String?
         
         @Argument(help: "ID of an object to be described")
@@ -47,7 +46,6 @@ extension PoieticTool {
             
             switch outputFormat {
             case .text: printObjectAsText(object)
-            case .json: printObjectAsJSON(object)
             }
         }
     }
@@ -58,7 +56,7 @@ func printObjectAsText(_ object: ObjectSnapshot) {
         ("Type", "\(object.type.name)"),
         ("Object ID", "\(object.objectID)"),
         ("Snapshot ID", "\(object.snapshotID)"),
-        ("Structure", "\(object.structure.type)"),
+        ("Topology", "\(object.topology.type)"),
     ]
     
     let traits = object.type.traits.map { $0.name }.joined(separator: ", ")
@@ -120,12 +118,4 @@ func printObjectAsText(_ object: ObjectSnapshot) {
         }
     }
 
-}
-
-func printObjectAsJSON(_ object: ObjectSnapshot) {
-    let raw = RawSnapshot(object)
-    let encoder = JSONEncoder()
-    let data = try! encoder.encode(raw)
-    let output = String(data: data, encoding: .utf8)!
-    print(output)
 }

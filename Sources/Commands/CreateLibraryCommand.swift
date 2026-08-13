@@ -18,7 +18,7 @@ extension PoieticTool {
                 commandName: "create-library",
                 abstract: "Create a library description for multiple models",
                 discussion: """
-The command creates a library description from a given list of design files (not a Poietic frame file).
+The command creates a library description from a given list of design files (not a Poietic plane file).
 
 Command extracts DesignInfo from the designs. If multiple instances of DesignInfo are present, then one is chosen arbitrarily.
 """)
@@ -68,7 +68,7 @@ func createLibraryItem(fromDesignAt location: String) throws -> DesignLibraryIte
 
     let editor = try DesignEditor(url: actualURL)
 
-    guard let frame = editor.design.currentFrame else {
+    guard let frame = editor.design.currentPlane else {
         throw ToolError.emptyDesign
     }
 

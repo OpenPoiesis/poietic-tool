@@ -46,14 +46,14 @@ poietic edit add FlowRate name=expenses formula=50
 
             let object: TransientObject
             
-            switch type.structuralType {
+            switch type.topologyType {
             case .unstructured:
                 object = trans.create(type)
             case .node:
-                object = trans.create(type, structure: .node)
+                object = trans.create(type, topology: .node)
             default:
                 throw ToolError.structuralTypeMismatch("node or unstructured",
-                                                       type.structuralType.rawValue)
+                                                       type.topologyType.rawValue)
             }
             
             for item in attributeAssignments {
@@ -70,7 +70,7 @@ poietic edit add FlowRate name=expenses formula=50
             try editor.accept(trans, replacing: options.replaceRef, appendHistory: options.appendHistory)
             try editor.save()
 
-            print("Created node \(object.objectID) in frame \(trans.id)")
+            print("Created node \(object.objectID) in plane \(trans.id)")
         }
     }
 }

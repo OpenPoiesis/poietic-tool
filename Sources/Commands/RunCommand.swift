@@ -57,7 +57,7 @@ extension PoieticTool {
                        help: "Set (override) a value of a constant node in a form 'attribute=value'")
         var overrideValues: [String] = []
 
-        @Option(name: [.customLong("frame")], help: "Frame name or ID to run")
+        @Option(name: [.customLong("plane")], help: "Plane name or ID to run")
         var frameRef: String?
 
         /// Path to the output directory.

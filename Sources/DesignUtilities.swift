@@ -11,7 +11,7 @@
 // in the Flows library.
 //
 // This file contains functionality that might be more complex, not always
-// trivial manipulation of the frame.
+// trivial manipulation of the plane.
 //
 // Once happy with the function/structure, consider moving to Flows or even Core
 // library.

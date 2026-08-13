@@ -40,16 +40,16 @@ extension PoieticTool {
                 throw ToolError.unknownObjectType(typeName)
             }
             
-            guard type.structuralType == .edge else {
-                throw ToolError.structuralTypeMismatch(StructuralType.edge.rawValue,
-                                                       type.structuralType.rawValue)
+            guard type.topologyType == .edge else {
+                throw ToolError.structuralTypeMismatch(TopologyType.edge.rawValue,
+                                                       type.topologyType.rawValue)
             }
             
             guard let originObject = trans.object(stringReference: self.origin) else {
                 throw ToolError.unknownObject( self.origin)
             }
             
-            guard originObject.structure == .node else {
+            guard originObject.topology == .node else {
                 throw ToolError.nodeExpected(self.origin)
 
             }
@@ -58,12 +58,12 @@ extension PoieticTool {
                 throw ToolError.unknownObject(self.target)
             }
 
-            guard targetObject.structure == .node else {
+            guard targetObject.topology == .node else {
                 throw ToolError.nodeExpected(target)
 
             }
 
-            let id = trans.create(type, structure: .edge(originObject.objectID, targetObject.objectID))
+            let id = trans.create(type, topology: .edge(originObject.objectID, targetObject.objectID))
             
             try editor.accept(trans, replacing: options.replaceRef, appendHistory: options.appendHistory)
             try editor.save()

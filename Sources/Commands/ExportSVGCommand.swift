@@ -38,7 +38,7 @@ extension PoieticTool {
         @Option(name: [.customLong("zoom")], help: "Zoom level in %")
         var zoom: Double = 100.0
         
-        @Option(name: [.customLong("frame")], help: "Frame ID or name")
+        @Option(name: [.customLong("plane")], help: "Plane ID or name")
         var frameRef: String?
         
         @Option(name: [.customLong("pictograms")], help: "File with pictogram collection")

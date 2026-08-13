@@ -14,13 +14,13 @@ import PoieticFlows
 extension PoieticTool {
     struct Import: ParsableCommand {
         static let configuration
-            = CommandConfiguration(abstract: "Import a frame into the design")
+            = CommandConfiguration(abstract: "Import a plane into the design")
         
         @OptionGroup var globalOptions: Options
         @OptionGroup var options: EditOptions
 
-        // TODO: Specify which frame to import from a multi-frame file
-        // TODO: Fail on multi-frame file without current frame
+        // TODO: Specify which plane to import from a multi-plane file
+        // TODO: Fail on multi-plane file without current plane
         enum IdentityMode: String, CaseIterable, ExpressibleByArgument{
             case require = "require" // requireProvided
             case auto = "auto" // preserveOrCreate

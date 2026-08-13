@@ -20,7 +20,7 @@ extension PoieticTool {
         @OptionGroup var globalOptions: Options
 
         @Option(name: [.customLong("import"), .customShort("i")],
-                help: "Poietic frame to import into the first frame")
+                help: "Poietic plane to import into the first plane")
         var importPaths: [String] = []
 
         mutating func run() throws {
@@ -29,7 +29,7 @@ extension PoieticTool {
 
             if !importPaths.isEmpty {
                 let loader = DesignLoader(metamodel: design.metamodel, options: .useIDAsNameAttribute)
-                let frame = design.createFrame()
+                let frame = design.createPlane()
 
                 for path in importPaths {
                     let rawDesign = try readRawDesign(fromPath: path)
