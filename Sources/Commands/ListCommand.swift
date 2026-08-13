@@ -126,7 +126,7 @@ extension PoieticTool {
 
 func listAll(_ snapshots: [ObjectSnapshot], in frame: DesignPlane) {
     let sorted = snapshots.sorted { left, right in
-        left.id < right.id
+        left.snapshotID.rawValue < right.snapshotID.rawValue
     }
     let nodes = sorted.filter { $0.topology.type == .node }
     let edges = sorted.compactMap { DesignObjectEdge($0,in: frame) }
