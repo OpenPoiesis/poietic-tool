@@ -58,7 +58,7 @@ extension PoieticTool {
         var overrideValues: [String] = []
 
         @Option(name: [.customLong("plane")], help: "Plane name or ID to run")
-        var frameRef: String?
+        var planeRef: String?
 
         /// Path to the output directory.
         /// The generated files are:
@@ -78,6 +78,7 @@ extension PoieticTool {
         mutating func run() throws {
             let editor = try DesignEditor(location: options.designLocation)
             let world = editor.world
+            let plane = try editor.frame(planeRef)
 
             try world.run(schedule: PlanSchedule.self)
             
@@ -86,19 +87,11 @@ extension PoieticTool {
                 throw ToolError.designIssues(world.issues)
             }
             
-            var settings = plan.simulationSettings ?? SimulationSettings()
+            var settings: SimulationSettings = world.singleton() ?? SimulationSettings()
             
-            if let startTime {
-                settings.initialTime = startTime
-            }
-
-            if let timeDelta {
-                settings.timeDelta = timeDelta
-            }
-            
-            if let steps {
-                settings.steps = steps
-            }
+            if let startTime { settings.initialTime = startTime }
+            if let timeDelta { settings.timeDelta = timeDelta }
+            if let steps     { settings.steps = steps }
 
             settings.solverType = solverName
             

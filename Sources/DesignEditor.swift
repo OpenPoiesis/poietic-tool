@@ -90,8 +90,7 @@ public class DesignEditor {
         ))
         self.world.addSchedule(Schedule(
             label: SimulateSchedule.self,
-            systems: PoieticFlows.SimulationPlanningSystems
-                     + PoieticFlows.SimulationRunningSystems
+            systems: PoieticFlows.SimulationRunningSystems
                      + [PoieticFlows.NewChartResolutionSystem.self]
         ))
         

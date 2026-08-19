@@ -51,11 +51,11 @@ extension PoieticTool {
             for id in proposal.toRemove {
                 if verbose,
                    let object = trans[id],
-                   let edge = DesignObjectEdge(object, in: trans)
+                   case .edge(let origin, let target) = object.topology
                 {
-                    let originName = trans[edge.origin]?.name ?? "(unnamed)"
-                    let targetName = trans[edge.target]?.name ?? "(unnamed)"
-                    print("Disconnected parameter \(originName) (\(edge.origin)) from \(targetName) (\(edge.target)), edge: \(edge.id)")
+                    let originName = trans[origin]?.name ?? "(unnamed)"
+                    let targetName = trans[target]?.name ?? "(unnamed)"
+                    print("Disconnected parameter \(originName) (\(origin)) from \(targetName) (\(target)), edge: \(object.objectID)")
                 }
                 trans.removeCascading(id)
             }
