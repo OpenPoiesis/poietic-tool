@@ -212,7 +212,7 @@ func listPseudoEquations(_ frame: DesignPlane, world: World) throws (ToolError) 
         throw .internalSystemError(error)
     }
 
-    for (entity, stock) in world.query(StockComponent.self) {
+    for (entity, stock) in world.query(Stock.self) {
         let lhs = entity.displayName(default: "(unnamed)")
         var rhs = ""
         var hasInflows: Bool = false
