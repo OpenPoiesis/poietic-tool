@@ -1,5 +1,5 @@
 //
-//  File.swift
+//  WriteDOTCommand.swift
 //  
 //
 //  Created by Stefan Urbanek on 27/06/2023.

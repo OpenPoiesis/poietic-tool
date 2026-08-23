@@ -1,5 +1,5 @@
 //
-//  File.swift
+//  NewCommand.swift
 //  
 //
 //  Created by Stefan Urbanek on 11/01/2022.

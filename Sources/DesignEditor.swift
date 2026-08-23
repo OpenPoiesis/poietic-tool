@@ -1,5 +1,5 @@
 //
-//  Modeller+Tool.swift
+//  DesignEditor.swift
 //  poietic
 //
 //  Created by Stefan Urbanek on 07/11/2025.

@@ -1,5 +1,5 @@
 //
-//  NewCommand.swift
+//  CreateLibraryCommand.swift
 //
 //
 //  Created by Stefan Urbanek on 25/03/2024.

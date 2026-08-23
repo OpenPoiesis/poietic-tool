@@ -1,5 +1,5 @@
 //
-//  File.swift
+//  DotExporter.swift
 //
 //
 //  Created by Stefan Urbanek on 2021/10/21.

@@ -1,5 +1,5 @@
 //
-//  InspectCommand.swift
+//  EditCommand.swift
 //
 //
 //  Created by Stefan Urbanek on 29/06/2023.
@@ -34,7 +34,7 @@ extension PoieticTool {
                 Layout.self,
                 Align.self,
                 PruneHistory.self,
-                CreateFrame.self,
+                CreatePlane.self,
                 RemoveFrame.self,
             ]
         )

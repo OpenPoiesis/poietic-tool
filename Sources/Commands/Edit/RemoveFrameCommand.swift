@@ -46,7 +46,7 @@ extension PoieticTool {
                     toRemove.append(id)
                 }
                 else {
-                    throw ToolError.unknownFrame(ref)
+                    throw ToolError.unknownPlane(ref)
                 }
             }
 

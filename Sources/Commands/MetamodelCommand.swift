@@ -1,5 +1,5 @@
 //
-//  File.swift
+//  MetamodelCommand.swift
 //  
 //
 //  Created by Stefan Urbanek on 30/06/2023.

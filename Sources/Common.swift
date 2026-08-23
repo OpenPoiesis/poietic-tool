@@ -1,5 +1,5 @@
 //
-//  File.swift
+//  Common.swift
 //  
 //
 //  Created by Stefan Urbanek on 06/01/2022.
@@ -40,9 +40,9 @@ enum ToolError: Error, CustomStringConvertible {
     // Query errors
     case unknownObject(String)
     case nodeExpected(String)
-    case unknownFrame(String)
-    case frameExists(String)
-    case noCurrentFrame
+    case unknownPlane(String)
+    case planeExists(String)
+    case noCurrentPlane
 
     // Editing errors
     case noChangesToUndo
@@ -108,9 +108,9 @@ enum ToolError: Error, CustomStringConvertible {
                 detail += "\(issues.count) objects with errors"
             }
             if detail == "" {
-                detail = "unspecified compilation error(s)"
+                detail = "unspecified planning error(s)"
             }
-            return "Design compilation failed: \(detail)"
+            return "Simulation planning failed: \(detail)"
 
         case .unknownSolver(let value):
             return "Unknown solver '\(value)'"
@@ -119,11 +119,11 @@ enum ToolError: Error, CustomStringConvertible {
             return "Unknown variables: \(varlist)"
         case .unknownObject(let value):
             return "Unknown object '\(value)'"
-        case .unknownFrame(let value):
+        case .unknownPlane(let value):
             return "Unknown plane: \(value)"
-        case .noCurrentFrame:
+        case .noCurrentPlane:
             return "No current plane set"
-        case .frameExists(let value):
+        case .planeExists(let value):
             return "Plane already exists: \(value)"
         case .noChangesToUndo:
             return "No changes to undo"
@@ -173,11 +173,11 @@ enum ToolError: Error, CustomStringConvertible {
             return "See the list of available simulation variables using the 'list' command."
         case .unknownObject(_):
             return "See the list of available objects and their names by using the 'list' command."
-        case .unknownFrame(_):
+        case .unknownPlane(_):
             return nil
-        case .noCurrentFrame:
+        case .noCurrentPlane:
             return nil
-        case .frameExists(_):
+        case .planeExists(_):
             return "Use another plane name or ID, or use force to replace existing"
         case .noChangesToUndo:
             return nil

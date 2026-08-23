@@ -1,5 +1,5 @@
 //
-//  File.swift
+//  RemoveNodeCommand.swift
 //  
 //
 //  Created by Stefan Urbanek on 04/07/2023.
