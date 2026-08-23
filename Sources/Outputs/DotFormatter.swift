@@ -83,7 +83,7 @@ class DotFormatter {
 
         // Need to quote?
 
-        let hasInvalidCharacter = string.contains { $0.isDotIdentifier }
+        let hasInvalidCharacter = string.contains { !$0.isDotIdentifier }
         
         if !hasInvalidCharacter {
             return string

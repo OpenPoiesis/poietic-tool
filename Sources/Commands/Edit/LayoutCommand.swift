@@ -59,7 +59,6 @@ extension PoieticTool {
             let step: Double = (2 * Double.pi) / Double(objects.count)
             
             for obj in objects {
-                let obj = trans.mutate(obj.objectID)
                 let position = Point(center.x + radius * Double.cos(angle),
                                      center.y + radius * Double.sin(angle))
                 obj.position = position

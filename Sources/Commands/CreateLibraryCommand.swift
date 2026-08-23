@@ -41,9 +41,7 @@ Command extracts DesignInfo from the designs. If multiple instances of DesignInf
             let encoder = JSONEncoder()
             encoder.keyEncodingStrategy = .convertToSnakeCase
             let data: Data
-            do {
-                data = try encoder.encode(library)
-            }
+            data = try encoder.encode(library)
             
             try data.write(to: URL(fileURLWithPath: outputFile))
             print("Created library: \(outputFile)")

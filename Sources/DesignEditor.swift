@@ -84,6 +84,7 @@ public class DesignEditor {
         else {
             self.world = World(design: self.design)
         }
+        // TODO: [IMPORTANT][REFACTORING] Validate schedules
         self.world.addSchedule(Schedule(
             label: PlanSchedule.self,
             systems: PoieticFlows.SimulationPlanningSystems
@@ -98,7 +99,6 @@ public class DesignEditor {
             label: DiagramSchedule.self,
             systems:
                 TraitsToDiagramObjectsSystem.self,
-//                ConnectorGeometrySystem.self
         ))
     }
     convenience init(location: String?, design: Design? = nil) throws (ToolError) {

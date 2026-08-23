@@ -78,7 +78,7 @@ extension PoieticTool {
         mutating func run() throws {
             let editor = try DesignEditor(location: options.designLocation)
             let world = editor.world
-
+            
             try world.run(schedule: PlanSchedule.self)
             
             guard let plan: SimulationPlan = world.singleton() else {
@@ -103,7 +103,7 @@ extension PoieticTool {
             else {
                 var unknownNames: [String] = []
                 for name in outputNames {
-                    guard let variable = plan.stateVariables.first(where: { $0.name == name }) else {
+                    guard let variable = plan.variable(named: name) else {
                         unknownNames.append(name)
                         continue
                     }
@@ -133,7 +133,7 @@ extension PoieticTool {
             }
             let scenario = ScenarioParameters(initialValues: scenarioParams)
             
-            // Create and initialize the solver
+            // Create and initialise the solver
             // -------------------------------------------------------------
             world.setSingleton(settings)
             world.setSingleton(scenario)

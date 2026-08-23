@@ -19,17 +19,6 @@ extension PoieticTool {
             = CommandConfiguration(abstract: "Describe an object")
         @OptionGroup var options: Options
 
-        enum OutputFormat: String, CaseIterable, ExpressibleByArgument{
-            case text = "text"
-            var defaultValueDescription: String { "text" }
-            
-            static var allValueStrings: [String] {
-                OutputFormat.allCases.map { "\($0)" }
-            }
-        }
-        @Option(name: [.long, .customShort("f")], help: "Output format")
-        var outputFormat: OutputFormat = .text
-
         @Option(name: [.customLong("plane")], help: "Plane to get object from")
         var planeRef: String?
         
@@ -44,9 +33,7 @@ extension PoieticTool {
                 throw ToolError.unknownObject(reference)
             }
             
-            switch outputFormat {
-            case .text: printObjectAsText(object)
-            }
+            printObjectAsText(object)
         }
     }
 }

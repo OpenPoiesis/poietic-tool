@@ -8,7 +8,6 @@
 @preconcurrency import ArgumentParser
 import PoieticCore
 import PoieticFlows
-import Markdown
 
 extension PoieticTool {
     struct Info: ParsableCommand {

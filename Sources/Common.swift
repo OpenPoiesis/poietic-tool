@@ -96,7 +96,7 @@ enum ToolError: Error, CustomStringConvertible {
         case .brokenStructuralIntegrity(let error):
             return "Broken structural integrity: \(error)"
         case .validationFailed(let error):
-            let detail: String = "Constraints violated :" + String(error.violations.count)
+            let detail: String = "Constraints violated: " + String(error.violations.count)
             + " object errors: " + String(error.objectErrors.count)
             + " edge rule violations: " + String(error.edgeRuleViolations.count)
 
