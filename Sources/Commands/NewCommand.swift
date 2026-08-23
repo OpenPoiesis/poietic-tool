@@ -29,20 +29,20 @@ extension PoieticTool {
 
             if !importPaths.isEmpty {
                 let loader = DesignLoader(metamodel: design.metamodel, options: .useIDAsNameAttribute)
-                let frame = design.createPlane()
+                let plane = design.createPlane()
 
                 for path in importPaths {
                     let rawDesign = try readRawDesign(fromPath: path)
                     print("Importing from: \(path)")
                     do {
-                        try loader.load(rawDesign, into: frame)
+                        try loader.load(rawDesign, into: plane)
                     }
                     catch {
                         throw ToolError.designLoaderError(error, URL(fileURLWithPath: path))
                     }
                 }
                 
-                try editor.accept(frame)
+                try editor.accept(plane)
             }
             
             try editor.save()

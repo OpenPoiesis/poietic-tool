@@ -19,7 +19,7 @@ extension PoieticTool {
         @OptionGroup var globalOptions: Options
 
         @Option(name: [.customLong("plane")], help: "Plane to be exported. Default: current plane.")
-        var frameReference: String?
+        var planeReference: String?
 
         @Option(name: [.customLong("output"), .customShort("o")], help: "Output path. Default or '-' is standard output.")
         var outputPath: String = "-"
@@ -29,7 +29,7 @@ extension PoieticTool {
 
         mutating func run() throws {
             let editor = try DesignEditor(location: globalOptions.designLocation)
-            let plane = try editor.frame(frameReference)
+            let plane = try editor.plane(planeReference)
 
             let extractor = DesignExtractor()
             let snapshots: [RawSnapshot]

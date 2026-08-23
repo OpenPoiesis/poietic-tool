@@ -45,7 +45,7 @@ func designURL(_ location: String?) throws (ToolError) -> URL {
     }
 }
 
-// TODO: Rename to Laboratory
+// TODO: Rename to Laboratory?
 public class DesignEditor {
     public let url: URL
     public let design: Design
@@ -109,24 +109,24 @@ public class DesignEditor {
     ///
     /// Use this method to get a plane by user-provided reference.
     ///
-    func frame(_ reference: String? = nil) throws (ToolError) -> DesignPlane {
-        guard let frame = try frameIfPresent(reference) else {
-            throw .noCurrentFrame
+    func plane(_ reference: String? = nil) throws (ToolError) -> DesignPlane {
+        guard let plane = try planeIfPresent(reference) else {
+            throw .noCurrentPlane
         }
-        return frame
+        return plane
     }
     
 
     /// Get plane ID from a plane reference, which can be either plane ID or plane name.
     ///
     /// - Returns: Plane ID of resolved reference or `nil` if no such plane exists.
-    func frame(required reference: String? = nil) throws (ToolError) -> PlaneID? {
+    func plane(required reference: String? = nil) throws (ToolError) -> PlaneID? {
         if let reference {
-            if let frameID = PlaneID(reference), design.containsPlane(frameID) {
-                return frameID
+            if let planeID = PlaneID(reference), design.containsPlane(planeID) {
+                return planeID
             }
             else {
-                throw .unknownFrame(reference)
+                throw .unknownPlane(reference)
             }
         }
         else {
@@ -144,20 +144,20 @@ public class DesignEditor {
     ///
     /// Use this method to get a plane by user-provided reference.
     ///
-    /// - Throws ``ToolError/unknownFrame(_:)`` when the plane is not found.
+    /// - Throws ``ToolError/unknownPlane(_:)`` when the plane is not found.
     ///
-    func frameIfPresent(_ requiredReference: String? = nil) throws (ToolError) -> DesignPlane? {
+    func planeIfPresent(_ requiredReference: String? = nil) throws (ToolError) -> DesignPlane? {
         if let requiredReference {
-            if let id = PlaneID(requiredReference), let frame = design.plane(id) {
-                return frame
+            if let id = PlaneID(requiredReference), let plane = design.plane(id) {
+                return plane
             }
             else {
-                throw ToolError.unknownFrame(requiredReference)
+                throw ToolError.unknownPlane(requiredReference)
             }
         }
         else {
-            if let frame = design.currentPlane {
-                return frame
+            if let plane = design.currentPlane {
+                return plane
             }
             else if design.planes.count == 1 {
                 return design.planes.first!
@@ -171,16 +171,16 @@ public class DesignEditor {
     /// Derive a plane from existing plane, if the reference is valid or create a new plane if
     /// there is no current plane.
     ///
-    /// - Throws ``ToolError/unknownFrame(_:)`` when the plane is not found or
-    ///   ``ToolError/emptyDesign`` if there are no frames in the design.
+    /// - Throws ``ToolError/unknownPlane(_:)`` when the plane is not found or
+    ///   ``ToolError/emptyDesign`` if there are no planes in the design.
     ///
     func deriveOrCreate(_ reference: String? = nil) throws (ToolError) -> TransientPlane {
         if let reference {
-            if let original = try frameIfPresent(reference) {
+            if let original = try planeIfPresent(reference) {
                 return design.createPlane(deriving: original)
             }
             else {
-                throw .unknownFrame(reference)
+                throw .unknownPlane(reference)
             }
         }
         else if let original = design.currentPlane {

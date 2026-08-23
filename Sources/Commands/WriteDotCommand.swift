@@ -74,11 +74,11 @@ extension PoieticTool {
         var missingLabel = "(none)"
         
         @Option(name: [.customLong("plane")], help: "Plane ID or name")
-        var frameRef: String?
+        var planeRef: String?
         
         mutating func run() throws {
             let editor = try DesignEditor(location: globalOptions.designLocation)
-            let frame = try editor.frame(frameRef)
+            let plane = try editor.plane(planeRef)
 
             guard let testURL = URL(string: output) else {
                 fatalError("Invalid resource reference: \(output)")
@@ -98,7 +98,7 @@ extension PoieticTool {
                                        missingLabel: missingLabel,
                                        style: DefaultDOTStyle)
 
-            try exporter.export(frame)
+            try exporter.export(plane)
         }
     }
 }

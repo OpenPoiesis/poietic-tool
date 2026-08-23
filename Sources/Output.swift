@@ -8,18 +8,18 @@
 import PoieticCore
 
 func printIssues(_ world: World) {
-    guard let frame = world.plane else { return }
-    printIssues(world.issues, frame: frame)
+    guard let plane = world.plane else { return }
+    printIssues(world.issues, plane: plane)
 }
-func printIssues(_ issues: [ObjectID:[Issue]], frame: some Plane) {
+func printIssues(_ issues: [ObjectID:[Issue]], plane: some Plane) {
     // FIXME: Use stderr
     print("DESIGN ISSUES:")
     for (objectID, objectIssues) in issues {
-        printObjectIssues(objectID, issues: objectIssues, frame: frame)
+        printObjectIssues(objectID, issues: objectIssues, plane: plane)
     }
 }
 
-func printObjectIssues(_ objectID: ObjectID, issues: [Issue], frame: some Plane) {
+func printObjectIssues(_ objectID: ObjectID, issues: [Issue], plane: some Plane) {
     /*
      [1234] Stock (ProductionRate):
      error: Cycle detected in flow network
@@ -30,7 +30,7 @@ func printObjectIssues(_ objectID: ObjectID, issues: [Issue], frame: some Plane)
      error: Negative flow rate not allowed
      warning: Flow rate exceeds capacity limits
      */
-    guard let object = frame[objectID] else { return }
+    guard let object = plane[objectID] else { return }
     let identity = "[\(objectID)] \(object.type.name)"
     let name: String = object.name.map { " (\($0))" } ?? ""
     let structure: String
@@ -51,7 +51,7 @@ func printObjectIssues(_ objectID: ObjectID, issues: [Issue], frame: some Plane)
         print(indent + line)
     }
 }
-func printDesignIssues(_ issues: [Issue], frame: some Plane) {
+func printDesignIssues(_ issues: [Issue], plane: some Plane) {
     print("[design]")
     
     for issue in issues {
@@ -62,7 +62,7 @@ func printDesignIssues(_ issues: [Issue], frame: some Plane) {
     }
 }
 
-func printValidationResult(_ result: PlaneValidationResult, in frame: some Plane) {
-    printDesignIssues(result.violationsAsIssues(), frame: frame)
-    printIssues(result.objectIssues(), frame: frame)
+func printValidationResult(_ result: PlaneValidationResult, in plane: some Plane) {
+    printDesignIssues(result.violationsAsIssues(), plane: plane)
+    printIssues(result.objectIssues(), plane: plane)
 }

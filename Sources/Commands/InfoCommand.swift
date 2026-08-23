@@ -17,17 +17,17 @@ extension PoieticTool {
         @OptionGroup var options: Options
 
         @Argument(help: "Plane ID (current if not provided)")
-        var frameID: String?
+        var planeID: String?
 
         mutating func run() throws {
             let editor = try DesignEditor(location: options.designLocation)
-            let frame = try editor.frameIfPresent(frameID)
+            let plane = try editor.planeIfPresent(planeID)
             
             var items: [(String?, String?)] = [
                 ("Design", editor.url.relativeString)
             ]
 
-            if let info = frame?.filter(type: ObjectType.DesignInfo).first {
+            if let info = plane?.filter(type: ObjectType.DesignInfo).first {
                 if let text = try info["title"]?.stringValue() {
                     items.append(("Title", text))
                 }
@@ -51,18 +51,18 @@ extension PoieticTool {
                 ("Named planes", "\(editor.design.namedPlanes.count)"),
             ]
             
-            if let frame {
-                let unstructuredCount = frame.filter { $0.topology.type == .unstructured }.count
+            if let plane {
+                let unstructuredCount = plane.filter { $0.topology.type == .unstructured }.count
                 items += [
                     (nil, nil),
-                    ("Plane", "\(frame.id)"),
-                    ("All snapshots", "\(frame.snapshots.count)"),
-                    ("Nodes", "\(frame.nodeKeys)"),
-                    ("Edges", "\(frame.edgeKeys)"),
+                    ("Plane", "\(plane.id)"),
+                    ("All snapshots", "\(plane.snapshots.count)"),
+                    ("Nodes", "\(plane.nodeKeys)"),
+                    ("Edges", "\(plane.edgeKeys)"),
                     ("Unstructured", "\(unstructuredCount)"),
                 ]
 
-                if let obj = frame.first(trait: .Simulation) {
+                if let obj = plane.first(trait: .Simulation) {
                     let params = SimulationSettings(fromObject: obj)
                     items += [
                         (nil, nil),

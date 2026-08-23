@@ -68,11 +68,11 @@ func createLibraryItem(fromDesignAt location: String) throws -> DesignLibraryIte
 
     let editor = try DesignEditor(url: actualURL)
 
-    guard let frame = editor.design.currentPlane else {
+    guard let plane = editor.design.currentPlane else {
         throw ToolError.emptyDesign
     }
 
-    let info = frame.filter(type: ObjectType.DesignInfo).first?.attributes ?? [:]
+    let info = plane.filter(type: ObjectType.DesignInfo).first?.attributes ?? [:]
     
     let name: String
     if let infoName = try? info["name"]?.stringValue() {

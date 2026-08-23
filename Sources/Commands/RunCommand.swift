@@ -78,7 +78,6 @@ extension PoieticTool {
         mutating func run() throws {
             let editor = try DesignEditor(location: options.designLocation)
             let world = editor.world
-            let plane = try editor.frame(planeRef)
 
             try world.run(schedule: PlanSchedule.self)
             
@@ -127,10 +126,10 @@ extension PoieticTool {
                 guard let doubleValue = Double(stringValue) else {
                     throw ToolError.typeMismatch("constant override '\(key)'", stringValue, "double")
                 }
-                guard let variable = plan.variable(named: key) else {
+                guard let object = plan.simulationObject(named: key) else {
                     throw ToolError.unknownObject(key)
                 }
-                scenarioParams[variable.objectID] = Variant(doubleValue)
+                scenarioParams[object.objectID] = Variant(doubleValue)
             }
             let scenario = ScenarioParameters(initialValues: scenarioParams)
             
@@ -173,7 +172,7 @@ func writeCSV(path: String,
     // TODO: Step
     let writer: CSVWriter
     if path == "-" {
-        writer = try CSVWriter(.standardOutput)
+        writer = CSVWriter(.standardOutput)
     }
     else {
         writer = try CSVWriter(path: path)

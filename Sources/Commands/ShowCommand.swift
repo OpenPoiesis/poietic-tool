@@ -30,17 +30,17 @@ extension PoieticTool {
         @Option(name: [.long, .customShort("f")], help: "Output format")
         var outputFormat: OutputFormat = .text
 
-        @Option(name: [.customLong("plane")], help: "Frame to get object from")
-        var frameRef: String?
+        @Option(name: [.customLong("plane")], help: "Plane to get object from")
+        var planeRef: String?
         
         @Argument(help: "ID of an object to be described")
         var reference: String
         
         mutating func run() throws {
             let editor = try DesignEditor(location: options.designLocation)
-            let frame = try editor.frame(frameRef)
+            let plane = try editor.plane(planeRef)
             
-            guard let object = frame.object(stringReference: reference) else {
+            guard let object = plane.object(stringReference: reference) else {
                 throw ToolError.unknownObject(reference)
             }
             

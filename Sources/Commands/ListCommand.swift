@@ -17,14 +17,14 @@ extension PoieticTool {
         @OptionGroup var options: Options
 
         enum EntityType {
-            case frames
+            case planes
             case objects
         }
         
         enum ListType: String, CaseIterable, ExpressibleByArgument{
             case all = "all"
-            case namedFrames = "named-planes"
-            case frames
+            case namedPlanes = "named-planes"
+            case planes
             case history
             case names = "names"
             case formulas = "formulas"
@@ -40,9 +40,9 @@ extension PoieticTool {
                 switch self {
                 case .all: .objects
 
-                case .namedFrames: .frames
-                case .frames: .frames
-                case .history: .frames
+                case .namedPlanes: .planes
+                case .planes: .planes
+                case .history: .planes
                     
                 case .formulas: .objects
                 case .graphicalFunctions: .objects
@@ -53,7 +53,7 @@ extension PoieticTool {
         }
         
         @Option(name: [.customLong("plane")], help: "List objects in plane (ID or name). If not provided, current is used.")
-        var frameRef: String?
+        var planeRef: String?
 
         @Option(name: [.customLong("type")], help: "Filter list objects by type (when applicable)")
         var typeName: String?
@@ -64,30 +64,30 @@ extension PoieticTool {
         mutating func run() throws {
             let editor = try DesignEditor(location: options.designLocation)
             switch listType.entityType {
-            case .frames:
-                try listFrames(editor.design)
+            case .planes:
+                try listPlanes(editor.design)
             case .objects:
-                let frame = try editor.frame(frameRef)
-                try listObjects(editor.world, in: frame)
+                let plane = try editor.plane(planeRef)
+                try listObjects(editor.world, in: plane)
             }
         }
-        func listFrames(_ design: Design) throws {
+        func listPlanes(_ design: Design) throws {
             switch listType {
-            case .namedFrames:
-                listNamedFrames(design)
-            case .frames:
-                listFrameIDs(design)
+            case .namedPlanes:
+                listNamedPlanes(design)
+            case .planes:
+                listPlaneIDs(design)
             case .history:
                 listHistory(design)
             default:
                 return
             }
         }
-        func listObjects(_ world: World, in frame: DesignPlane) throws {
+        func listObjects(_ world: World, in plane: DesignPlane) throws {
             let type: ObjectType?
             
             if let typeName  {
-                if let maybeType = frame.design.metamodel.objectType(name: typeName) {
+                if let maybeType = plane.design.metamodel.objectType(name: typeName) {
                     type = maybeType
                 }
                 else {
@@ -100,23 +100,23 @@ extension PoieticTool {
             
             let snapshots: [ObjectSnapshot]
             if let type {
-                snapshots = frame.filter(type: type)
+                snapshots = plane.filter(type: type)
             }
             else {
-                snapshots = frame.snapshots
+                snapshots = plane.snapshots
             }
 
             switch listType {
             case .all:
-                listAll(snapshots,in: frame)
+                listAll(snapshots,in: plane)
             case .names:
                 listNames(snapshots)
             case .formulas:
                 listFormulas(snapshots)
             case .pseudoEquations:
-                try listPseudoEquations(frame, world: world)
+                try listPseudoEquations(plane, world: world)
             case .graphicalFunctions:
-                listGraphicalFunctions(frame)
+                listGraphicalFunctions(plane)
             default:
                 return
             }
@@ -124,12 +124,12 @@ extension PoieticTool {
     }
 }
 
-func listAll(_ snapshots: [ObjectSnapshot], in frame: DesignPlane) {
+func listAll(_ snapshots: [ObjectSnapshot], in plane: DesignPlane) {
     let sorted = snapshots.sorted { left, right in
         left.snapshotID.rawValue < right.snapshotID.rawValue
     }
     let nodes = sorted.filter { $0.topology.type == .node }
-    let edges = sorted.compactMap { DesignObjectEdge($0,in: frame) }
+    let edges = sorted.compactMap { DesignObjectEdge($0,in: plane) }
     let unstructured = sorted.filter { $0.topology.type == .unstructured }
 
     if unstructured.count > 0 {
@@ -203,7 +203,7 @@ func listFormulas(_ snapshots: [ObjectSnapshot]) {
     }
 }
 
-func listPseudoEquations(_ frame: DesignPlane, world: World) throws (ToolError) {
+func listPseudoEquations(_ plane: DesignPlane, world: World) throws (ToolError) {
     // TODO: Add stocks
     do {
         try world.run(schedule: PlanSchedule.self)
@@ -237,10 +237,10 @@ func listPseudoEquations(_ frame: DesignPlane, world: World) throws (ToolError) 
     }
 }
 
-func listGraphicalFunctions(_ frame: some Plane) {
+func listGraphicalFunctions(_ plane: some Plane) {
     var result: [String: [Point]?] = [:]
     
-    for object in frame.snapshots {
+    for object in plane.snapshots {
         guard let name = object.name else {
             continue
         }
@@ -267,20 +267,20 @@ func listGraphicalFunctions(_ frame: some Plane) {
     }
 }
 
-func listNamedFrames(_ design: Design) {
+func listNamedPlanes(_ design: Design) {
     let names = design.namedPlanes.keys
     let sorted = names.sorted {
         $0.localizedLowercase.lexicographicallyPrecedes($1.localizedLowercase)
     }
     for name in sorted {
-        let frame = design.plane(name: name)!
-        print("\(name) \(frame.id)")
+        let plane = design.plane(name: name)!
+        print("\(name) \(plane.id)")
     }
 }
 
-func listFrameIDs(_ design: Design) {
-    for frame in design.planes {
-        print("\(frame.id)")
+func listPlaneIDs(_ design: Design) {
+    for plane in design.planes {
+        print("\(plane.id)")
     }
 }
 func listHistory(_ design: Design) {

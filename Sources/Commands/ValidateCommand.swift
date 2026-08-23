@@ -15,11 +15,11 @@ extension PoieticTool {
         @OptionGroup var options: Options
 
         @Argument(help: "Plane ID or name to validate (current if not provided)")
-        var frameRef: String?
+        var planeRef: String?
 
         mutating func run() throws {
             let editor = try DesignEditor(location: options.designLocation)
-            let frame = try editor.frame(frameRef)
+            let plane = try editor.plane(planeRef)
             let world = editor.world
             try world.run(schedule: PlanSchedule.self)
             
@@ -28,7 +28,7 @@ extension PoieticTool {
                 throw ToolError.designIssues(world.issues)
             }
 
-            print("Frame is valid.")
+            print("Plane is valid.")
         }
     }
 }

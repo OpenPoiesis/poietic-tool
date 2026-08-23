@@ -1,5 +1,5 @@
 //
-//  CreateFrameCommand.swift
+//  CreatePlaneCommand.swift
 //  poietic
 //
 //  Created by Stefan Urbanek on 28/03/2025.
@@ -12,7 +12,7 @@ import PoieticFlows
 // TODO: Add import
 
 extension PoieticTool {
-    struct CreateFrame: ParsableCommand {
+    struct CreatePlane: ParsableCommand {
         static let configuration
             = CommandConfiguration(
                 commandName: "create-plane",
@@ -65,12 +65,12 @@ Note: Plane with requested IDs can not be --forced to be replaced. Remove the pl
             let design = editor.design
             let requestedID: PlaneID?
             let createdRef: String
-            let derivingFrame = try editor.frameIfPresent(derivingRef)
+            let derivingPlane = try editor.planeIfPresent(derivingRef)
 
-            if let ref = requestedRef, let frameID = PlaneID(ref) {
-                requestedID = frameID
-                guard !design.containsPlane(frameID) else {
-                    throw ToolError.frameExists(frameID.stringValue)
+            if let ref = requestedRef, let planeID = PlaneID(ref) {
+                requestedID = planeID
+                guard !design.containsPlane(planeID) else {
+                    throw ToolError.planeExists(planeID.stringValue)
                 }
             }
             else {
@@ -79,21 +79,21 @@ Note: Plane with requested IDs can not be --forced to be replaced. Remove the pl
             
             if let name {
                 guard design.plane(name: name) == nil || force else {
-                    throw ToolError.frameExists(name)
+                    throw ToolError.planeExists(name)
                 }
-                let frame = createFrame(in: design, deriving: derivingFrame)
-                try design.accept(frame, replacingName: name)
+                let plane = createPlane(in: design, deriving: derivingPlane)
+                try design.accept(plane, replacingName: name)
                 createdRef = name
             }
             else if let requestedID {
-                let frame = createFrame(in: design, deriving: derivingFrame, requestedID: requestedID)
-                try design.accept(frame, appendHistory: appendHistory)
+                let plane = createPlane(in: design, deriving: derivingPlane, requestedID: requestedID)
+                try design.accept(plane, appendHistory: appendHistory)
                 createdRef = requestedID.stringValue
             }
             else {
-                let frame = createFrame(in: design, deriving: derivingFrame)
-                try design.accept(frame, appendHistory: appendHistory)
-                createdRef = frame.id.stringValue
+                let plane = createPlane(in: design, deriving: derivingPlane)
+                try design.accept(plane, appendHistory: appendHistory)
+                createdRef = plane.id.stringValue
             }
 
             try editor.save()
@@ -103,7 +103,7 @@ Note: Plane with requested IDs can not be --forced to be replaced. Remove the pl
     }
 }
 
-func createFrame(in design: Design, deriving: DesignPlane?, requestedID: PlaneID? = nil) -> TransientPlane {
+func createPlane(in design: Design, deriving: DesignPlane?, requestedID: PlaneID? = nil) -> TransientPlane {
     if let deriving {
         return design.createPlane(deriving: deriving, id: requestedID)
     }

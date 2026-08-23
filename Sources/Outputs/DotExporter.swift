@@ -56,14 +56,14 @@ public class DotExporter {
     }
     
     /// Export nodes and edges into the output.
-    public func export(_ frame: some Plane) throws  {
+    public func export(_ plane: some Plane) throws  {
         var output: String = ""
         let formatter = DotFormatter(name: name, type: .directed)
 
         output = formatter.header()
         
-        for nodeID in frame.nodeKeys {
-            guard let node = frame[nodeID] else { continue }
+        for nodeID in plane.nodeKeys {
+            guard let node = plane[nodeID] else { continue }
             let label: String
             
             if let attribute = labelAttribute {
@@ -81,15 +81,15 @@ public class DotExporter {
                 label = nodeID.stringValue
             }
 
-            var attributes = format(graph: frame, node: node)
+            var attributes = format(graph: plane, node: node)
             attributes["label"] = label
 
             let id = "\(nodeID)"
             output += formatter.node(id, attributes: attributes)
         }
 
-        for edge in frame.edges {
-            let attributes = format(graph: frame, edge: edge.object)
+        for edge in plane.edges {
+            let attributes = format(graph: plane, edge: edge.object)
             // TODO: Edge label
             // attributes["label"] = edge.type.name
             output += formatter.edge(from:"\(edge.origin)",

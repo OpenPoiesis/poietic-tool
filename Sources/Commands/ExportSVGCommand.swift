@@ -102,8 +102,7 @@ extension PoieticTool {
             
             let scene = composer.createScene(diagram: diagram, viewport: ViewportState(zoom: zoom / 100.0))
             scene.setComponent(SceneLayoutProvider(provider: svgStyle))
-            let system = SceneCompositionSystem(world)
-            try system.update(world)
+            try SceneCompositionSystem.update(world)
 
             // Export
             let renderer = SVGDiagramSceneRenderer(world: world)
