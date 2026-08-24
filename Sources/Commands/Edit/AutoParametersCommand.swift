@@ -34,9 +34,9 @@ extension PoieticTool {
 
         mutating func run() throws {
             let session = try DesignSession(location: globalOptions.designLocation)
+            try session.setPlane(options.deriveRef)
+            let trans = try session.createTransaction(deriving: options.deriveRef)
             let world = session.world
-            let plane = try session.plane(options.deriveRef)
-            world.setPlane(plane)
             
             try world.run(systems: ParameterResolutionSystems)
 
@@ -44,8 +44,6 @@ extension PoieticTool {
                 throw ToolError.internalError("No parameter proposal created")
             }
             
-            let trans = try session.deriveOrCreate(options.deriveRef)
-
             for id in proposal.toRemove {
                 if verbose,
                    let object = trans[id],
@@ -73,8 +71,7 @@ extension PoieticTool {
                 print("All parameter connections seem to be ok.")
             }
             else {
-                try session.accept(trans, replacing: options.replaceRef, appendHistory: options.appendHistory)
-                try session.save()
+                try session.save(replacing: options.replaceRef, appendHistory: options.appendHistory)
                 print("Added \(proposal.toAdd.count) edges and removed \(proposal.toRemove.count) edges.")
             }
         }

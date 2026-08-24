@@ -38,7 +38,7 @@ poietic edit add FlowRate name=expenses formula=50
         
         mutating func run() throws {
             let session = try DesignSession(location: globalOptions.designLocation)
-            let trans = try session.deriveOrCreate(options.deriveRef)
+            let trans = try session.createTransaction(deriving: options.deriveRef)
 
             guard let type = StockFlowMetamodel.objectType(name: typeName) else {
                 throw ToolError.unknownObjectType(typeName)
@@ -67,8 +67,7 @@ poietic edit add FlowRate name=expenses formula=50
 
             }
 
-            try session.accept(trans, replacing: options.replaceRef, appendHistory: options.appendHistory)
-            try session.save()
+            try session.save(replacing: options.replaceRef, appendHistory: options.appendHistory)
 
             print("Created node \(object.objectID) in plane \(trans.id)")
         }

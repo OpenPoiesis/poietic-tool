@@ -10,7 +10,6 @@ import Foundation
 import PoieticCore
 import PoieticFlows
 
-// TODO: Merge with PrintCommand, use --format=id
 extension PoieticTool {
     struct Import: ParsableCommand {
         static let configuration
@@ -40,7 +39,7 @@ extension PoieticTool {
         
         mutating func run() throws {
             let session = try DesignSession(location: globalOptions.designLocation)
-            let trans = try session.deriveOrCreate(options.deriveRef)
+            let trans = try session.createTransaction(deriving: options.deriveRef)
 
             let rawDesign = try readRawDesign(fromPath: fileName)
             let loader = DesignLoader(metamodel: StockFlowMetamodel, options: .useIDAsNameAttribute)
@@ -59,8 +58,7 @@ extension PoieticTool {
                 throw ToolError.designLoaderError(error, URL(fileURLWithPath: fileName))
             }
 
-            try session.accept(trans, replacing: options.replaceRef, appendHistory: options.appendHistory)
-            try session.save()
+            try session.save(replacing: options.replaceRef, appendHistory: options.appendHistory)
         }
     }
 }

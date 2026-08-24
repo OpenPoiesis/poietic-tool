@@ -66,7 +66,7 @@ extension PoieticTool {
             case .planes:
                 try listPlanes(editor.design)
             case .objects:
-                let plane = try editor.plane(planeRef)
+                let plane = try editor.setPlane(planeRef)
                 try listObjects(editor.world, in: plane)
             }
         }

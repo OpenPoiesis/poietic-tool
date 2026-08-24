@@ -21,9 +21,11 @@ class DesignSession {
     let design: Design
     let world: World
     
-    // TODO: [REFACTORING] Allow specifying reference on init()
-    // TODO: [REFACTORING] Keep one transaction (fatal error on multiple attempts), and then accept on save()
-
+    /// Plane we are working with.
+    ///
+    var plane: DesignPlane? { world.plane }
+    var transaction: TransientPlane? = nil
+    
     /// Create a new session given the URL and optional design.
     ///
     /// If the design is provided, then it is used and the URL is assigned as a storage URL
@@ -114,55 +116,78 @@ class DesignSession {
             }
         }
     }
-
-//    func defaultPlane() -> DesignPlane? {
-//        if let plane = design.currentPlane {
-//            return plane
-//        }
-//        else if design.planes.count == 1, let plane = design.planes.first {
-//            return plane
-//        }
-//        else {
-//            return nil
-//        }
-//    }
     
-    /// Derive a plane from existing plane, if the reference is valid. Create a new plane if
-    /// there is no current plane.
+    @discardableResult
+    func setPlane(_ reference: String? = nil) throws (ToolError) -> DesignPlane {
+        let plane = try plane(reference)
+        self.world.setPlane(plane)
+        return plane
+    }
+    
+    /// Create a new transaction deriving a plane with given reference.
+    ///
+    /// If the reference is `nil` then current plane is tried, if there is no current plane
+    /// then the only plane in design is used. If the design has multiple planes, the function
+    /// throws.
+    ///
+    /// - Note: This function differs from the ``createTransaction()`` in the way that on
+    ///   `nil` references it is checking for defaults. This function _requires_ an existing
+    ///   plane.
     ///
     /// - Throws ``ToolError/unknownPlane(_:)`` when the plane is not found or
-    ///   ``ToolError/emptyDesign`` if there are no planes in the design.
+    ///   ``ToolError/planeRequired`` if there are no planes in the design or more than one plane
+    ///   without current plane set.
     ///
-    func deriveOrCreate(_ reference: String? = nil) throws (ToolError) -> TransientPlane {
-        // TODO: [REFACTORING] Is this good logic? Verify!
-        let trans: TransientPlane
-        
-        do {
-            let original = try plane(reference)
-            trans = design.createPlane(deriving: original)
-        }
-        catch .planeRequired {
-            guard design.planes.count == 0 else {
-                throw .planeRequired
-            }
-            trans = design.createPlane()
-        }
-        
+    /// - SeeAlso: ``createTransaction()``
+    ///
+    func createTransaction(deriving reference: String?) throws (ToolError) -> TransientPlane {
+        let original = try plane(reference)
+        return _createTransaction(deriving: original)
+    }
+
+    /// Create transaction without deriving any existing plane.
+    ///
+    /// Function does not require any planes to exist in the design.
+    ///
+    func createTransaction() -> TransientPlane {
+        return _createTransaction(deriving: nil)
+    }
+
+    private func _createTransaction(deriving original: DesignPlane?) -> TransientPlane {
+        precondition(transaction == nil) // This is our programming problem, not throwing.
+        let trans = design.createPlane(deriving: original)
+        self.transaction = trans
         return trans
     }
 
+    /// Accept pending transaction and save the design.
+    func save(replacing: String? = nil, appendHistory: Bool = true) throws (ToolError) {
+        if let transaction {
+            try _accept(transaction, replacing: replacing, appendHistory: appendHistory)
+            self.transaction = nil
+        }
+        
+        let store = DesignStore(url: url)
+        do {
+            try store.save(design: design)
+        }
+        catch {
+            throw ToolError.unableToSaveDesign(error)
+        }
+    }
+    
     /// Try to accept a plane in the modeller design.
     ///
     /// Tries to accept the plane. If the plane contains constraint violations, then
     /// the violations are printed out in a more human-readable format.
     ///
-    func accept(_ trans: TransientPlane, replacing: String? = nil, appendHistory: Bool = true) throws (ToolError) {
+    private func _accept(_ transaction: TransientPlane, replacing: String? = nil, appendHistory: Bool = true) throws (ToolError) {
         do {
             if let name = replacing {
-                try design.accept(trans, replacingName: name)
+                try design.accept(transaction, replacingName: name)
             }
             else {
-                try design.accept(trans, appendHistory: appendHistory)
+                try design.accept(transaction, appendHistory: appendHistory)
             }
         }
         catch {
@@ -172,22 +197,12 @@ class DesignSession {
             case .constraintViolation(_),
                     .edgeRuleViolation(_, _),
                     .objectTypeError(_, _):
-                let checker = ConstraintChecker(trans.design.metamodel)
-                let result = checker.diagnose(trans)
-                printValidationResult(result, in: trans)
+                let checker = ConstraintChecker(transaction.design.metamodel)
+                let result = checker.diagnose(transaction)
+                printValidationResult(result, in: transaction)
                 throw ToolError.validationFailed(result)
             }
         }
     }
 
-    /// Save the design.
-    func save() throws (ToolError) {
-        let store = DesignStore(url: url)
-        do {
-            try store.save(design: design)
-        }
-        catch {
-            throw ToolError.unableToSaveDesign(error)
-        }
-    }
 }

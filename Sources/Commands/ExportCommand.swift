@@ -28,7 +28,7 @@ extension PoieticTool {
 
         mutating func run() throws {
             let editor = try DesignSession(location: globalOptions.designLocation)
-            let plane = try editor.plane(planeReference)
+            let plane = try editor.setPlane(planeReference)
 
             let extractor = DesignExtractor()
             let snapshots: [RawSnapshot]

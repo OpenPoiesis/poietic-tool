@@ -34,7 +34,7 @@ extension PoieticTool {
         
         mutating func run() throws {
             let session = try DesignSession(location: globalOptions.designLocation)
-            let trans = try session.deriveOrCreate(options.deriveRef)
+            let trans = try session.createTransaction(deriving: options.deriveRef)
 
             guard let object = trans.object(stringReference: reference) else {
                 throw ToolError.unknownObject(reference)
@@ -46,8 +46,7 @@ extension PoieticTool {
                                        attribute: attributeName,
                                        string: value)
             
-            try session.accept(trans, replacing: options.replaceRef, appendHistory: options.appendHistory)
-            try session.save()
+            try session.save(replacing: options.replaceRef, appendHistory: options.appendHistory)
 
             print("Property set in \(reference): \(attributeName) = \(value)")
         }

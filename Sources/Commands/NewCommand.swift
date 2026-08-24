@@ -25,11 +25,11 @@ extension PoieticTool {
 
         mutating func run() throws {
             let design = Design(metamodel: StockFlowMetamodel)
-            let editor = try DesignSession(location: globalOptions.designLocation, design: design)
+            let session = try DesignSession(location: globalOptions.designLocation, design: design)
 
             if !importPaths.isEmpty {
                 let loader = DesignLoader(metamodel: design.metamodel, options: .useIDAsNameAttribute)
-                let plane = design.createPlane()
+                let plane = session.createTransaction()
 
                 for path in importPaths {
                     let rawDesign = try readRawDesign(fromPath: path)
@@ -41,16 +41,14 @@ extension PoieticTool {
                         throw ToolError.designLoaderError(error, URL(fileURLWithPath: path))
                     }
                 }
-                
-                try editor.accept(plane)
             }
             
-            try editor.save()
-            if editor.url.scheme == nil || editor.url.scheme == "file" {
-                print("Design created: \(editor.url.path)")
+            try session.save()
+            if session.url.scheme == nil || session.url.scheme == "file" {
+                print("Design created: \(session.url.path)")
             }
             else {
-                print("Design created: \(editor.url)")
+                print("Design created: \(session.url)")
             }
         }
     }

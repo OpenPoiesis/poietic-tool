@@ -25,7 +25,7 @@ extension PoieticTool {
                 plane = nil
             }
             else {
-                plane = try session.plane(planeReference)
+                plane = try session.setPlane(planeReference)
             }
             
             var items: [(String?, String?)] = [

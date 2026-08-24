@@ -39,7 +39,7 @@ extension PoieticTool {
         
         mutating func run() throws {
             let editor = try DesignSession(location: globalOptions.designLocation)
-            let trans = try editor.deriveOrCreate(options.deriveRef)
+            let trans = try editor.createTransaction(deriving: options.deriveRef)
 
             var objects: [TransientObject] = []
             if references.isEmpty {
@@ -71,8 +71,7 @@ extension PoieticTool {
                 angle += step
             }
             
-            try editor.accept(trans, replacing: options.replaceRef, appendHistory: options.appendHistory)
-            try editor.save()
+            try editor.save(replacing: options.replaceRef, appendHistory: options.appendHistory)
         }
     }
 }

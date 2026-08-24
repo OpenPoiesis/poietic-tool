@@ -11,7 +11,6 @@ import PoieticCore
 import PoieticFlows
 import Diagramming
 
-
 extension PoieticTool {
     struct ExportSVG: ParsableCommand {
         static let configuration
@@ -46,9 +45,8 @@ extension PoieticTool {
 
         mutating func run() throws {
             let session = try DesignSession(location: options.designLocation)
-            let plane = try session.plane(planeRef)
+            try session.setPlane(planeRef)
             let world = session.world
-            world.setPlane(plane)
             
             guard let testURL = URL(string: output) else {
                 throw ToolError.malformedLocation(output)

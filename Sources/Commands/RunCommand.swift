@@ -76,9 +76,8 @@ extension PoieticTool {
         
         mutating func run() throws {
             let session = try DesignSession(location: options.designLocation)
+            try session.setPlane(planeRef)
             let world = session.world
-            let plane = try session.plane(planeRef)
-            world.setPlane(plane)
             
             try world.run(schedule: PlanSchedule.self)
             

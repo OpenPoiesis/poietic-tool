@@ -18,12 +18,10 @@ extension PoieticTool {
         var planeReference: String?
 
         mutating func run() throws {
-            let editor = try DesignSession(location: options.designLocation)
-            let world = editor.world
-
-            let plane = try editor.plane(planeReference)
-            world.setPlane(plane)
-
+            let session = try DesignSession(location: options.designLocation)
+            try session.setPlane(planeReference)
+            let world = session.world
+            
             try world.run(schedule: PlanSchedule.self)
             
             guard let _: SimulationPlan = world.singleton() else {

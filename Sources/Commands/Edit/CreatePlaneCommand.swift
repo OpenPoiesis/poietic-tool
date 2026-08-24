@@ -45,7 +45,6 @@ Note: Plane with requested IDs can not be --forced to be replaced. Remove the pl
         //
         @OptionGroup var globalOptions: Options
 
-        // TODO: [REFACTORING] Should we call this --plane to be aligned with others? It has other meaning here though.
         @Option(name: [.customLong("derive")], help: "Derive an existing plane")
         var derivingRef: String?
 
