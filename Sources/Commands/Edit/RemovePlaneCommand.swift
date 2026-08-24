@@ -1,5 +1,5 @@
 //
-//  RemoveFrameCommand.swift
+//  RemovePlaneCommand.swift
 //  poietic
 //
 //  Created by Stefan Urbanek on 28/03/2025.
@@ -12,7 +12,7 @@ import PoieticCore
 // TODO: Add possibility of using multiple references
 
 extension PoieticTool {
-    struct RemoveFrame: ParsableCommand {
+    struct RemovePlane: ParsableCommand {
         static let configuration
             = CommandConfiguration(
                 abstract: "Remove a plane"
@@ -24,11 +24,8 @@ extension PoieticTool {
         var references: [String]
         
         mutating func run() throws {
-            let editor = try DesignSession(location: globalOptions.designLocation)
+            let session = try DesignSession(location: globalOptions.designLocation)
 
-            guard editor.design.planes.count > 0 else {
-                throw ToolError.emptyDesign
-            }
             guard !references.isEmpty else {
                 print("Nothing to be removed")
                 return
@@ -37,24 +34,15 @@ extension PoieticTool {
             var toRemove: [PlaneID] = []
             
             for ref in references {
-                if let id = editor.design.plane(name: ref)?.id {
-                    toRemove.append(id)
-                }
-                else if let id = PlaneID(ref),
-                        editor.design.containsPlane(id)
-                {
-                    toRemove.append(id)
-                }
-                else {
-                    throw ToolError.unknownPlane(ref)
-                }
+                let plane = try session.plane(ref)
+                toRemove.append(plane.id)
             }
 
             for id in toRemove {
-                editor.design.removePlane(id)
+                session.design.removePlane(id)
             }
 
-            try editor.save()
+            try session.save()
             print("Removed \(toRemove.count) planes.")
         }
     }

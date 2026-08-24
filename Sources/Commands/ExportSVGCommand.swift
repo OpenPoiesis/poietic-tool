@@ -38,15 +38,17 @@ extension PoieticTool {
         @Option(name: [.customLong("zoom")], help: "Zoom level in %")
         var zoom: Double = 100.0
         
-        @Option(name: [.customLong("plane")], help: "Plane ID or name")
-        var frameRef: String?
-        
+        @Option(name: [.customLong("plane")], help: "Plane name or ID. Default: current plane")
+        var planeRef: String?
+
         @Option(name: [.customLong("pictograms")], help: "File with pictogram collection")
         var pictogramCollectionPath: String?
 
         mutating func run() throws {
-            let editor = try DesignSession(location: options.designLocation)
-            let world = editor.world
+            let session = try DesignSession(location: options.designLocation)
+            let plane = try session.plane(planeRef)
+            let world = session.world
+            world.setPlane(plane)
             
             guard let testURL = URL(string: output) else {
                 fatalError("Invalid resource reference: \(output)")

@@ -24,7 +24,7 @@ extension PoieticTool {
         enum IdentityMode: String, CaseIterable, ExpressibleByArgument{
             case require = "require" // requireProvided
             case auto = "auto" // preserveOrCreate
-            case create = "create" // createNew
+            case new = "new" // createNew
 
             var defaultValueDescription: String { "require" }
             
@@ -39,8 +39,8 @@ extension PoieticTool {
         var fileName: String
         
         mutating func run() throws {
-            let editor = try DesignSession(location: globalOptions.designLocation)
-            let trans = try editor.deriveOrCreate(options.deriveRef)
+            let session = try DesignSession(location: globalOptions.designLocation)
+            let trans = try session.deriveOrCreate(options.deriveRef)
 
             let rawDesign = try readRawDesign(fromPath: fileName)
             let loader = DesignLoader(metamodel: StockFlowMetamodel, options: .useIDAsNameAttribute)
@@ -49,7 +49,7 @@ extension PoieticTool {
             switch identityMode {
             case .require: strategy = .requireProvided
             case .auto: strategy = .preserveOrCreate
-            case .create: strategy = .preserveOrCreate
+            case .new: strategy = .createNew
             }
 
             do {
@@ -59,8 +59,8 @@ extension PoieticTool {
                 throw ToolError.designLoaderError(error, URL(fileURLWithPath: fileName))
             }
 
-            try editor.accept(trans, replacing: options.replaceRef, appendHistory: options.appendHistory)
-            try editor.save()
+            try session.accept(trans, replacing: options.replaceRef, appendHistory: options.appendHistory)
+            try session.save()
         }
     }
 }

@@ -24,6 +24,8 @@ enum ToolError: Error, CustomStringConvertible {
     case storeError(DesignStoreError)
     case designReaderError(RawDesignReaderError, URL?)
     case designLoaderError(DesignLoaderError, URL?)
+    case unableToWrite(URL, any Error)
+    // TODO: Do we still need this? -> planeRequired (new rule: use single-plane design for convenience)
     case emptyDesign
     
     // Design errors
@@ -38,10 +40,17 @@ enum ToolError: Error, CustomStringConvertible {
     case simulationFailed(String)
     
     // Query errors
+    /// Thrown by ``DesignSession/plane(_:)``, usually when option `--plane` is invalid.
+    case unknownPlane(String)
+    /// Thrown by ``DesignSession/plane(_:)`` when no planes was specified, no current plane exists
+    /// and there are no planes or more than one plane in the design
+    // TODO: Review with emptyDesign and noCurrentPlane
+    case planeRequired
+    
     case unknownObject(String)
     case nodeExpected(String)
-    case unknownPlane(String)
     case planeExists(String)
+    // TODO: Do we still need this? -> planeRequired (new rule: use single-plane design for convenience)
     case noCurrentPlane
 
     // Editing errors
@@ -89,6 +98,10 @@ enum ToolError: Error, CustomStringConvertible {
             else {
                 return "Unable to load (from unknown source): \(error)"
             }
+
+        case .unableToWrite(let url, let error):
+            return "Unable to write to \(url): \(error)"
+
         case .emptyDesign:
             return "The design is empty"
 
@@ -145,6 +158,8 @@ enum ToolError: Error, CustomStringConvertible {
             
         case .simulationFailed(let message):
             return "Simulation failed: \(message)"
+        case .planeRequired:
+            return "Plane ID or name required"
         }
     }
     
@@ -159,6 +174,8 @@ enum ToolError: Error, CustomStringConvertible {
             return nil
         case .unableToSaveDesign(_):
             return "Check whether the location is correct and that you have permissions for writing."
+        case .unableToWrite(_, _):
+            return nil
 
         case .brokenStructuralIntegrity(_):
             return "Unfortunately the only way is to inspect the database or a foreign plane. 'doctor' command is not yet implemented."
@@ -205,6 +222,8 @@ enum ToolError: Error, CustomStringConvertible {
             return "Design has no planes, create a plane"
         case .simulationFailed(_):
             return nil
+        case .planeRequired:
+            return "Specify --plane"
         }
     }
 
@@ -250,6 +269,36 @@ func setAttributeFromString(object: TransientObject,
 
 // Plane reading
 // ====================================================================
+
+/// Get the design URL. The database location can be specified by options,
+/// environment variable or as a default name, in respective order
+func designURL(_ location: String?) throws (ToolError) -> URL {
+    let actualLocation: String
+    let env = ProcessInfo.processInfo.environment
+    
+    if let location {
+        actualLocation = location
+    }
+    else if let location = env[DesignEnvironmentVariable] {
+        actualLocation = location
+    }
+    else {
+        actualLocation = DefaultDesignLocation
+    }
+    
+    if let url = URL(string: actualLocation) {
+        if url.scheme == nil {
+            return URL(fileURLWithPath: actualLocation, isDirectory: false)
+        }
+        else {
+            return url
+        }
+    }
+    else {
+        throw ToolError.malformedLocation(actualLocation)
+    }
+}
+
 
 func makeFileURL(fromPath path: String) throws (ToolError) -> URL {
     let url: URL

@@ -8,7 +8,7 @@
 @preconcurrency import ArgumentParser
 import PoieticCore
 
-// TODO: Allow pruning options, such as only non-simulation related changes (position/style)
+// TODO: Allow "smart" pruning options, such as only non-simulation related changes (position/style); requires plane diffing
 
 extension PoieticTool {
     struct PruneHistory: ParsableCommand {
@@ -20,9 +20,13 @@ extension PoieticTool {
 
         @OptionGroup var globalOptions: Options
 
+        // TODO: [REFACTORING] Add this
+//        @Option(name: [.customLong("keep")], help: "Keep at most given number of planes in the undo history")
+//        var keep: UInt = 0
+
         mutating func run() throws {
-            let editor = try DesignSession(location: globalOptions.designLocation)
-            let design = editor.design
+            let session = try DesignSession(location: globalOptions.designLocation)
+            let design = session.design
             
             let count = design.undoList.count + design.redoList.count
 
@@ -33,7 +37,7 @@ extension PoieticTool {
                 design.removePlane(plane)
             }
 
-            try editor.save()
+            try session.save()
             
             if count > 0 {
                 print("Removed \(count) planes.")

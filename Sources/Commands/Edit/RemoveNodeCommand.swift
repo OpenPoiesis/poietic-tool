@@ -22,11 +22,10 @@ extension PoieticTool {
 
         @Argument(help: "ID of an object to be removed")
         var reference: String
-
         
         mutating func run() throws {
-            let editor = try DesignSession(location: globalOptions.designLocation)
-            let trans = try editor.deriveOrCreate(options.deriveRef)
+            let session = try DesignSession(location: globalOptions.designLocation)
+            let trans = try session.deriveOrCreate(options.deriveRef)
 
             guard let object = trans.object(stringReference: reference) else {
                 throw ToolError.unknownObject(reference)
@@ -34,8 +33,8 @@ extension PoieticTool {
 
             let removed = trans.removeCascading(object.objectID)
 
-            try editor.accept(trans, replacing: options.replaceRef, appendHistory: options.appendHistory)
-            try editor.save()
+            try session.accept(trans, replacing: options.replaceRef, appendHistory: options.appendHistory)
+            try session.save()
 
             print("Removed object: \(object.objectID)")
             if !removed.isEmpty {

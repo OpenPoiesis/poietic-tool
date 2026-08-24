@@ -16,39 +16,13 @@ enum PlanSchedule: ScheduleLabel {}
 enum SimulateSchedule: ScheduleLabel {}
 enum DiagramSchedule: ScheduleLabel {}
 
-/// Get the design URL. The database location can be specified by options,
-/// environment variable or as a default name, in respective order
-func designURL(_ location: String?) throws (ToolError) -> URL {
-    let actualLocation: String
-    let env = ProcessInfo.processInfo.environment
-    
-    if let location {
-        actualLocation = location
-    }
-    else if let location = env[DesignEnvironmentVariable] {
-        actualLocation = location
-    }
-    else {
-        actualLocation = DefaultDesignLocation
-    }
-    
-    if let url = URL(string: actualLocation) {
-        if url.scheme == nil {
-            return URL(fileURLWithPath: actualLocation, isDirectory: false)
-        }
-        else {
-            return url
-        }
-    }
-    else {
-        throw ToolError.malformedLocation(actualLocation)
-    }
-}
-
 class DesignSession {
     let url: URL
     let design: Design
     let world: World
+    
+    // TODO: [REFACTORING] Allow specifying reference on init()
+    // TODO: [REFACTORING] Keep one transaction (fatal error on multiple attempts), and then accept on save()
 
     /// Create a new session given the URL and optional design.
     ///
@@ -100,94 +74,81 @@ class DesignSession {
                 TraitsToDiagramObjectsSystem.self,
         ))
     }
+    
     convenience init(location: String?, design: Design? = nil) throws (ToolError) {
         try self.init(url: try designURL(location), design: design)
     }
     
-    /// Get a plane by its name or an ID reference.
+    /// Get a plane by reference or default plane.
+    ///
+    /// If the plane reference is specified: function tries to find a plane with given ID or name.
+    /// If no plane with given reference exists, then it throws ``ToolError/unknownPlane(_:)``.
+    ///
+    /// If no plane reference is specified: try to use current plane. If no current plane
+    /// is found, then return the only plane in design. If multiple planes exist in the design,
+    /// then the function throws ``ToolError/planeRequired``
     ///
     /// Use this method to get a plane by user-provided reference.
     ///
     func plane(_ reference: String? = nil) throws (ToolError) -> DesignPlane {
-        guard let plane = try planeIfPresent(reference) else {
-            throw .noCurrentPlane
-        }
-        return plane
-    }
-    
-
-    /// Get plane ID from a plane reference, which can be either plane ID or plane name.
-    ///
-    /// - Returns: Plane ID of resolved reference or `nil` if no such plane exists.
-    func plane(required reference: String? = nil) throws (ToolError) -> PlaneID? {
         if let reference {
-            if let planeID = PlaneID(reference), design.containsPlane(planeID) {
-                return planeID
+            if let id = PlaneID(reference), let plane = design.plane(id) {
+                return plane
             }
-            else {
-                throw .unknownPlane(reference)
-            }
-        }
-        else {
-            return design.currentPlaneID
-        }
-    }
-    
-    /// Get a plane by given ID as a string or current plane.
-    ///
-    /// - If ID is provided: tries to find it, otherwise throws an error.
-    /// - If ID is not provided:
-    ///     - If current plane is set: use current plane.
-    ///     - There is only one plane: use the only plane.
-    ///     - Otherwise return nil
-    ///
-    /// Use this method to get a plane by user-provided reference.
-    ///
-    /// - Throws ``ToolError/unknownPlane(_:)`` when the plane is not found.
-    ///
-    func planeIfPresent(_ requiredReference: String? = nil) throws (ToolError) -> DesignPlane? {
-        if let requiredReference {
-            if let id = PlaneID(requiredReference), let plane = design.plane(id) {
+            else if let plane = design.plane(name: reference){
                 return plane
             }
             else {
-                throw ToolError.unknownPlane(requiredReference)
+                throw .unknownPlane(reference)
             }
         }
         else {
             if let plane = design.currentPlane {
                 return plane
             }
-            else if design.planes.count == 1 {
-                return design.planes.first!
+            else if design.planes.count == 1, let plane = design.planes.first {
+                return plane
             }
             else {
-                return nil
+                throw .planeRequired
             }
         }
     }
 
-    /// Derive a plane from existing plane, if the reference is valid or create a new plane if
+//    func defaultPlane() -> DesignPlane? {
+//        if let plane = design.currentPlane {
+//            return plane
+//        }
+//        else if design.planes.count == 1, let plane = design.planes.first {
+//            return plane
+//        }
+//        else {
+//            return nil
+//        }
+//    }
+    
+    /// Derive a plane from existing plane, if the reference is valid. Create a new plane if
     /// there is no current plane.
     ///
     /// - Throws ``ToolError/unknownPlane(_:)`` when the plane is not found or
     ///   ``ToolError/emptyDesign`` if there are no planes in the design.
     ///
     func deriveOrCreate(_ reference: String? = nil) throws (ToolError) -> TransientPlane {
-        if let reference {
-            if let original = try planeIfPresent(reference) {
-                return design.createPlane(deriving: original)
+        // TODO: [REFACTORING] Is this good logic? Verify!
+        let trans: TransientPlane
+        
+        do {
+            let original = try plane(reference)
+            trans = design.createPlane(deriving: original)
+        }
+        catch .planeRequired {
+            guard design.planes.count == 0 else {
+                throw .planeRequired
             }
-            else {
-                throw .unknownPlane(reference)
-            }
+            trans = design.createPlane()
         }
-        else if let original = design.currentPlane {
-            return design.createPlane(deriving: original)
-        }
-        else {
-            return design.createPlane()
-        }
+        
+        return trans
     }
 
     /// Try to accept a plane in the modeller design.

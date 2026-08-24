@@ -10,7 +10,6 @@ import Foundation
 import PoieticCore
 import PoieticFlows
 
-// TODO: Merge with PrintCommand, use --format=id
 extension PoieticTool {
     struct Export: ParsableCommand {
         static let configuration
@@ -65,8 +64,7 @@ extension PoieticTool {
                     try writer.write(rawDesign, toURL: url)
                 }
                 catch {
-                    // TODO: Add tool error
-                    fatalError("Unable to write to \(url): \(error)")
+                    throw ToolError.unableToWrite(url, error)
                 }
             }
         }

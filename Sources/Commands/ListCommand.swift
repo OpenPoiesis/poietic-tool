@@ -9,7 +9,6 @@
 import PoieticCore
 import PoieticFlows
 
-// TODO: Merge with PrintCommand, use --format=id
 extension PoieticTool {
     struct List: ParsableCommand {
         static let configuration

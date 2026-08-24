@@ -19,15 +19,15 @@ extension PoieticTool {
             = CommandConfiguration(abstract: "Describe an object")
         @OptionGroup var options: Options
 
-        @Option(name: [.customLong("plane")], help: "Plane to get object from")
+        @Option(name: [.customLong("plane")], help: "Plane to get object from. Default is current plane")
         var planeRef: String?
         
         @Argument(help: "ID of an object to be described")
         var reference: String
         
         mutating func run() throws {
-            let editor = try DesignSession(location: options.designLocation)
-            let plane = try editor.plane(planeRef)
+            let session = try DesignSession(location: options.designLocation)
+            let plane = try session.plane(planeRef)
             
             guard let object = plane.object(stringReference: reference) else {
                 throw ToolError.unknownObject(reference)

@@ -18,16 +18,16 @@ extension PoieticTool {
         @OptionGroup var globalOptions: Options
 
         mutating func run() throws {
-            let editor = try DesignSession(location: globalOptions.designLocation)
+            let session = try DesignSession(location: globalOptions.designLocation)
 
-            if !editor.design.canUndo {
+            if !session.design.canUndo {
                 throw ToolError.noChangesToUndo
             }
             
-            let frameID = editor.design.undoList.last!
-            editor.design.undo(to: frameID)
+            let frameID = session.design.undoList.last!
+            session.design.undo(to: frameID)
 
-            try editor.save()
+            try session.save()
             print("Did undo")
         }
     }
@@ -44,16 +44,16 @@ extension PoieticTool {
         @OptionGroup var globalOptions: Options
 
         mutating func run() throws {
-            let editor = try DesignSession(location: globalOptions.designLocation)
+            let session = try DesignSession(location: globalOptions.designLocation)
 
-            if !editor.design.canRedo {
+            if !session.design.canRedo {
                 throw ToolError.noChangesToRedo
             }
             
-            let frameID = editor.design.redoList.first!
-            editor.design.redo(to: frameID)
+            let frameID = session.design.redoList.first!
+            session.design.redo(to: frameID)
 
-            try editor.save()
+            try session.save()
             print("Did redo.")
         }
     }

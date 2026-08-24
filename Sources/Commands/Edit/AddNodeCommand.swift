@@ -37,8 +37,8 @@ poietic edit add FlowRate name=expenses formula=50
         var attributeAssignments: [String] = []
         
         mutating func run() throws {
-            let editor = try DesignSession(location: globalOptions.designLocation)
-            let trans = try editor.deriveOrCreate(options.deriveRef)
+            let session = try DesignSession(location: globalOptions.designLocation)
+            let trans = try session.deriveOrCreate(options.deriveRef)
 
             guard let type = StockFlowMetamodel.objectType(name: typeName) else {
                 throw ToolError.unknownObjectType(typeName)
@@ -67,8 +67,8 @@ poietic edit add FlowRate name=expenses formula=50
 
             }
 
-            try editor.accept(trans, replacing: options.replaceRef, appendHistory: options.appendHistory)
-            try editor.save()
+            try session.accept(trans, replacing: options.replaceRef, appendHistory: options.appendHistory)
+            try session.save()
 
             print("Created node \(object.objectID) in plane \(trans.id)")
         }

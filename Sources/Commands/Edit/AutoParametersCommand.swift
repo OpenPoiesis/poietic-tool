@@ -28,8 +28,10 @@ extension PoieticTool {
         var verbose: Bool = false
 
         mutating func run() throws {
-            let editor = try DesignSession(location: globalOptions.designLocation)
-            let world = editor.world
+            let session = try DesignSession(location: globalOptions.designLocation)
+            let world = session.world
+            let plane = try session.plane(options.deriveRef)
+            world.setPlane(plane)
 
             let schedule = Schedule(
                 label: ParameterResolutionSchedule.self,
@@ -46,7 +48,7 @@ extension PoieticTool {
 
             let proposal: ParameterProposal = world.singleton()!
             
-            let trans = try editor.deriveOrCreate(options.deriveRef)
+            let trans = try session.deriveOrCreate(options.deriveRef)
 
             for id in proposal.toRemove {
                 if verbose,
@@ -75,8 +77,8 @@ extension PoieticTool {
                 print("All parameter connections seem to be ok.")
             }
             else {
-                try editor.accept(trans, replacing: options.replaceRef, appendHistory: options.appendHistory)
-                try editor.save()
+                try session.accept(trans, replacing: options.replaceRef, appendHistory: options.appendHistory)
+                try session.save()
                 print("Added \(proposal.toAdd.count) edges and removed \(proposal.toRemove.count) edges.")
             }
         }

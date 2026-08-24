@@ -21,8 +21,6 @@ extension PoieticTool {
                 abstract: "Show information about the metamodel and object types"
             )
 
-        @OptionGroup var globalOptions: Options
-
         enum OutputFormat: String, CaseIterable, ExpressibleByArgument{
             case text = "text"
             case markdown = "markdown"

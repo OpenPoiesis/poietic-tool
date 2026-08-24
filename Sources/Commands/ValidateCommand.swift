@@ -11,16 +11,19 @@ import PoieticFlows
 extension PoieticTool {
     struct Validate: ParsableCommand {
         static let configuration
-            = CommandConfiguration(abstract: "Get information about the design")
+            = CommandConfiguration(abstract: "Validate design or a single plane")
         @OptionGroup var options: Options
 
-        @Argument(help: "Plane ID or name to validate (current if not provided)")
-        var planeRef: String?
+        @Option(name: [.customLong("plane")], help: "Plane to be validated. Default: current plane.")
+        var planeReference: String?
 
         mutating func run() throws {
             let editor = try DesignSession(location: options.designLocation)
-            let plane = try editor.plane(planeRef)
             let world = editor.world
+
+            let plane = try editor.plane(planeReference)
+            world.setPlane(plane)
+
             try world.run(schedule: PlanSchedule.self)
             
             guard let _: SimulationPlan = world.singleton() else {

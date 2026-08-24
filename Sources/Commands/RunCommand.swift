@@ -49,7 +49,7 @@ extension PoieticTool {
         var outputFormat: OutputFormat = .csv
 
         @Option(name: [.customLong("variable"), .customShort("V")],
-                help: "Values to observe in the output; can be object IDs or object names.")
+                help: "Values to observe in the output; can be object IDs or object names")
         var outputNames: [String] = []
 
         // TODO: Rename to --parameter/-p
@@ -57,7 +57,7 @@ extension PoieticTool {
                        help: "Set (override) a value of a constant node in a form 'attribute=value'")
         var overrideValues: [String] = []
 
-        @Option(name: [.customLong("plane")], help: "Plane name or ID to run")
+        @Option(name: [.customLong("plane")], help: "Plane name or ID to run. Default: current plane")
         var planeRef: String?
 
         /// Path to the output directory.
@@ -76,8 +76,10 @@ extension PoieticTool {
         var outputPath: String = "-"
         
         mutating func run() throws {
-            let editor = try DesignSession(location: options.designLocation)
-            let world = editor.world
+            let session = try DesignSession(location: options.designLocation)
+            let world = session.world
+            let plane = try session.plane(planeRef)
+            world.setPlane(plane)
             
             try world.run(schedule: PlanSchedule.self)
             
