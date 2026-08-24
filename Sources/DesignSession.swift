@@ -16,6 +16,54 @@ enum PlanSchedule: ScheduleLabel {}
 enum SimulateSchedule: ScheduleLabel {}
 enum DiagramSchedule: ScheduleLabel {}
 
+/// Main object managing a command-line session.
+///
+/// Usage:
+///
+/// - Session starts with ``init(url:design:)``.
+/// - ``setPlane(reference:)`` resolves and sets the world's plane.
+/// - A session without a transaction needs no explicit ending.
+/// - The session owns **one** transaction created by ``createTransaction(deriving:)`` or ``createTransaction()``.
+/// - Session is concluded with ``save(replacing:appendHistory:)``, which accept pending transaction
+///   (if any) + persist the design. On failed accept, print design errors and throw.
+///
+/// ## Examples
+///
+/// Typical command that uses a plane contains the following option:
+///
+/// ```
+/// @Option(name: [.customLong("plane")],
+///         help: "Plane to get object from. Default is current plane")
+/// var planeReference: String?
+/// ```
+///
+/// Read-only commands get the plane and use the plane directly or world with the plane:
+///
+/// ```swift
+/// let session = try DesignSession(location: options.designLocation)
+/// let plane = try session.setPlane(planeReference)
+///
+/// // Use plane ...
+///
+/// // Run systems, query entities and components, ...
+/// session.world.run(systems: ...)
+/// ```
+///
+/// Commands that edit planes:
+///
+/// ```swift
+/// let session = try DesignSession(location: options.designLocation)
+/// // Begin editing session by creating a transaction
+/// let trans = try session.createTransaction(planeReference)
+///
+/// // Make changes ...
+/// let object = trans.mutate(...)
+/// object["name"] = "New Name"
+///
+/// // Accept transaction and persist the design
+/// session.save()
+/// ```
+///
 class DesignSession {
     let url: URL
     let design: Design
@@ -24,6 +72,11 @@ class DesignSession {
     /// Plane we are working with.
     ///
     var plane: DesignPlane? { world.plane }
+    
+    /// Current transaction
+    ///
+    /// - SeeAlso: ``save(replacing:appendHistory:)``, ``createTransaction(deriving:)``, ``createTransaction()``
+    ///
     var transaction: TransientPlane? = nil
     
     /// Create a new session given the URL and optional design.
@@ -117,6 +170,10 @@ class DesignSession {
         }
     }
     
+    /// Set a design plane by reference and populate the world.
+    ///
+    /// See ``plane(_:)`` for more information about reference rules.
+    ///
     @discardableResult
     func setPlane(_ reference: String? = nil) throws (ToolError) -> DesignPlane {
         let plane = try plane(reference)
