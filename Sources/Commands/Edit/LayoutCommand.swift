@@ -34,7 +34,7 @@ extension PoieticTool {
         @Option
         var layout: LayoutType = .circle
 
-        @Argument(help: "IDs of objects to be laid out. If not specified, then lay out all.")
+        @Argument(help: "IDs of objects to be laid out. If not specified, then lay out all with position attribute or with DiagramBlock trait.")
         var references: [String] = []
         
         mutating func run() throws {
@@ -43,7 +43,13 @@ extension PoieticTool {
 
             var objects: [TransientObject] = []
             if references.isEmpty {
-                objects = trans.objectIDs.map { trans.mutate($0) }
+                for object in trans.snapshots {
+                    if object.attributes["position"] != nil
+                        || object.type.hasTrait(.DiagramBlock)
+                    {
+                        objects.append(trans.mutate(object.objectID))
+                    }
+                }
             }
             else {
                 for ref in references {

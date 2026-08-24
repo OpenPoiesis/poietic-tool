@@ -9,8 +9,13 @@
 import PoieticCore
 import PoieticFlows
 
-enum ParameterResolutionSchedule: ScheduleLabel {}
-
+let ParameterResolutionSystems: [System.Type] = [
+    ComputationOrderSystem.self,
+    NameResolutionSystem.self,
+    ExpressionParserSystem.self,
+    ParameterResolutionSystem.self,
+    ParameterConnectionProposalSystem.self,
+]
 
 extension PoieticTool {
     struct AutoParameters: ParsableCommand {
@@ -32,21 +37,12 @@ extension PoieticTool {
             let world = session.world
             let plane = try session.plane(options.deriveRef)
             world.setPlane(plane)
-
-            let schedule = Schedule(
-                label: ParameterResolutionSchedule.self,
-                systems:
-                    ComputationOrderSystem.self,
-                    NameResolutionSystem.self,
-                    ExpressionParserSystem.self,
-                    ParameterResolutionSystem.self,
-                    ParameterConnectionProposalSystem.self,
-            )
             
-            world.addSchedule(schedule)
-            try world.run(schedule: ParameterResolutionSchedule.self)
+            try world.run(systems: ParameterResolutionSystems)
 
-            let proposal: ParameterProposal = world.singleton()!
+            guard let proposal: ParameterProposal = world.singleton() else {
+                throw ToolError.internalError("No parameter proposal created")
+            }
             
             let trans = try session.deriveOrCreate(options.deriveRef)
 

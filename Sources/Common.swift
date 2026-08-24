@@ -15,6 +15,7 @@ let DesignEnvironmentVariable = "POIETIC_DESIGN"
 /// Error thrown by the command-line tool.
 ///
 enum ToolError: Error, CustomStringConvertible {
+    case internalError(String)
     case internalSystemError(InternalSystemError)
 
     // I/O errors
@@ -64,6 +65,8 @@ enum ToolError: Error, CustomStringConvertible {
     
     public var description: String {
         switch self {
+        case .internalError(let message):
+            return "Internal error: \(message)"
         case .internalSystemError(let error):
             return "Internal systems error: \(error)"
             
@@ -165,7 +168,8 @@ enum ToolError: Error, CustomStringConvertible {
         //       covered.
         
         switch self {
-        case .internalSystemError(_):
+        case .internalError(_),
+                .internalSystemError(_):
             return "Not your fault. Contact the developers with more details - what you did and what the error was"
         case .malformedLocation(_):
             return nil
@@ -175,7 +179,7 @@ enum ToolError: Error, CustomStringConvertible {
             return nil
 
         case .brokenStructuralIntegrity(_):
-            return "Unfortunately the only way is to inspect the database or a foreign plane. 'doctor' command is not yet implemented."
+            return "Unfortunately the only way is to inspect the database. You can try jq tool (third party) to perform surgery"
         case .validationFailed(_):
             return "Make sure that the design is conforming to the metamodel. (In the future there will be 'doctor' command to help you.)"
         case .designIssues(_):
