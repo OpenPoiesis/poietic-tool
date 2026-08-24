@@ -36,7 +36,6 @@ enum ToolError: Error, CustomStringConvertible {
     
     // Simulation errors
     case unknownVariables([String])
-    case unknownSolver(String)
     case simulationFailed(String)
     
     // Query errors
@@ -125,8 +124,6 @@ enum ToolError: Error, CustomStringConvertible {
             }
             return "Simulation planning failed: \(detail)"
 
-        case .unknownSolver(let value):
-            return "Unknown solver '\(value)'"
         case .unknownVariables(let names):
             let varlist = names.joined(separator: ", ")
             return "Unknown variables: \(varlist)"
@@ -184,8 +181,6 @@ enum ToolError: Error, CustomStringConvertible {
         case .designIssues(_):
             return "Make sure that the design is conforming to the metamodel and the rules of simulation. (In the future there will be 'doctor' command to help you.)"
 
-        case .unknownSolver(_):
-            return "Check the list of available solvers by running the 'info' command."
         case .unknownVariables(_):
             return "See the list of available simulation variables using the 'list' command."
         case .unknownObject(_):

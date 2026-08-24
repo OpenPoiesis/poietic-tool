@@ -52,9 +52,8 @@ extension PoieticTool {
                 help: "Values to observe in the output; can be object IDs or object names")
         var outputNames: [String] = []
 
-        // TODO: Rename to --parameter/-p
-        @Option(name: [.customLong("constant"), .customShort("c")],
-                       help: "Set (override) a value of a constant node in a form 'attribute=value'")
+        @Option(name: [.customLong("parameter"), .customShort("p")],
+                       help: "Set (override) a value of a parameter node in a form 'object_name=value'")
         var overrideValues: [String] = []
 
         @Option(name: [.customLong("plane")], help: "Plane name or ID to run. Default: current plane")
@@ -142,11 +141,17 @@ extension PoieticTool {
             
             // Run the simulation
             // -------------------------------------------------------------
-            try world.run(schedule: SimulateSchedule.self)
+            do {
+                try world.run(schedule: SimulateSchedule.self)
+            }
+            catch {
+                throw ToolError.simulationFailed(error.message)
+            }
             
             guard let result: SimulationResult = world.singleton() else {
-                // FIXME: Handle simulation failed error
-                throw ToolError.simulationFailed("No simulation result")
+                // This should not happen, if the simulation system does not throw, then we get result.
+                // TODO: Once we have simulation errors set on objects, use them. We do not have them yet.
+                throw ToolError.simulationFailed("Unknown error (no result produced")
             }
             
             switch outputFormat {

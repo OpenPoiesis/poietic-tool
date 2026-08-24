@@ -81,7 +81,7 @@ extension PoieticTool {
             let plane = try editor.plane(planeRef)
 
             guard let testURL = URL(string: output) else {
-                fatalError("Invalid resource reference: \(output)")
+                throw ToolError.malformedLocation(output)
             }
             let outputURL: URL
 

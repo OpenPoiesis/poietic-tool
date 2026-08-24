@@ -51,8 +51,9 @@ extension PoieticTool {
             world.setPlane(plane)
             
             guard let testURL = URL(string: output) else {
-                fatalError("Invalid resource reference: \(output)")
+                throw ToolError.malformedLocation(output)
             }
+
             let outputURL: URL
 
             if testURL.scheme == nil {

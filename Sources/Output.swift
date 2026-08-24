@@ -6,14 +6,22 @@
 //
 
 import PoieticCore
+import Foundation
+
+/// Print a string to `stderr`.
+func errorPrint(_ string: String) {
+    if let data = (string + "\n").data(using: .utf8) {
+        FileHandle.standardError.write(data)
+        FileHandle.standardError.synchronizeFile()
+    }
+}
 
 func printIssues(_ world: World) {
     guard let plane = world.plane else { return }
     printIssues(world.issues, plane: plane)
 }
 func printIssues(_ issues: [ObjectID:[Issue]], plane: some Plane) {
-    // FIXME: Use stderr
-    print("DESIGN ISSUES:")
+    errorPrint("DESIGN ISSUES:")
     for (objectID, objectIssues) in issues {
         printObjectIssues(objectID, issues: objectIssues, plane: plane)
     }
@@ -33,32 +41,35 @@ func printObjectIssues(_ objectID: ObjectID, issues: [Issue], plane: some Plane)
     guard let object = plane[objectID] else { return }
     let identity = "[\(objectID)] \(object.type.name)"
     let name: String = object.name.map { " (\($0))" } ?? ""
-    let structure: String
+    let topology: String
     
     switch object.topology {
-    case .unstructured, .node:          structure = ""
-    case .edge(let origin, let target): structure = "[\(origin) → \(target)]"
-    case .orderedSet(let owner, _):         structure = "[↕︎\(owner)]"
+    case .unstructured, .node:
+        topology = ""
+    case .edge(let origin, let target):
+        topology = "[\(origin) → \(target)]"
+    case .orderedSet(let owner, _):
+        topology = "[\(owner),...]"
     }
     
-    print(identity + name + structure + ":")
+    errorPrint(identity + name + topology + ":")
     let indent = "    "
     
     for issue in issues {
         let severity = issue.severity.description
         let message = issue.message
         let line = severity + ": " + message
-        print(indent + line)
+        errorPrint(indent + line)
     }
 }
 func printDesignIssues(_ issues: [Issue], plane: some Plane) {
-    print("[design]")
+    errorPrint("[design]")
     
     for issue in issues {
         let severity = issue.severity.description
         let message = issue.message
         let line = severity + ": " + message
-        print("    " + line)
+        errorPrint("    " + line)
     }
 }
 

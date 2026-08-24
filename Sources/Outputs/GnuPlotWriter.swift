@@ -36,8 +36,6 @@ func writeToCSV(path: String, result: SimulationResult, plan: SimulationPlan) th
 /// - `chart_NAME.gnuplot` – one file for every chart where the NAME is the
 ///    chart object name.
 ///
-/// If the path is '-' then the current directory will be used.
-///
 class GNUPlotBundleWriter {
     let dataFileName: String
 
