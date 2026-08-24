@@ -53,7 +53,7 @@ extension PoieticTool {
         var outputNames: [String] = []
 
         @Option(name: [.customLong("parameter"), .customShort("p")],
-                       help: "Set (override) a value of a parameter node in a form 'object_name=value'")
+                       help: "Set (override) a numeric value of a parameter node in a form 'object_name=value'")
         var overrideValues: [String] = []
 
         @Option(name: [.customLong("plane")], help: "Plane name or ID to run. Default: current plane")
