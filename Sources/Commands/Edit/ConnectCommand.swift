@@ -41,7 +41,7 @@ extension PoieticTool {
             }
             
             guard type.topologyType == .edge else {
-                throw ToolError.structuralTypeMismatch(TopologyType.edge.rawValue,
+                throw ToolError.topologyTypeMismatch(TopologyType.edge.rawValue,
                                                        type.topologyType.rawValue)
             }
             

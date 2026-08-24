@@ -52,7 +52,7 @@ poietic edit add FlowRate name=expenses formula=50
             case .node:
                 object = trans.create(type, topology: .node)
             default:
-                throw ToolError.structuralTypeMismatch("node or unstructured",
+                throw ToolError.topologyTypeMismatch("node or unstructured",
                                                        type.topologyType.rawValue)
             }
             

@@ -56,7 +56,7 @@ enum ToolError: Error, CustomStringConvertible {
     // Editing errors
     case noChangesToUndo
     case noChangesToRedo
-    case structuralTypeMismatch(String, String)
+    case topologyTypeMismatch(String, String)
     // Metamodel errors
     case unknownObjectType(String)
     
@@ -142,8 +142,8 @@ enum ToolError: Error, CustomStringConvertible {
             return "No changes to undo"
         case .noChangesToRedo:
             return "No changes to re-do"
-        case .structuralTypeMismatch(let given, let expected):
-            return "Mismatch of structural type. Expected: \(expected), given: \(given)"
+        case .topologyTypeMismatch(let given, let expected):
+            return "Mismatch of topology type. Expected: \(expected), given: \(given)"
         case .unknownObjectType(let value):
             return "Unknown object type '\(value)'"
         case .nodeExpected(let value):
@@ -199,10 +199,10 @@ enum ToolError: Error, CustomStringConvertible {
             return nil
         case .noChangesToRedo:
             return nil
-        case .structuralTypeMismatch(_, _):
-            return "See the metamodel to know structural type of the object type."
+        case .topologyTypeMismatch(_, _):
+            return "See the metamodel to know topology type of the object type"
         case .unknownObjectType(_):
-            return "See the metamodel for a list of known object types."
+            return "See the metamodel for a list of known object types"
         case .nodeExpected(_):
             return nil
         case .invalidAttributeAssignment(_):
@@ -240,7 +240,7 @@ enum ToolError: Error, CustomStringConvertible {
 ///         splitting the assignment on your own.
 ///
 func parseValueAssignment(_ assignment: String) -> (String, String)? {
-    let split = assignment.split(separator: "=", maxSplits: 2)
+    let split = assignment.split(separator: "=", maxSplits: 1)
     if split.count != 2 {
         return nil
     }
@@ -250,7 +250,8 @@ func parseValueAssignment(_ assignment: String) -> (String, String)? {
 
 func setAttributeFromString(object: TransientObject,
                             attribute attributeName: String,
-                            string: String) throws {
+                            string: String) throws
+{
     let type = object.type
     if let attr = type.attribute(attributeName), attr.type.isArray {
         let json = try JSONValue(parsing: string)

@@ -84,7 +84,7 @@ class DotFormatter {
         // Need to quote?
 
         let hasInvalidCharacter = string.contains { !$0.isDotIdentifier }
-        let noNumberPrefix = string.prefix(where: { $0.isNumber }).isEmpty
+        let noNumberPrefix = string.prefix(while: { $0.isNumber }).isEmpty
 
         if !(hasInvalidCharacter || noNumberPrefix) {
             return string
