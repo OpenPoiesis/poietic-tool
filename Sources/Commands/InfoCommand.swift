@@ -19,7 +19,7 @@ extension PoieticTool {
         var planeID: String?
 
         mutating func run() throws {
-            let editor = try DesignEditor(location: options.designLocation)
+            let editor = try DesignSession(location: options.designLocation)
             let plane = try editor.planeIfPresent(planeID)
             
             var items: [(String?, String?)] = [

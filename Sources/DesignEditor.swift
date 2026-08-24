@@ -1,5 +1,5 @@
 //
-//  DesignEditor.swift
+//  DesignSession.swift
 //  poietic
 //
 //  Created by Stefan Urbanek on 07/11/2025.
@@ -45,13 +45,12 @@ func designURL(_ location: String?) throws (ToolError) -> URL {
     }
 }
 
-// TODO: Rename to Laboratory?
-public class DesignEditor {
-    public let url: URL
-    public let design: Design
-    public let world: World
+class DesignSession {
+    let url: URL
+    let design: Design
+    let world: World
 
-    /// Create a new editor given the URL and optional design.
+    /// Create a new session given the URL and optional design.
     ///
     /// If the design is provided, then it is used and the URL is assigned as a storage URL
     /// of the design.

@@ -28,7 +28,7 @@ extension PoieticTool {
         var references: [String] = []
 
         mutating func run() throws {
-            let editor = try DesignEditor(location: globalOptions.designLocation)
+            let editor = try DesignSession(location: globalOptions.designLocation)
             let plane = try editor.plane(planeReference)
 
             let extractor = DesignExtractor()

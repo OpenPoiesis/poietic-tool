@@ -61,7 +61,7 @@ Note: Plane with requested IDs can not be --forced to be replaced. Remove the pl
         var appendHistory: Bool = false
 
         mutating func run() throws {
-            let editor = try DesignEditor(location: globalOptions.designLocation)
+            let editor = try DesignSession(location: globalOptions.designLocation)
             let design = editor.design
             let requestedID: PlaneID?
             let createdRef: String

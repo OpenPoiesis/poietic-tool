@@ -77,7 +77,7 @@ extension PoieticTool {
         var planeRef: String?
         
         mutating func run() throws {
-            let editor = try DesignEditor(location: globalOptions.designLocation)
+            let editor = try DesignSession(location: globalOptions.designLocation)
             let plane = try editor.plane(planeRef)
 
             guard let testURL = URL(string: output) else {

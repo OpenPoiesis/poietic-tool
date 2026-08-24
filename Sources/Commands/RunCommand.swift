@@ -76,7 +76,7 @@ extension PoieticTool {
         var outputPath: String = "-"
         
         mutating func run() throws {
-            let editor = try DesignEditor(location: options.designLocation)
+            let editor = try DesignSession(location: options.designLocation)
             let world = editor.world
             
             try world.run(schedule: PlanSchedule.self)

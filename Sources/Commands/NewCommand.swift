@@ -25,7 +25,7 @@ extension PoieticTool {
 
         mutating func run() throws {
             let design = Design(metamodel: StockFlowMetamodel)
-            let editor = try DesignEditor(location: globalOptions.designLocation, design: design)
+            let editor = try DesignSession(location: globalOptions.designLocation, design: design)
 
             if !importPaths.isEmpty {
                 let loader = DesignLoader(metamodel: design.metamodel, options: .useIDAsNameAttribute)

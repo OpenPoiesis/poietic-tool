@@ -62,7 +62,7 @@ extension PoieticTool {
         var listType: ListType = .all
 
         mutating func run() throws {
-            let editor = try DesignEditor(location: options.designLocation)
+            let editor = try DesignSession(location: options.designLocation)
             switch listType.entityType {
             case .planes:
                 try listPlanes(editor.design)

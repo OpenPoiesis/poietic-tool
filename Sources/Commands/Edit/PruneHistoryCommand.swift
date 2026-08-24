@@ -21,7 +21,7 @@ extension PoieticTool {
         @OptionGroup var globalOptions: Options
 
         mutating func run() throws {
-            let editor = try DesignEditor(location: globalOptions.designLocation)
+            let editor = try DesignSession(location: globalOptions.designLocation)
             let design = editor.design
             
             let count = design.undoList.count + design.redoList.count

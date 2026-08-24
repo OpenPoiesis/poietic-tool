@@ -24,7 +24,7 @@ extension PoieticTool {
         var references: [String]
         
         mutating func run() throws {
-            let editor = try DesignEditor(location: globalOptions.designLocation)
+            let editor = try DesignSession(location: globalOptions.designLocation)
 
             guard editor.design.planes.count > 0 else {
                 throw ToolError.emptyDesign

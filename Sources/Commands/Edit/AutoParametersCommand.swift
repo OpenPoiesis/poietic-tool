@@ -28,7 +28,7 @@ extension PoieticTool {
         var verbose: Bool = false
 
         mutating func run() throws {
-            let editor = try DesignEditor(location: globalOptions.designLocation)
+            let editor = try DesignSession(location: globalOptions.designLocation)
             let world = editor.world
 
             let schedule = Schedule(

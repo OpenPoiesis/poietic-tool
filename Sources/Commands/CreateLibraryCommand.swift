@@ -64,7 +64,7 @@ func createLibraryItem(fromDesignAt location: String) throws -> DesignLibraryIte
         url
     }
 
-    let editor = try DesignEditor(url: actualURL)
+    let editor = try DesignSession(url: actualURL)
 
     guard let plane = editor.design.currentPlane else {
         throw ToolError.emptyDesign

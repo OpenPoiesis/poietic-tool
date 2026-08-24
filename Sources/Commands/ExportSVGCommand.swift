@@ -45,7 +45,7 @@ extension PoieticTool {
         var pictogramCollectionPath: String?
 
         mutating func run() throws {
-            let editor = try DesignEditor(location: options.designLocation)
+            let editor = try DesignSession(location: options.designLocation)
             let world = editor.world
             
             guard let testURL = URL(string: output) else {

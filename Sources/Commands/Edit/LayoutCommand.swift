@@ -38,7 +38,7 @@ extension PoieticTool {
         var references: [String] = []
         
         mutating func run() throws {
-            let editor = try DesignEditor(location: globalOptions.designLocation)
+            let editor = try DesignSession(location: globalOptions.designLocation)
             let trans = try editor.deriveOrCreate(options.deriveRef)
 
             var objects: [TransientObject] = []

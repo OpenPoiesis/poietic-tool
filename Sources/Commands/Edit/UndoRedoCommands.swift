@@ -18,7 +18,7 @@ extension PoieticTool {
         @OptionGroup var globalOptions: Options
 
         mutating func run() throws {
-            let editor = try DesignEditor(location: globalOptions.designLocation)
+            let editor = try DesignSession(location: globalOptions.designLocation)
 
             if !editor.design.canUndo {
                 throw ToolError.noChangesToUndo
@@ -44,7 +44,7 @@ extension PoieticTool {
         @OptionGroup var globalOptions: Options
 
         mutating func run() throws {
-            let editor = try DesignEditor(location: globalOptions.designLocation)
+            let editor = try DesignSession(location: globalOptions.designLocation)
 
             if !editor.design.canRedo {
                 throw ToolError.noChangesToRedo
