@@ -242,12 +242,10 @@ func setAttributeFromString(object: TransientObject,
     let type = object.type
     if let attr = type.attribute(attributeName), attr.type.isArray {
         let arrayValue = try Variant(jsonWithFallback: string)
-        object.setAttribute(value: arrayValue,
-                                forKey: attributeName)
+        object.setAttribute(value: arrayValue, forKey: attributeName)
     }
     else {
-        object.setAttribute(value: Variant(string),
-                                forKey: attributeName)
+        object.setAttribute(value: Variant(string), forKey: attributeName)
     }
 
 }

@@ -59,9 +59,13 @@ extension PoieticTool {
                     objects.append(trans.mutate(object.objectID))
                 }
             }
+            
+            guard objects.count > 0 else { return }
+            
             let center = Point(100.0, 100.0)
             let radius: Double = 100.0
             var angle: Double = 0.0
+            
             let step: Double = (2 * Double.pi) / Double(objects.count)
             
             for obj in objects {
