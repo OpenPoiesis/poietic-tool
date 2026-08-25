@@ -3,13 +3,12 @@
 Command-line tool for manipulating and exploring Poietic Models, with support for
 Stock and Flow simulation.
 
-See also: [Full documentation](https://github.com/OpenPoiesis/poietic-tool/blob/main/Docs/Tool.md)
-with all the commands.
+[Full documentation](Docs/Tool.md) with all the commands.
 
 
 ## Installation
 
-Available platforms: MacOS 14 (and later), Linux
+Available platforms: MacOS 15 (and later), Linux
 
 To install the `poietic` command-line tool, run the following command in the
 project's top-level directory:
@@ -18,7 +17,7 @@ project's top-level directory:
 ./install
 ```
 
-The tool will be installed in the Swift Package Manager's' `~/.swiftpm/bin`
+The tool will be installed in the Swift Package Manager's `~/.swiftpm/bin`
 directory. Make sure you have the directory in your `PATH`, if you do not, then
 add the following to the end of your `~/.zshrc` or `~/.bashrc` file:
 
@@ -34,51 +33,51 @@ On MacOS with Homebrew:
 brew install graphviz gnuplot
 ```
 
-## Examples
-
-The examples are located in the [Examples repository](https://github.com/OpenPoiesis/poietic-examples).
-Follow instructions how to run them in the documentation contained within the
-repository.
-
-
-## Tool Overview
+## Quick Start
 
 Detailed documentation can be found here: [Command Line Tool documentation](Docs/Tool.md).
 
 Command summary:
 
-- `new`: Create an empty design.
-- `info`: Get information about the design
-- `list`: List design content objects.
-- `show`: Describe an object.
-- `edit`: Edit an object or a selection of objects.
-    - `set`: Set an attribute value
-    - `undo`: Undo last change
-    - `redo`: Redo undone change
-    - `add`: Create a new node
-    - `connect`: Create a new connection (edge) between two nodes
-    - `remove`: Remove an object – a node or a connection
-    - `auto-parameters`: Automatically connect parameter nodes: connect required, disconnect unused
-    - `layout`: Lay out objects
-    - `align`: Align objects on canvas
-- `import`: Import a frame into the design.
-- `run`: Run the simulation and generate output
-- `write-dot`: Write a Graphviz DOT file.
-- `metamodel`: Describe the metamodel (supports: text, markdown and HTML output)
-- `create-library` Create a library of multiple models.
+| Command | Overview |
+|:----|:----|
+|`new`| Create an empty design |
+|`info`| Get information about the design |
+|`list`| List design content objects |
+|`show`| Describe an object |
+|`validate`| Validate the design for potential errors |
+|`edit`| Edit an object or a selection of objects _(see subcommands below)_ |
+|`import`| Import a plane into the design |
+|`export`| Export current plane or a collection of objects |
+|`run`| Run the simulation and generate output |
+|`write-dot`| Write a Graphviz DOT file |
+|`metamodel`| Describe the metamodel (various output formats)|
+|`create-library`| Create a library of multiple models |
+|`export-svg`| Export design as a SVG diagram |
 
-Experimental commands:
-- `experimental-export-svg`: Export design as a SVG diagram. Requires pictograms from [poietic-assets](https://github.com/openpoiesis/poietic-assets)
+Edit sub-commands:
+
+| Command | Overview |
+|:----|:----|
+|`set`| Set an attribute value |
+|`undo`| Undo last change |
+|`redo`| Redo undone change |
+|`add`| Create a new node or an unstructured object |
+|`connect`| Create a new connection (edge) between two nodes |
+|`remove`| Remove an object – a node or a connection |
+|`auto-parameters`| Automatically connect parameter nodes: connect required, disconnect unused |
+|`layout`| Lay out objects |
+|`align`| Align objects on canvas |
+|`prune-history`| Remove all undo/redo history |
+|`create-plane`| Create a new plane or derive a copy from existing plane |
+|`remove-plane`| Remove existing plane |
 
 Use `--help` with a desired command to learn more.
-
-_Developer's note: At the moment of writing this, I know how to include resources with a
-command-line tool in a Swift package. That is why the SVG feature is "experimental"._
 
 ### Pseudo-REPL
 
 Think of this tool as [ed](https://en.wikipedia.org/wiki/Ed_(text_editor)) but
-for data represented as a graph. At least for now.
+for data represented as a graph.
 
 The tool is designed in a way that it is by itself interactive for a single-user. 
 For interactivity in a shell, set the `POIETIC_DESIGN` environment variable to
@@ -138,17 +137,25 @@ currently available metamodel for the given design.
 
 ## Features
 
-- Preserved history – Editing is non-destructive, can be reversed using undo
-  and redo commands.
-- Exports to different formats:
-    - [Graphviz](https://graphviz.org) dot files
-    - CSV
-    - Charts to [Gnuplot](http://gnuplot.info)
-- Stock, Flow, Auxiliary, Graphical function and more kinds of nodes. See
-  [Metamodel](https://openpoiesis.github.io/poietic-flows/documentation/poieticflows/metamodel).
-- Arithmetic expressions with built-in functions. See
-  [Formulas](https://openpoiesis.github.io/poietic-flows/documentation/poieticflows/formulas).
 
+**Problem Domain**
+
+- Modelling in the [Stock and Flow](https://en.wikipedia.org/wiki/Stock_and_flow) problem domain.
+- Computational objects included: Stock, FlowRate, Auxiliary, Graphical function, Delay and Smooth. See [Metamodel](https://openpoiesis.github.io/poietic-flows/documentation/poieticflows/metamodel) for details.
+
+**Editing**
+
+- Command-line model editing with undo/redo history
+- Export diagrams to SVG or [Graphviz](https://graphviz.org)
+- Export results to CSV and [Gnuplot](http://gnuplot.info)
+
+
+## Examples
+
+See [Examples repository](https://github.com/OpenPoiesis/poietic-examples).
+
+Follow instructions how to run them in the documentation contained within the
+repository.
 
 ## See Also
 
@@ -167,20 +174,7 @@ Underlying packages:
 
 _All humans are more than welcome to contribute to the project._
 
-**Contributions that are substantially generative AI/LLM-generated (such as code or issues)**,
-without substantive human authorship, verification and understanding, will be rejected
-without further review, regardless of content.
-
-**Generative AI/LLM-assisted human contribution might be allowed** with prior discussion
-and disclosure. The disclosure must confirm that:
-
-- You fully understand every part of the contribution, and can answer questions about it
-  without using AI assistance.
-- You have personally tested and verified it.
-- You clearly indicate which parts of the content is AI generated.
-
-The human contributor takes full responsibility for all code, including its correctness
-and licensing compliance.
+Read more in the [Contribution Policy](CONTRIBUTING.md) file.
 
 
 ## Author

@@ -1,6 +1,6 @@
 # Command Line Tool
 
-The Poietic Flows includes a command-line tool to create, edit and run
+Poietic Flows includes a command-line tool to create, edit and run
 Stock and Flow models.
 
 Usage:
@@ -26,11 +26,13 @@ Command summary:
 |`show`| Describe an object |
 |`validate`| Validate the design for potential errors |
 |`edit`| Edit an object or a selection of objects _(see subcommands below)_ |
-|`import`| Import a frame into the design |
+|`import`| Import a plane into the design |
+|`export`| Export current plane or a collection of objects |
 |`run`| Run the simulation and generate output |
 |`write-dot`| Write a Graphviz DOT file |
 |`metamodel`| Describe the metamodel (various output formats)|
-|`create-library` | Create a library of multiple models _(experimental)_ |
+|`create-library`| Create a library of multiple models |
+|`export-svg`| Export design as an SVG diagram |
 
 Edit sub-commands:
 
@@ -39,20 +41,15 @@ Edit sub-commands:
 |`set`| Set an attribute value |
 |`undo`| Undo last change |
 |`redo`| Redo undone change |
-|`add`| Create a new node |
+|`add`| Create a new node or an unstructured object |
 |`connect`| Create a new connection (edge) between two nodes |
 |`remove`| Remove an object – a node or a connection |
 |`auto-parameters`| Automatically connect parameter nodes: connect required, disconnect unused |
 |`layout`| Lay out objects |
 |`align`| Align objects on canvas |
-
-Advanced `edit` sub-commands:
-
-| Command | Overview |
-|:----|:----|
-|`prune-history`| Remove all undo-redo history |
-|`create-frame`| Create a new frame or derive a copy from existing frame |
-|`remove-frame`| Remove existing frame |
+|`prune-history`| Remove all undo/redo history |
+|`create-plane`| Create a new plane or derive a copy from existing plane |
+|`remove-plane`| Remove existing plane |
 
 
 ## Commons
@@ -84,7 +81,7 @@ Multiple commands operating on objects expect an object reference. For example
 the `show` command or any of the `edit` sub-commands. Object reference can be
 given directly either as object ID or as object name.
 
-When an object ID is provided, it must exist in the current frame.
+When an object ID is provided, it must exist in the current plane.
 
 When an object name is provided and multiple objects carry the same name, then
 one of the objects is selected arbitrarily. It is advised to reference objects
@@ -108,19 +105,19 @@ USAGE: poietic new [--design <design>] [--import <import> ...]
 
 Options:
 
-- `-i`, `--import <import>`: Poietic frame to import into the first frame. See
+- `-i`, `--import <import>`: Poietic plane to import into the first plane. See
   `import` command for more information.
 
 
-During the creation of a new frame the user has an option to import one or
-multiple frames that will be combined into the first frame of the design.
+During the creation of a new plane the user has an option to import one or
+multiple planes that will be combined into the first plane of the design.
 
 Example:
 
 ```
-% poietic new --import ../poietic-examples/ThinkingInSystems/Capital.poieticframe
-Importing from: ../PoieticExamples/ThinkingInSystems/Capital.poieticframe
-Design created.
+% poietic new --import ../poietic-examples/ThinkingInSystems/Capital.poietic
+Importing from: ../PoieticExamples/ThinkingInSystems/Capital.poietic
+Design created: design.poietic
 ```
 
 See also: `auto-parameters` subcommand of `edit`.
@@ -133,18 +130,12 @@ Get information about the design.
 Usage:
 
 ```bash
-poietic info [--design <design>] [<frame-id>]
+poietic info [--design <design>] [--plane <plane>]
 ```
-
-Arguments:
-
-- `<frame-id>`: Frame ID (current if not provided)
-
 
 Options:
 
-- `--type <type>`: Filter objects by given object type, when listing objects. For example to list
-  just stocks, use `--type Stock`
+- `--plane <plane>`: Plane ID or name. Default is current.
 
 ## List Command
 
@@ -153,10 +144,12 @@ List design content objects.
 Usage:
 
 ```
-poietic list [--design <design>] [--frame <frame>] [--type <type>] [<list-type>]
+poietic list [--design <design>] [--plane <plane>] [--type <type>] [<list-type>]
 ```
 
-Lists types for objects and object-related properties:
+`--plane` Specifies which plane to list. If not specified, the default plane is used.
+
+Lists `--type` types for objects and object-related properties:
 
 - `all`: List all objects in the design in groups: unstructured objects, nodes and
    edges. Each entry contains object ID, object type name and object name.
@@ -164,13 +157,13 @@ Lists types for objects and object-related properties:
 - `formulas`: List arithmetic formulas in the form: `name = formula`, for example
   `growth_goal = capital * 0.1`.
 - `pseudo-equations`: List equations for stocks.
-- `charts`: List charts in the form: `chart: series`.
+- `graphical-functions`: List graphical function points.
 
-Lists types for frames:
+Lists types for planes:
 
-- `named-frames`: List of frames that have a name associated, such as application configuration
-- `frames`: List of frame IDs.
-- `history`: List frame IDs for undo and redo history.
+- `named-planes`: List of planes that have a name associated, such as application configuration
+- `planes`: List of plane IDs.
+- `history`: List plane IDs for undo and redo history.
 
 ## Show Command
 
@@ -179,14 +172,17 @@ Describe a design object.
 Usage:
 
 ```sh
-poietic show [--design <design>] [--output-format <output-format>] <reference>
+poietic show [--design <design>] [--plane <plane>] [--debug] <reference>
 ```
+
+Arguments:
+
+- `<reference>`: ID or a name of an object to be described.
 
 Options:
 
-- `-f, --output-format <output-format>`: Format in which the object is
-  described. Can be `text` for mostly human-readable description and `json`
-  for machine processable description.
+- `--plane <plane>`: Plane to get object from. Default is current plane.
+- `--debug`: Show detailed debug information.
 
 The text output is grouped by traits of object's type.
 
@@ -197,7 +193,7 @@ Example:
 Type                : FlowRate
 Object ID           : 26
 Snapshot ID         : 27
-Structure           : node
+Topology            : node
 Traits:             : Name, Formula, FlowRate, ComputedValue, NumericIndicator, DiagramNode
 
 Attributes
@@ -209,33 +205,77 @@ z_index             : 0
 
 ## Import Command
 
-Import a frame into the design.
+Import a plane into the design.
 
 Usage:
 
 ```sh
-poietic import [--design <design>] [--derive <derive>] [--replace <replace>] [--append-history] [--no-append-history] <file-name>
+poietic import [--design <design>] [--plane <plane>] [--replace <replace>] [--append-history] [--no-append-history] [--identity <identity>] <file-name>
 ```
 
-Imports a poietic frame file or a bundle into the design. See documentation
-of the frame file or a bundle for more information.
+Arguments:
+
+- `<file-name>`: Path to a poietic design to import from.
+
+Options:
+
+- `--plane <plane>`: Plane ID or name to base edits on. If not provided, current is used.
+- `--replace <replace>`: Plane name to replace.
+- `--append-history` / `--no-append-history`: If true, then the plane will be added to history (if not named). Default: `--append-history`.
+- `--identity <identity>`: Object identity mode. Values: `require`, `auto`, `new`. Default: `require`.
+
+Imports a poietic plane file or a bundle into the design. See documentation
+of the plane file or a bundle for more information.
 
 Notes:
 
-- If the imported frame requires explicit object IDs, then the design
-  the frame is being imported to must not contain objects with given IDs.
-- The imported frame must contain only types the design supports.
-- Structural type of the imported objects (node, edge, unstructured) is
+- If the imported plane requires explicit object IDs, then the design
+  the plane is being imported to must not contain objects with given IDs.
+- The imported plane must contain only types the design supports.
+- Topology type of the imported objects (node, edge, unstructured) is
   determined by the target design object types.
 
 Current shortcomings, which might be resolved in the future:
 
-- Imported frame has no way to specify edges between its objects and the target
+- Imported plane has no way to specify edges between its objects and the target
   design objects.
-- User has no way to ignore imported IDs, this this should be an option.
+- User has no way to ignore imported IDs, this should be an option.
 
 See also: `auto-parameters` subcommand of `edit`.
 
+
+## Validate Command
+
+Validate design or a single plane.
+
+Usage:
+
+```sh
+poietic validate [--design <design>] [--plane <plane>]
+```
+
+Options:
+
+- `--plane <plane>`: Plane to be validated. Default: current plane.
+
+## Export Command
+
+Export current plane or a collection of objects.
+
+Usage:
+
+```sh
+poietic export [--design <design>] [--plane <plane>] [--output <output>] [<references> ...]
+```
+
+Arguments:
+
+- `<references>`: List of references of objects to be exported. Default: all objects in a plane.
+
+Options:
+
+- `--plane <plane>`: Plane to be exported. Default: current plane.
+- `-o, --output <output>`: Output path. Default or '-' is standard output.
 
 ## Run Command
 
@@ -246,26 +286,28 @@ Usage:
 ```
 poietic run [--design <design>] \
     [--start-time <start-time>] \
-    [--end-time <end-time>] \
+    [--steps <steps>] \
     [--time-delta <time-delta>] \
+    [--solver <solver>] \
     [--output-format <output-format>] \
     [--variable <variable> ...] \
-    [--constant <constant> ...] \
-    [--frame <frame>] \
+    [--parameter <parameter> ...] \
+    [--plane <plane>] \
     [--output <output>]
 ```
 
 Options:
 
-- `--start-time`: Initial time for the `time` variable.
-- `--end-time`: Final simulation time. Default is `start_time + 10 * time_delta`
-- `-t, --time-delta`: Time delta to use. Default: 1.0 (unit-less)
-- `--solver <solver>`: Type of the solver to be used for computation.
+- `--start-time <start-time>`: Initial time, overrides design-specified initial time.
+- `-s, --steps <steps>`: Maximum number of steps to run, before end-time is reached.
+- `-t, --time-delta <time-delta>`: Time delta, overrides design-specified time delta.
+- `--solver <solver>`: Type of the solver to be used for computation. Default: `euler`.
 - `-f, --output-format <output-format>`: Output format, see below.
 - `-V, --variable <variable>`: Values to observe in the output; can be object IDs or object names.
   If not specified, all simulation variables are used.
-- `-c, --constant <constant>`: Set (override) a value of a constant node in a
-  form 'attribute=value'.
+- `-p, --parameter <parameter>`: Set (override) a numeric value of a parameter node in a
+  form 'object_name=value'.
+- `--plane <plane>`: Plane name or ID to run. Default: current plane.
 - `-o, --output <output>`: Output path. Default or '-' is standard output.
 
 Output formats:
@@ -301,12 +343,15 @@ There are multiple commands for model editing:
 - `set`: Set an attribute value
 - `undo`: Undo last change
 - `redo`: Redo undone change
-- `add`: Create a new node
+- `add`: Create a new node or an unstructured object
 - `connect`: Create a new connection (edge) between two nodes
 - `remove`: Remove an object – a node or a connection
 - `auto-parameters`: Automatically connect parameter nodes: connect required, disconnect unused
 - `layout`: Lay out objects
 - `align`: Align objects on canvas
+- `prune-history`: Remove all undo/redo history
+- `create-plane`: Create a new plane or derive a copy from existing plane
+- `remove-plane`: Remove existing plane
 
 All edit commands alter the history which can be reversed. The editing commands
 are not destructive to the design, simply use `undo` and `redo` edit commands
@@ -319,7 +364,7 @@ Set an attribute value.
 Usage:
 
 ```sh
-poietic edit set [--design <design>] <reference> <attribute-name> <value>
+poietic edit set [--design <design>] [--plane <plane>] [--replace <replace>] [--append-history] [--no-append-history] <reference> <attribute-name> <value>
 ```
 
 Arguments:
@@ -332,38 +377,42 @@ Arguments:
 The type of the attribute is determined by the object type. The following rules
 apply:
 
+- If the type is a string, the value is used as-is.
+- If the type is numeric or boolean, the value must be convertible to the type.
+- If the type is a point, the value is `[x, y]`, for example: `"[100, 0]"` for
+  a point at `x=100` and `y=0`.
 - If the type is an array, then the value string is a JSON representation of
   the array, for example: `"[10, 20, 30, 40]"`
-- If the type is a point, then the value is a JSON array of two elements, for
-  example: `"[100, 0]"` for a point at `x=100` and `y=0`.
 
 ### Undo Command
 
 Undo last change.
 
-The previous frame in the history will become the current frame. All frames
-that are undone are preserved until a next change. On a change, the frames
+The previous plane in the history will become the current plane. All planes
+that are undone are preserved until a next change. On a change, the planes
 held in the undo-buffer are removed.
 
 ### Redo Command
 
 Redo last undone change.
 
-The next frame in the history after the current frame will become current.
-
-The previous frame in the history will become the current frame. All frames
-that are undone are preserved until a next change. On a change, the frames
-held in the undo-buffer are removed.
+The next plane in the history after the current plane will become current.
 
 ### Add Object Command
 
-Create a new node or an unstructured object
+Create a new node or an unstructured object.
 
-Usage examples:
+Usage:
+
+```sh
+poietic edit add [--design <design>] [--plane <plane>] [--replace <replace>] [--append-history] [--no-append-history] <type-name> [<attribute-assignments> ...]
+```
+
+Examples:
 
 ```
-poietic add Stock name=account formula=100
-poietic add Flow name=expenses formula=50
+poietic edit add Stock name=account formula=100
+poietic edit add FlowRate name=expenses formula=50
 ```
 
 Arguments:
@@ -390,10 +439,6 @@ poietic metamodel Stock
 poietic metamodel DesignInfo
 ```
 
-**IMPORTANT**: The format of the attribute assignments will likely change in the
-upcoming releases.
-
-
 ### Connect Command
 
 Create a new connection (edge) between two nodes.
@@ -401,7 +446,7 @@ Create a new connection (edge) between two nodes.
 Usage:
 
 ```sh
-poietic edit connect [--design <design>] <type-name> <origin> <target>
+poietic edit connect [--design <design>] [--plane <plane>] [--replace <replace>] [--append-history] [--no-append-history] <type-name> <origin> <target>
 ```
 
 Arguments:
@@ -422,7 +467,7 @@ Remove an object – a node or a connection.
 
 Usage: 
 ```sh
-poietic edit remove [--design <design>] <reference>
+poietic edit remove [--design <design>] [--plane <plane>] [--replace <replace>] [--append-history] [--no-append-history] <reference>
 ```
 
 Arguments:
@@ -437,7 +482,7 @@ all the edges are removed as well.
 Automatically connect parameter nodes: connect required, disconnect unused.
 
 ```sh
-poietic edit auto-parameters [--design <design>] [--verbose]
+poietic edit auto-parameters [--design <design>] [--plane <plane>] [--replace <replace>] [--append-history] [--no-append-history] [--verbose]
 ```
 
 Options:
@@ -447,9 +492,9 @@ Options:
 The Stock and Flow model requires that all parameters used in formulas
 must be connected to their corresponding nodes. Moreover, there must be no
 connected parameters that are not used in the model. If this requirement is not
-satisfied, the compiler will refuse to compile the model and it will be not
+satisfied, the simulation planning/validation fails and it will be not
 possible to simulate it. This is a design principle, not a fussiness of the
-compiler.
+simulation planner.
 
 This command connects the required parameter nodes and removes connections
 from the nodes that are not used in the formulas.
@@ -463,13 +508,13 @@ _Note_: This is a preview feature. Use with caution.
 Usage:
 
 ```sh
-poietic edit layout [--design <design>] [--layout <layout>] [<references> ...]
+poietic edit layout [--design <design>] [--plane <plane>] [--replace <replace>] [--append-history] [--no-append-history] [--layout <layout>] [<references> ...]
 ```
 
 Arguments:
 
-- `references`: Objects to be laid out. If not specified, then all objects 
-  where the object type contains position trait are considered.
+- `references`: Objects to be laid out. If not specified, then all objects
+  with a position attribute or with the DiagramBlock trait are considered.
 
 Options:
 
@@ -488,7 +533,7 @@ function to full satisfaction.
 Usage:
 
 ```sh
-poietic edit align [--design <design>] <mode> [--spacing <spacing>] <references> ...
+poietic edit align [--design <design>] [--plane <plane>] [--replace <replace>] [--append-history] [--no-append-history] <mode> [--spacing <spacing>] <references> ...
 ```
 
 Arguments:
@@ -508,6 +553,48 @@ Alignment modes:
 - Spread: `spread-horizontal`, `spread-vertical`
 
 
+### Prune History Command
+
+Remove all planes in the undo/redo history and keep just the current plane.
+
+Usage:
+
+```sh
+poietic edit prune-history [--design <design>]
+```
+
+### Create Plane Command
+
+Create a new plane or derive a copy from existing plane.
+
+Usage:
+
+```sh
+poietic edit create-plane [--design <design>] [--derive <derive>] [--name <name>] [--id <id>] [--force] [--append-history]
+```
+
+Options:
+
+- `--derive <derive>`: Derive an existing plane.
+- `--name <name>`: Create a named plane with given name.
+- `--id <id>`: Create a plane with given id.
+- `--force`: Replace existing named plane.
+- `--append-history`: Append plane to the undo history.
+
+### Remove Plane Command
+
+Remove a plane.
+
+Usage:
+
+```sh
+poietic edit remove-plane [--design <design>] <references> ...
+```
+
+Arguments:
+
+- `<references>`: IDs or names of planes to be removed.
+
 ## Metamodel Command
 
 Show information about the metamodel and object types.
@@ -520,7 +607,7 @@ Options:
 Usage:
 
 ```sh
- poietic metamodel [--design <design>] [--output-format <output-format>] [<object-type>]
+ poietic metamodel [--output-format <output-format>] [<object-type>]
 ```
 
 If `object-type` is provided, then the command lists all attributes of the 
@@ -534,39 +621,50 @@ TYPES AND COMPONENTS
 
 DesignInfo (unstructured)
     title (string)
+        - Design title
     author (string)
-    license (string)
-    abstract (string)
+        - Author of the design
+    ...
 ...
 
 Stock (node)
     name (string)
+        - Object name
+    color (string)
+        - Colour name
     formula (string)
+        - Arithmetic formula or a constant value represented by the node
     allows_negative (bool)
+        - Flag whether the stock can contain a negative value
+    position (point)
+    ...
 ...
 
-Flow (node)
+FlowRate (node)
     name (string)
+        - Object name
+    color (string)
+        - Colour name
     formula (string)
-    priority (int)
+        - Arithmetic formula or a constant value represented by the node
     position (point)
-    z_index (int)
-
+    ...
 ...
 
 Simulation (unstructured)
-    steps (int)
     initial_time (double)
+        - Initial simulation time
     time_delta (double)
+        - Advancement of time for each simulation step
+    end_time (double)
+        - Final simulation time
+    steps (int)
+        - Number of steps the simulation is run by default [deprecated]
+    solver_type (string)
+        - Solver type name
 
 ...
 
-CONSTRAINTS
-
-flow_fill_is_stock: Flow must drain (from) a stock, no other kind of node.
-flow_drain_is_stock: Flow must fill (into) a stock, no other kind of node.
-one_parameter_for_graphical_function: Graphical function must not have more than one incoming parameters.
-...
 ```
 
 Output of `poietic metamodel Stock`:
@@ -579,8 +677,6 @@ Stock (node)
         - Arithmetic formula or a constant value represented by the node.
     allows_negative (bool)
         - Flag whether the stock can contain a negative value.
-    delayed_inflow (bool)
-        - Flag whether the inflow of the stock is delayed by one step, when the stock is part of a cycle.
     position (point)
     z_index (int)
 ```
@@ -616,7 +712,7 @@ Use:
 poietic create-library [--output-file <output-file>] <designs> ...
 ```
 
-The command takes a list of design files (_important_: not a list of frames).
+The command takes a list of design files (_important_: not a list of planes).
 The command extracts `DesignInfo` from the designs. If multiple instances of
 `DesignInfo` are present, then one is chosen arbitrarily.
 
@@ -640,7 +736,8 @@ poietic write-dot [--design <design>] \
                     [--name <name>] \
                     [--output <output>] \
                     [--label-attribute <label-attribute>] \
-                    [--missing-label <missing-label>]
+                    [--missing-label <missing-label>] \
+                    [--plane <plane>]
 ```
 
 Options:
@@ -652,6 +749,7 @@ Options:
    as node label (default: id).
 - `-m, --missing-label <missing-label>`: Label used if the node has no label
    attribute (default: `(none)`)
+- `--plane <plane>`: Plane ID or name.
 
 Practical options:
 - Use `-l name` to display node name
@@ -667,9 +765,32 @@ dot -Tpng -odiagram.png output.dot
 This will create `diagram.png` file with the design diagram.
 
 
+## Export SVG Command
+
+Export design as an SVG diagram.
+
+Usage:
+
+```sh
+poietic export-svg [--design <design>] [--output <output>] [--pictogram-scale <pictogram-scale>] [--pictogram-line-width <pictogram-line-width>] [--zoom <zoom>] [--plane <plane>] [--pictograms <pictograms>]
+```
+
+Options:
+
+- `-o, --output <output>`: Output file path (default: diagram.svg).
+- `--pictogram-scale <pictogram-scale>`: Scale of pictograms (default: 0.5).
+- `--pictogram-line-width <pictogram-line-width>`: Scale of pictograms (default: 1.0).
+- `--zoom <zoom>`: Zoom level in % (default: 100.0).
+- `--plane <plane>`: Plane name or ID. Default: current plane.
+- `--pictograms <pictograms>`: File with pictogram collection.
+
+
+Pictograms are created by the `pictogram` tool in the [Diagramming](https://github.com/openpoiesis/poietic-diagram))
+package.
+
 ## Future
 
-The tool is currently part of PoieticFlows, however it serves two distinct
+The tool is currently using only one domain: PoieticFlows, however it serves two distinct
 purposes. One is model editing and the other is simulation or domain-specific
 functionality. It should be split into two tools, one part of the PoieticCore
 and the other part of PoieticFlows, or in the future, other packages with
@@ -678,7 +799,6 @@ simulation capabilities.
 The nice to have commands and functionalities:
 
 - `repair` – attempt to repair a broken design or a design of older versions
-- `export` – export a collection of objects as a frame bundle
 - `compare` or `diff` – compare two designs
 - `merge` merge two or more designs, with rules and conflict resolution
 - `edit change-type` – change object type

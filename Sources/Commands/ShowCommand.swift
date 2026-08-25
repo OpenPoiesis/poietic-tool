@@ -50,7 +50,7 @@ func printObjectAsText(_ object: ObjectSnapshot, debug: Bool) {
     ]
     
     let traits = object.type.traits.map { $0.name }.joined(separator: ", ")
-    items.append(("Traits:", traits))
+    items.append(("Traits", traits))
     
     var seenAttributes: [String] = []
     
@@ -114,5 +114,4 @@ func printObjectAsText(_ object: ObjectSnapshot, debug: Bool) {
             print(item)
         }
     }
-
 }
