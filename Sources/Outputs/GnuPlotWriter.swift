@@ -82,7 +82,7 @@ class GNUPlotBundleWriter {
     func plotCommands(entity: RuntimeEntity, chart: Chart, plan: SimulationPlan) -> [String] {
         var commands: [String] = []
         let timeIndex = plan.builtins.time
-        for seriesEnt in entity.outgoing(ChildOf.self) {
+        for seriesEnt in entity.children {
             guard let _: ChartSeries = seriesEnt.component(),
                   let target = seriesEnt.firstOutgoing(RepresentationOf.self),
                   let targetObjectID = target.objectID,
