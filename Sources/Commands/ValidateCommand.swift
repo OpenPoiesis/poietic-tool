@@ -29,7 +29,7 @@ extension PoieticTool {
                 throw ToolError.designIssues(world.issues)
             }
 
-            print("Plane is valid.")
+            infoPrint("Plane is valid.")
         }
     }
 }

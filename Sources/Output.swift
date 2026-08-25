@@ -16,6 +16,12 @@ func errorPrint(_ string: String) {
     }
 }
 
+/// Print a status information message.
+func infoPrint(_ string: String) {
+    // Just forward it to stderr.
+    errorPrint(string)
+}
+
 func printIssues(_ world: World) {
     guard let plane = world.plane else { return }
     printIssues(world.issues, plane: plane)

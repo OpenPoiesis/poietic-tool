@@ -40,10 +40,10 @@ extension PoieticTool {
             try session.save()
             
             if count > 0 {
-                print("Removed \(count) planes.")
+                infoPrint("Removed \(count) planes.")
             }
             else {
-                print("History is empty, nothing removed.")
+                infoPrint("History is empty, nothing removed.")
             }
         }
     }

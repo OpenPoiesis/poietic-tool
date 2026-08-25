@@ -105,7 +105,7 @@ Note: Plane with requested IDs can not be --forced to be replaced. Remove the pl
 
             try session.save()
 
-            print("Created plane \(createdRef)")
+            infoPrint("Created plane \(createdRef)")
         }
     }
 }

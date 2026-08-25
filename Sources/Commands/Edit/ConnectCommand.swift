@@ -67,7 +67,7 @@ extension PoieticTool {
             
             try session.save(replacing: options.replaceRef, appendHistory: options.appendHistory)
 
-            print("Created edge \(id)")
+            infoPrint("Created edge \(id)")
         }
     }
 

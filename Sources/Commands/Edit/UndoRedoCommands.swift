@@ -28,7 +28,7 @@ extension PoieticTool {
             session.design.undo(to: planeID)
 
             try session.save()
-            print("Did undo")
+            infoPrint("Did undo")
         }
     }
 
@@ -54,7 +54,7 @@ extension PoieticTool {
             session.design.redo(to: planeID)
 
             try session.save()
-            print("Did redo.")
+            infoPrint("Did redo.")
         }
     }
 }

@@ -69,7 +69,7 @@ poietic edit add FlowRate name=expenses formula=50
 
             try session.save(replacing: options.replaceRef, appendHistory: options.appendHistory)
 
-            print("Created node \(object.objectID) in plane \(trans.id)")
+            infoPrint("Created node \(object.objectID) in plane \(trans.id)")
         }
     }
 }

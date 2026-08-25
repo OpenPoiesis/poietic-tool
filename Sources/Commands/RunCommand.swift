@@ -150,7 +150,7 @@ extension PoieticTool {
             guard let result: SimulationResult = world.singleton() else {
                 // This should not happen, if the simulation system does not throw, then we get result.
                 // TODO: Once we have simulation errors set on objects, use them. We do not have them yet.
-                throw ToolError.simulationFailed("Unknown error (no result produced")
+                throw ToolError.internalError("Unknown error (no result produced)")
             }
             
             switch outputFormat {

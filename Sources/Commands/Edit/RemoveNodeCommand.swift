@@ -35,10 +35,10 @@ extension PoieticTool {
 
             try session.save(replacing: options.replaceRef, appendHistory: options.appendHistory)
 
-            print("Removed object: \(object.objectID)")
+            infoPrint("Removed object: \(object.objectID)")
             if !removed.isEmpty {
                 let list = removed.map { $0.stringValue }.joined(separator: ", ")
-                print("Removed cascading: \(list)")
+                infoPrint("Removed cascading: \(list)")
             }
         }
     }

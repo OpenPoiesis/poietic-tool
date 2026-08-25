@@ -48,7 +48,7 @@ extension PoieticTool {
             
             try session.save(replacing: options.replaceRef, appendHistory: options.appendHistory)
 
-            print("Property set in \(reference): \(attributeName) = \(value)")
+            infoPrint("Property set in \(reference): \(attributeName) = \(value)")
         }
     }
 

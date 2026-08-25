@@ -51,7 +51,7 @@ extension PoieticTool {
                 {
                     let originName = trans[origin]?.name ?? "(unnamed)"
                     let targetName = trans[target]?.name ?? "(unnamed)"
-                    print("Disconnected parameter \(originName) (\(origin)) from \(targetName) (\(target)), edge: \(object.objectID)")
+                    errorPrint("Disconnected parameter \(originName) (\(origin)) from \(targetName) (\(target)), edge: \(object.objectID)")
                 }
                 trans.removeCascading(id)
             }
@@ -62,17 +62,17 @@ extension PoieticTool {
                 if verbose {
                     let originName = trans[edgeProposal.origin]?.name ?? "(unnamed)"
                     let targetName = trans[edgeProposal.target]?.name ?? "(unnamed)"
-                    print("Connected parameter \(originName) (\(edgeProposal.origin)) to \(targetName) (\(edgeProposal.target)), edge: \(edge.objectID)")
+                    infoPrint("Connected parameter \(originName) (\(edgeProposal.origin)) to \(targetName) (\(edgeProposal.target)), edge: \(edge.objectID)")
                 }
             }
             
 
             if proposal.isEmpty {
-                print("All parameter connections seem to be ok.")
+                infoPrint("All parameter connections seem to be ok.")
             }
             else {
                 try session.save(replacing: options.replaceRef, appendHistory: options.appendHistory)
-                print("Added \(proposal.toAdd.count) edges and removed \(proposal.toRemove.count) edges.")
+                infoPrint("Added \(proposal.toAdd.count) edges and removed \(proposal.toRemove.count) edges.")
             }
         }
     }

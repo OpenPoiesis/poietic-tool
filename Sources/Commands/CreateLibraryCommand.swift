@@ -55,7 +55,7 @@ Command extracts DesignInfo from the designs. If multiple instances of DesignInf
                 throw ToolError.unableToWrite(outputURL, error)
             }
 
-            print("Created library: \(outputFile)")
+            infoPrint("Created library: \(outputFile)")
         }
         
     }

@@ -94,7 +94,7 @@ func printObjectAsText(_ object: ObjectSnapshot) {
     }
     
     if items.isEmpty {
-        print("Object has no attributes.")
+        infoPrint("Object has no attributes.")
     }
     else {
         let formattedItems = formatLabelledList(items,

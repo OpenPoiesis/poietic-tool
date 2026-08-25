@@ -27,7 +27,7 @@ extension PoieticTool {
             let session = try DesignSession(location: globalOptions.designLocation)
 
             guard !references.isEmpty else {
-                print("Nothing to be removed")
+                infoPrint("Nothing to be removed")
                 return
             }
 
@@ -43,7 +43,7 @@ extension PoieticTool {
             }
 
             try session.save()
-            print("Removed \(toRemove.count) planes.")
+            infoPrint("Removed \(toRemove.count) planes.")
         }
     }
 }

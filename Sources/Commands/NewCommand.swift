@@ -33,7 +33,7 @@ extension PoieticTool {
 
                 for path in importPaths {
                     let rawDesign = try readRawDesign(fromPath: path)
-                    print("Importing from: \(path)")
+                    infoPrint("Importing from: \(path)")
                     do {
                         try loader.load(rawDesign, into: plane)
                     }
@@ -45,10 +45,10 @@ extension PoieticTool {
             
             try session.save()
             if session.url.scheme == nil || session.url.scheme == "file" {
-                print("Design created: \(session.url.path)")
+                infoPrint("Design created: \(session.url.path)")
             }
             else {
-                print("Design created: \(session.url)")
+                infoPrint("Design created: \(session.url)")
             }
         }
     }

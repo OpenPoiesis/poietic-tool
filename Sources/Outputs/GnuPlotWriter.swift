@@ -45,7 +45,7 @@ class GNUPlotBundleWriter {
     
     func write(result: SimulationResult, toPath path: String, world: World) throws {
         guard let plan: SimulationPlan = world.singleton() else {
-            return
+            throw ToolError.internalError("No simulation plan")
         }
         let fm = FileManager()
         try fm.createDirectory(atPath: path, withIntermediateDirectories: true)

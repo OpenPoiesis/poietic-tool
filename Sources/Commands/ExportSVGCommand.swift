@@ -63,7 +63,7 @@ extension PoieticTool {
 
             let pictograms: PictogramCollection
             if let path = pictogramCollectionPath {
-                print("Loading pictograms from \(path)")
+                infoPrint("Loading pictograms from \(path)")
                 pictograms = try loadPictograms(path: path)
             }
             else {
@@ -74,8 +74,8 @@ extension PoieticTool {
             let scaledPictos = pictograms.pictograms.map { $0.scaled(pictogramScale) }
             pictograms.pictograms = scaledPictos
             
-            print("Exporting to: \(outputURL.path())")
-            print("Creating diagram...")
+            infoPrint("Exporting to: \(outputURL.path())")
+            infoPrint("Creating diagram...")
 
             // 1. Configure the notation
             //
