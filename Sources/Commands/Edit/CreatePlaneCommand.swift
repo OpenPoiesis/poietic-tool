@@ -1,5 +1,5 @@
 //
-//  CreateFrameCommand.swift
+//  CreatePlaneCommand.swift
 //  poietic
 //
 //  Created by Stefan Urbanek on 28/03/2025.
@@ -12,7 +12,7 @@ import PoieticFlows
 // TODO: Add import
 
 extension PoieticTool {
-    struct CreateFrame: ParsableCommand {
+    struct CreatePlane: ParsableCommand {
         static let configuration
             = CommandConfiguration(
                 commandName: "create-plane",
@@ -54,60 +54,58 @@ Note: Plane with requested IDs can not be --forced to be replaced. Remove the pl
         @Option(name: [.customLong("id")], help: "Create a plane with given id")
         var requestedRef: String?
 
-        @Flag(name: [.customLong("force")], help: "Replace existing plane")
+        @Flag(name: [.customLong("force")], help: "Replace existing named plane")
         var force: Bool = false
 
         @Flag(name: [.customLong("append-history")], help: "Append plane to the undo history")
         var appendHistory: Bool = false
 
         mutating func run() throws {
-            let editor = try DesignEditor(location: globalOptions.designLocation)
-            let design = editor.design
+            let session = try DesignSession(location: globalOptions.designLocation)
+            let design = session.design
             let requestedID: PlaneID?
             let createdRef: String
-            let derivingFrame = try editor.frameIfPresent(derivingRef)
 
-            if let ref = requestedRef, let frameID = PlaneID(ref) {
-                requestedID = frameID
-                guard !design.containsPlane(frameID) else {
-                    throw ToolError.frameExists(frameID.stringValue)
+            let original: DesignPlane?
+            if let derivingRef {
+                original = try session.plane(derivingRef)
+            }
+            else {
+                original = nil
+            }
+
+            if let ref = requestedRef, let planeID = PlaneID(ref) {
+                guard !session.design.containsPlane(planeID)
+                else {
+                    throw ToolError.planeExists(planeID.stringValue)
                 }
+                requestedID = planeID
             }
             else {
                 requestedID = nil
             }
-            
             if let name {
                 guard design.plane(name: name) == nil || force else {
-                    throw ToolError.frameExists(name)
+                    throw ToolError.planeExists(name)
                 }
-                let frame = createFrame(in: design, deriving: derivingFrame)
-                try design.accept(frame, replacingName: name)
+                let plane = design.createPlane(deriving: original)
+                try design.accept(plane, replacingName: name)
                 createdRef = name
             }
             else if let requestedID {
-                let frame = createFrame(in: design, deriving: derivingFrame, requestedID: requestedID)
-                try design.accept(frame, appendHistory: appendHistory)
+                let plane = design.createPlane(deriving: original, id: requestedID)
+                try design.accept(plane, appendHistory: appendHistory)
                 createdRef = requestedID.stringValue
             }
             else {
-                let frame = createFrame(in: design, deriving: derivingFrame)
-                try design.accept(frame, appendHistory: appendHistory)
-                createdRef = frame.id.stringValue
+                let plane = design.createPlane(deriving: original)
+                try design.accept(plane, appendHistory: appendHistory)
+                createdRef = plane.id.stringValue
             }
 
-            try editor.save()
+            try session.save()
 
-            print("Created plane \(createdRef)")
+            infoPrint("Created plane \(createdRef)")
         }
-    }
-}
-
-func createFrame(in design: Design, deriving: DesignPlane?, requestedID: PlaneID? = nil) -> TransientPlane {
-    if let deriving {
-        return design.createPlane(deriving: deriving, id: requestedID)
-    }
-    else {
-        return design.createPlane(id: requestedID)
     }
 }

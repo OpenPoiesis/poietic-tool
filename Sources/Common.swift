@@ -1,5 +1,5 @@
 //
-//  File.swift
+//  Common.swift
 //  
 //
 //  Created by Stefan Urbanek on 06/01/2022.
@@ -15,6 +15,7 @@ let DesignEnvironmentVariable = "POIETIC_DESIGN"
 /// Error thrown by the command-line tool.
 ///
 enum ToolError: Error, CustomStringConvertible {
+    case internalError(String)
     case internalSystemError(InternalSystemError)
 
     // I/O errors
@@ -24,7 +25,7 @@ enum ToolError: Error, CustomStringConvertible {
     case storeError(DesignStoreError)
     case designReaderError(RawDesignReaderError, URL?)
     case designLoaderError(DesignLoaderError, URL?)
-    case emptyDesign
+    case unableToWrite(URL, any Error)
     
     // Design errors
     case designIssues([ObjectID:[Issue]])
@@ -34,28 +35,35 @@ enum ToolError: Error, CustomStringConvertible {
     
     // Simulation errors
     case unknownVariables([String])
-    case unknownSolver(String)
     case simulationFailed(String)
     
     // Query errors
+    /// Thrown by ``DesignSession/plane(_:)``, usually when option `--plane` is invalid.
+    case unknownPlane(String)
+    /// Thrown by ``DesignSession/plane(_:)`` when no planes was specified, no current plane exists
+    /// and there are no planes or more than one plane in the design
+    // TODO: Review with emptyDesign and noCurrentPlane
+    case planeRequired
+    
     case unknownObject(String)
     case nodeExpected(String)
-    case unknownFrame(String)
-    case frameExists(String)
-    case noCurrentFrame
-
+    case planeExists(String)
+    
     // Editing errors
     case noChangesToUndo
     case noChangesToRedo
-    case structuralTypeMismatch(String, String)
+    case topologyTypeMismatch(String, String)
     // Metamodel errors
     case unknownObjectType(String)
     
     case invalidAttributeAssignment(String)
     case typeMismatch(String, String, String)
+    case invalidValue(String, String)
     
     public var description: String {
         switch self {
+        case .internalError(let message):
+            return "Internal error: \(message)"
         case .internalSystemError(let error):
             return "Internal systems error: \(error)"
             
@@ -89,14 +97,15 @@ enum ToolError: Error, CustomStringConvertible {
             else {
                 return "Unable to load (from unknown source): \(error)"
             }
-        case .emptyDesign:
-            return "The design is empty"
+
+        case .unableToWrite(let url, let error):
+            return "Unable to write to \(url): \(error)"
 
         // Design Errors
         case .brokenStructuralIntegrity(let error):
             return "Broken structural integrity: \(error)"
         case .validationFailed(let error):
-            let detail: String = "Constraints violated :" + String(error.violations.count)
+            let detail: String = "Constraints violated: " + String(error.violations.count)
             + " object errors: " + String(error.objectErrors.count)
             + " edge rule violations: " + String(error.edgeRuleViolations.count)
 
@@ -108,29 +117,25 @@ enum ToolError: Error, CustomStringConvertible {
                 detail += "\(issues.count) objects with errors"
             }
             if detail == "" {
-                detail = "unspecified compilation error(s)"
+                detail = "unspecified planning error(s)"
             }
-            return "Design compilation failed: \(detail)"
+            return "Simulation planning failed: \(detail)"
 
-        case .unknownSolver(let value):
-            return "Unknown solver '\(value)'"
         case .unknownVariables(let names):
             let varlist = names.joined(separator: ", ")
             return "Unknown variables: \(varlist)"
         case .unknownObject(let value):
             return "Unknown object '\(value)'"
-        case .unknownFrame(let value):
+        case .unknownPlane(let value):
             return "Unknown plane: \(value)"
-        case .noCurrentFrame:
-            return "No current plane set"
-        case .frameExists(let value):
+        case .planeExists(let value):
             return "Plane already exists: \(value)"
         case .noChangesToUndo:
             return "No changes to undo"
         case .noChangesToRedo:
             return "No changes to re-do"
-        case .structuralTypeMismatch(let given, let expected):
-            return "Mismatch of structural type. Expected: \(expected), given: \(given)"
+        case .topologyTypeMismatch(let given, let expected):
+            return "Mismatch of topology type. Expected: \(expected), given: \(given)"
         case .unknownObjectType(let value):
             return "Unknown object type '\(value)'"
         case .nodeExpected(let value):
@@ -140,11 +145,15 @@ enum ToolError: Error, CustomStringConvertible {
             return "Invalid attribute assignment: \(value)"
         case .typeMismatch(let subject, let value, let expected):
             return "Type mismatch in \(subject) value '\(value)', expected type: \(expected)"
+        case .invalidValue(let variable, let value):
+            return "Invalid value for \(variable): '\(value)'"
         case .fileDoesNotExist(let file):
             return "File '\(file)' not found"
             
         case .simulationFailed(let message):
             return "Simulation failed: \(message)"
+        case .planeRequired:
+            return "Plane ID or name required"
         }
     }
     
@@ -153,45 +162,46 @@ enum ToolError: Error, CustomStringConvertible {
         //       covered.
         
         switch self {
-        case .internalSystemError(_):
+        case .internalError(_),
+                .internalSystemError(_):
             return "Not your fault. Contact the developers with more details - what you did and what the error was"
         case .malformedLocation(_):
             return nil
         case .unableToSaveDesign(_):
             return "Check whether the location is correct and that you have permissions for writing."
+        case .unableToWrite(_, _):
+            return nil
 
         case .brokenStructuralIntegrity(_):
-            return "Unfortunately the only way is to inspect the database or a foreign plane. 'doctor' command is not yet implemented."
+            return "Unfortunately the only way is to inspect the database. You can try jq tool (third party) to perform surgery"
         case .validationFailed(_):
             return "Make sure that the design is conforming to the metamodel. (In the future there will be 'doctor' command to help you.)"
         case .designIssues(_):
             return "Make sure that the design is conforming to the metamodel and the rules of simulation. (In the future there will be 'doctor' command to help you.)"
 
-        case .unknownSolver(_):
-            return "Check the list of available solvers by running the 'info' command."
         case .unknownVariables(_):
             return "See the list of available simulation variables using the 'list' command."
         case .unknownObject(_):
             return "See the list of available objects and their names by using the 'list' command."
-        case .unknownFrame(_):
+        case .unknownPlane(_):
             return nil
-        case .noCurrentFrame:
-            return nil
-        case .frameExists(_):
+        case .planeExists(_):
             return "Use another plane name or ID, or use force to replace existing"
         case .noChangesToUndo:
             return nil
         case .noChangesToRedo:
             return nil
-        case .structuralTypeMismatch(_, _):
-            return "See the metamodel to know structural type of the object type."
+        case .topologyTypeMismatch(_, _):
+            return "See the metamodel to know topology type of the object type"
         case .unknownObjectType(_):
-            return "See the metamodel for a list of known object types."
+            return "See the metamodel for a list of known object types"
         case .nodeExpected(_):
             return nil
         case .invalidAttributeAssignment(_):
             return "Attribute assignment should be in a form: `attribute_name=value`, everything after '=' is considered a value. Ex.: `name=account`, `formula=fish * 10`."
         case .typeMismatch(_, _, _):
+            return nil
+        case .invalidValue(_, _):
             return nil
         case .designLoaderError(_, _):
             return "Check the metamodel version and potentially use a design doctor"
@@ -201,10 +211,10 @@ enum ToolError: Error, CustomStringConvertible {
             return nil
         case .storeError(_):
             return nil
-        case .emptyDesign:
-            return "Design has no planes, create a plane"
         case .simulationFailed(_):
             return nil
+        case .planeRequired:
+            return "Specify --plane"
         }
     }
 
@@ -222,7 +232,7 @@ enum ToolError: Error, CustomStringConvertible {
 ///         splitting the assignment on your own.
 ///
 func parseValueAssignment(_ assignment: String) -> (String, String)? {
-    let split = assignment.split(separator: "=", maxSplits: 2)
+    let split = assignment.split(separator: "=", maxSplits: 1)
     if split.count != 2 {
         return nil
     }
@@ -232,24 +242,124 @@ func parseValueAssignment(_ assignment: String) -> (String, String)? {
 
 func setAttributeFromString(object: TransientObject,
                             attribute attributeName: String,
-                            string: String) throws {
-    let type = object.type
-    if let attr = type.attribute(attributeName), attr.type.isArray {
-        let json = try JSONValue(parsing: string)
-        let arrayValue = try Variant(json: json)
-        object.setAttribute(value: arrayValue,
-                                forKey: attributeName)
+                            string: String) throws (ToolError)
+{
+    let type: VariableType
+    if let attribute = object.type.attribute(attributeName) {
+        type = attribute.type
     }
     else {
-        object.setAttribute(value: Variant(string),
-                                forKey: attributeName)
+        type = .any
+    }
+    
+    let variant: Variant
+    do {
+        variant = try Variant(fromUserString: string, variableType: type)
+    }
+    catch {
+        throw ToolError.invalidValue(attributeName, string)
+    }
+    object.setAttribute(value: variant, forKey: attributeName)
+}
+
+extension Variant {
+    init(fromUserString string: String, variableType: VariableType) throws (ValueError) {
+        switch variableType {
+        case .any:
+            do {
+                self = try Variant(jsonWithFallback: string)
+            }
+            catch {
+                self = Variant(string)
+            }
+        case .concrete(let valueType):
+            self = try Variant(fromUserString: string, valueType: valueType)
+        case .union(let types):
+            var lastError = ValueError.invalidUserString(string)
+            for type in types {
+                do {
+                    self = try Variant(fromUserString: string, valueType: type)
+                    return
+                }
+                catch {
+                    lastError = error
+                }
+            }
+            throw lastError
+        }
+    }
+    
+    init(fromUserString string: String, valueType type: ValueType) throws (ValueError) {
+        switch type {
+        case .atom(let atomType):
+            self = .atom(try VariantAtom(fromUserString: string, type: atomType))
+        case .array(let arrayType):
+            let value: Variant
+            do {
+                value = try Variant(jsonWithFallback: string)
+            }
+            catch {
+                throw .invalidUserString(string)
+            }
+            
+            switch arrayType {
+            case .bool: self = .array(.bool(try value.boolArray()))
+            case .int: self = .array(.int(try value.intArray()))
+            case .double: self = .array(.double(try value.doubleArray()))
+            case .string: self = .array(.string(try value.stringArray()))
+            case .point: self = .array(.point(try value.pointArray()))
+            }
+        }
     }
 
+}
+
+extension VariantAtom {
+    init(fromUserString string: String, type: AtomType) throws (ValueError) {
+        let atom = VariantAtom.string(string)
+        switch type {
+        case .bool: self = .bool(try atom.boolValue())
+        case .int: self = .int(try atom.intValue())
+        case .double: self = .double(try atom.doubleValue())
+        case .string: self = atom
+        case .point: self = .point(try atom.pointValue())
+        }
+    }
 }
 
 
 // Plane reading
 // ====================================================================
+
+/// Get the design URL. The database location can be specified by options,
+/// environment variable or as a default name, in respective order
+func designURL(_ location: String?) throws (ToolError) -> URL {
+    let actualLocation: String
+    let env = ProcessInfo.processInfo.environment
+    
+    if let location {
+        actualLocation = location
+    }
+    else if let location = env[DesignEnvironmentVariable] {
+        actualLocation = location
+    }
+    else {
+        actualLocation = DefaultDesignLocation
+    }
+    
+    if let url = URL(string: actualLocation) {
+        if url.scheme == nil {
+            return URL(fileURLWithPath: actualLocation, isDirectory: false)
+        }
+        else {
+            return url
+        }
+    }
+    else {
+        throw ToolError.malformedLocation(actualLocation)
+    }
+}
+
 
 func makeFileURL(fromPath path: String) throws (ToolError) -> URL {
     let url: URL

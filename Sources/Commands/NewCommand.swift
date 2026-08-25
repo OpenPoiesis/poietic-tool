@@ -1,5 +1,5 @@
 //
-//  File.swift
+//  NewCommand.swift
 //  
 //
 //  Created by Stefan Urbanek on 11/01/2022.
@@ -25,32 +25,30 @@ extension PoieticTool {
 
         mutating func run() throws {
             let design = Design(metamodel: StockFlowMetamodel)
-            let editor = try DesignEditor(location: globalOptions.designLocation, design: design)
+            let session = try DesignSession(location: globalOptions.designLocation, design: design)
 
             if !importPaths.isEmpty {
                 let loader = DesignLoader(metamodel: design.metamodel, options: .useIDAsNameAttribute)
-                let frame = design.createPlane()
+                let plane = session.createTransaction()
 
                 for path in importPaths {
                     let rawDesign = try readRawDesign(fromPath: path)
-                    print("Importing from: \(path)")
+                    infoPrint("Importing from: \(path)")
                     do {
-                        try loader.load(rawDesign, into: frame)
+                        try loader.load(rawDesign, into: plane)
                     }
                     catch {
                         throw ToolError.designLoaderError(error, URL(fileURLWithPath: path))
                     }
                 }
-                
-                try editor.accept(frame)
             }
             
-            try editor.save()
-            if editor.url.scheme == nil || editor.url.scheme == "file" {
-                print("Design created: \(editor.url.path)")
+            try session.save()
+            if session.url.scheme == nil || session.url.scheme == "file" {
+                infoPrint("Design created: \(session.url.path)")
             }
             else {
-                print("Design created: \(editor.url)")
+                infoPrint("Design created: \(session.url)")
             }
         }
     }

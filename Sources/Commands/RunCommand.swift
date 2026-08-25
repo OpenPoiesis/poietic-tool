@@ -1,5 +1,5 @@
 //
-//  File.swift
+//  RunCommand.swift
 //  
 //
 //  Created by Stefan Urbanek on 17/07/2022.
@@ -49,15 +49,14 @@ extension PoieticTool {
         var outputFormat: OutputFormat = .csv
 
         @Option(name: [.customLong("variable"), .customShort("V")],
-                help: "Values to observe in the output; can be object IDs or object names.")
+                help: "Values to observe in the output; can be object IDs or object names")
         var outputNames: [String] = []
 
-        // TODO: Rename to --parameter/-p
-        @Option(name: [.customLong("constant"), .customShort("c")],
-                       help: "Set (override) a value of a constant node in a form 'attribute=value'")
+        @Option(name: [.customLong("parameter"), .customShort("p")],
+                       help: "Set (override) a numeric value of a parameter node in a form 'object_name=value'")
         var overrideValues: [String] = []
 
-        @Option(name: [.customLong("plane")], help: "Plane name or ID to run")
+        @Option(name: [.customLong("plane")], help: "Plane name or ID to run. Default: current plane")
         var planeRef: String?
 
         /// Path to the output directory.
@@ -76,10 +75,10 @@ extension PoieticTool {
         var outputPath: String = "-"
         
         mutating func run() throws {
-            let editor = try DesignEditor(location: options.designLocation)
-            let world = editor.world
-            let plane = try editor.frame(planeRef)
-
+            let session = try DesignSession(location: options.designLocation)
+            try session.setPlane(planeRef)
+            let world = session.world
+            
             try world.run(schedule: PlanSchedule.self)
             
             guard let plan: SimulationPlan = world.singleton() else {
@@ -104,7 +103,7 @@ extension PoieticTool {
             else {
                 var unknownNames: [String] = []
                 for name in outputNames {
-                    guard let variable = plan.stateVariables.first(where: { $0.name == name }) else {
+                    guard let variable = plan.variable(named: name) else {
                         unknownNames.append(name)
                         continue
                     }
@@ -115,8 +114,7 @@ extension PoieticTool {
                 }
             }
 
-            // TODO: Add JSON for controls
-            // Collect constants to be overridden during initialization.
+            // Collect parameters to be overridden during initialisation.
             // -------------------------------------------------------------
             var scenarioParams: [ObjectID: Variant] = [:]
             for item in overrideValues {
@@ -125,27 +123,33 @@ extension PoieticTool {
                 }
                 let (key, stringValue) = split
                 guard let doubleValue = Double(stringValue) else {
-                    throw ToolError.typeMismatch("constant override '\(key)'", stringValue, "double")
+                    throw ToolError.typeMismatch("parameter override '\(key)'", stringValue, "double")
                 }
-                guard let variable = plan.variable(named: key) else {
+                guard let object = plan.simulationObject(named: key) else {
                     throw ToolError.unknownObject(key)
                 }
-                scenarioParams[variable.objectID] = Variant(doubleValue)
+                scenarioParams[object.objectID] = Variant(doubleValue)
             }
             let scenario = ScenarioParameters(initialValues: scenarioParams)
             
-            // Create and initialize the solver
+            // Create and initialise the solver
             // -------------------------------------------------------------
             world.setSingleton(settings)
             world.setSingleton(scenario)
             
             // Run the simulation
             // -------------------------------------------------------------
-            try world.run(schedule: SimulateSchedule.self)
+            do {
+                try world.run(schedule: SimulateSchedule.self)
+            }
+            catch {
+                throw ToolError.simulationFailed(error.message)
+            }
             
             guard let result: SimulationResult = world.singleton() else {
-                // FIXME: Handle simulation failed error
-                throw ToolError.simulationFailed("No simulation result")
+                // This should not happen, if the simulation system does not throw, then we get result.
+                // TODO: Once we have simulation errors set on objects, use them. We do not have them yet.
+                throw ToolError.internalError("Unknown error (no result produced)")
             }
             
             switch outputFormat {
@@ -155,7 +159,8 @@ extension PoieticTool {
                              states: result.states)
             case .gnuplot:
                 let writer = GNUPlotBundleWriter()
-                try writer.write(result: result, toPath: outputPath, world: world)
+                let coalescedPath = outputPath == "-" ? "." : outputPath
+                try writer.write(result: result, toPath: coalescedPath, world: world)
 //            case .json:
 //                try writeJSON(path: outputPath,
 //                              variables: outputVariables,
@@ -173,7 +178,7 @@ func writeCSV(path: String,
     // TODO: Step
     let writer: CSVWriter
     if path == "-" {
-        writer = try CSVWriter(.standardOutput)
+        writer = CSVWriter(.standardOutput)
     }
     else {
         writer = try CSVWriter(path: path)

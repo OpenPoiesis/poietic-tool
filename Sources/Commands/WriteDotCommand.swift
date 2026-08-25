@@ -1,5 +1,5 @@
 //
-//  File.swift
+//  WriteDotCommand.swift
 //  
 //
 //  Created by Stefan Urbanek on 27/06/2023.
@@ -74,14 +74,14 @@ extension PoieticTool {
         var missingLabel = "(none)"
         
         @Option(name: [.customLong("plane")], help: "Plane ID or name")
-        var frameRef: String?
+        var planeRef: String?
         
         mutating func run() throws {
-            let editor = try DesignEditor(location: globalOptions.designLocation)
-            let frame = try editor.frame(frameRef)
+            let session = try DesignSession(location: globalOptions.designLocation)
+            let plane = try session.plane(planeRef)
 
             guard let testURL = URL(string: output) else {
-                fatalError("Invalid resource reference: \(output)")
+                throw ToolError.malformedLocation(output)
             }
             let outputURL: URL
 
@@ -98,7 +98,7 @@ extension PoieticTool {
                                        missingLabel: missingLabel,
                                        style: DefaultDOTStyle)
 
-            try exporter.export(frame)
+            try exporter.export(plane)
         }
     }
 }

@@ -8,7 +8,6 @@
 @preconcurrency import ArgumentParser
 import PoieticCore
 import PoieticFlows
-import Markdown
 
 extension PoieticTool {
     struct Info: ParsableCommand {
@@ -16,18 +15,24 @@ extension PoieticTool {
             = CommandConfiguration(abstract: "Get information about the design")
         @OptionGroup var options: Options
 
-        @Argument(help: "Plane ID (current if not provided)")
-        var frameID: String?
+        @Option(name: [.customLong("plane")], help: "Plane ID or name. Default is current.")
+        var planeReference: String?
 
         mutating func run() throws {
-            let editor = try DesignEditor(location: options.designLocation)
-            let frame = try editor.frameIfPresent(frameID)
+            let session = try DesignSession(location: options.designLocation)
+            let plane: DesignPlane?
+            if session.design.isEmpty {
+                plane = nil
+            }
+            else {
+                plane = try session.setPlane(planeReference)
+            }
             
             var items: [(String?, String?)] = [
-                ("Design", editor.url.relativeString)
+                ("Design", session.url.relativeString)
             ]
 
-            if let info = frame?.filter(type: ObjectType.DesignInfo).first {
+            if let info = plane?.filter(type: ObjectType.DesignInfo).first {
                 if let text = try info["title"]?.stringValue() {
                     items.append(("Title", text))
                 }
@@ -41,28 +46,28 @@ extension PoieticTool {
             
             items += [
                 (nil, nil),
-                ("Total snapshots", "\(editor.design.objectSnapshots.count)"),
+                ("Total snapshots", "\(session.design.objectSnapshots.count)"),
 
                 (nil, nil),
-                ("Total planes", "\(editor.design.planes.count)"),
-                ("History planes", "\(editor.design.versionHistory.count)"),
-                ("Undoable planes", "\(editor.design.undoList.count)"),
-                ("Redoable planes", "\(editor.design.redoList.count)"),
-                ("Named planes", "\(editor.design.namedPlanes.count)"),
+                ("Total planes", "\(session.design.planes.count)"),
+                ("History planes", "\(session.design.versionHistory.count)"),
+                ("Undoable planes", "\(session.design.undoList.count)"),
+                ("Redoable planes", "\(session.design.redoList.count)"),
+                ("Named planes", "\(session.design.namedPlanes.count)"),
             ]
             
-            if let frame {
-                let unstructuredCount = frame.filter { $0.topology.type == .unstructured }.count
+            if let plane {
+                let unstructuredCount = plane.filter { $0.topology.type == .unstructured }.count
                 items += [
                     (nil, nil),
-                    ("Plane", "\(frame.id)"),
-                    ("All snapshots", "\(frame.snapshots.count)"),
-                    ("Nodes", "\(frame.nodeKeys)"),
-                    ("Edges", "\(frame.edgeKeys)"),
+                    ("Plane", "\(plane.id)"),
+                    ("All snapshots", "\(plane.snapshots.count)"),
+                    ("Nodes", "\(plane.nodeKeys)"),
+                    ("Edges", "\(plane.edgeKeys)"),
                     ("Unstructured", "\(unstructuredCount)"),
                 ]
 
-                if let obj = frame.first(trait: .Simulation) {
+                if let obj = plane.first(trait: .Simulation) {
                     let params = SimulationSettings(fromObject: obj)
                     items += [
                         (nil, nil),

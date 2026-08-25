@@ -83,9 +83,10 @@ class DotFormatter {
 
         // Need to quote?
 
-        let hasInvalidCharacter = string.contains { $0.isDotIdentifier }
+        let hasInvalidCharacter = string.contains { !$0.isDotIdentifier }
+        let startsWithNumber = string.first?.isNumber
         
-        if !hasInvalidCharacter {
+        guard hasInvalidCharacter || startsWithNumber == true else {
             return string
         }
         

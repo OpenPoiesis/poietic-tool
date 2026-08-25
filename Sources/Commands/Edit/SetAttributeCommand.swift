@@ -1,5 +1,5 @@
 //
-//  File.swift
+//  SetAttributeCommand.swift
 //  
 //
 //  Created by Stefan Urbanek on 04/07/2023.
@@ -33,8 +33,8 @@ extension PoieticTool {
 
         
         mutating func run() throws {
-            let editor = try DesignEditor(location: globalOptions.designLocation)
-            let trans = try editor.deriveOrCreate(options.deriveRef)
+            let session = try DesignSession(location: globalOptions.designLocation)
+            let trans = try session.createTransaction(deriving: options.deriveRef)
 
             guard let object = trans.object(stringReference: reference) else {
                 throw ToolError.unknownObject(reference)
@@ -46,10 +46,9 @@ extension PoieticTool {
                                        attribute: attributeName,
                                        string: value)
             
-            try editor.accept(trans, replacing: options.replaceRef, appendHistory: options.appendHistory)
-            try editor.save()
+            try session.save(replacing: options.replaceRef, appendHistory: options.appendHistory)
 
-            print("Property set in \(reference): \(attributeName) = \(value)")
+            infoPrint("Property set in \(reference): \(attributeName) = \(value)")
         }
     }
 

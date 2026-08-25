@@ -1,5 +1,5 @@
 //
-//  File.swift
+//  ConnectCommand.swift
 //  
 //
 //  Created by Stefan Urbanek on 04/07/2023.
@@ -33,15 +33,15 @@ extension PoieticTool {
 
         
         mutating func run() throws {
-            let editor = try DesignEditor(location: globalOptions.designLocation)
-            let trans = try editor.deriveOrCreate(options.deriveRef)
+            let session = try DesignSession(location: globalOptions.designLocation)
+            let trans = try session.createTransaction(deriving: options.deriveRef)
 
             guard let type = StockFlowMetamodel.objectType(name: typeName) else {
                 throw ToolError.unknownObjectType(typeName)
             }
             
             guard type.topologyType == .edge else {
-                throw ToolError.structuralTypeMismatch(TopologyType.edge.rawValue,
+                throw ToolError.topologyTypeMismatch(TopologyType.edge.rawValue,
                                                        type.topologyType.rawValue)
             }
             
@@ -65,10 +65,9 @@ extension PoieticTool {
 
             let id = trans.create(type, topology: .edge(originObject.objectID, targetObject.objectID))
             
-            try editor.accept(trans, replacing: options.replaceRef, appendHistory: options.appendHistory)
-            try editor.save()
+            try session.save(replacing: options.replaceRef, appendHistory: options.appendHistory)
 
-            print("Created edge \(id)")
+            infoPrint("Created edge \(id)")
         }
     }
 

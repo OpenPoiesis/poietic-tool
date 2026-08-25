@@ -1,5 +1,5 @@
 //
-//  File.swift
+//  MetamodelCommand.swift
 //  
 //
 //  Created by Stefan Urbanek on 30/06/2023.
@@ -7,6 +7,7 @@
 
 @preconcurrency import ArgumentParser
 import PoieticCore
+import PoieticFlows
 import Markdown
 
 // TODO: Add output to JSON
@@ -19,8 +20,6 @@ extension PoieticTool {
                 commandName: "metamodel",
                 abstract: "Show information about the metamodel and object types"
             )
-
-        @OptionGroup var globalOptions: Options
 
         enum OutputFormat: String, CaseIterable, ExpressibleByArgument{
             case text = "text"
@@ -39,8 +38,8 @@ extension PoieticTool {
         var objectType: String?
 
         mutating func run() throws {
-            let editor = try DesignEditor(location: globalOptions.designLocation)
-            let metamodel = editor.design.metamodel
+            // TODO: Once we support multiple metamodels, allow selection of a metamodel
+            let metamodel = StockFlowMetamodel
             
             if let typeName = objectType {
                 guard let type = metamodel.objectType(name: typeName) else {

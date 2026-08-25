@@ -1,5 +1,5 @@
 //
-//  File.swift
+//  RemoveNodeCommand.swift
 //  
 //
 //  Created by Stefan Urbanek on 04/07/2023.
@@ -22,11 +22,10 @@ extension PoieticTool {
 
         @Argument(help: "ID of an object to be removed")
         var reference: String
-
         
         mutating func run() throws {
-            let editor = try DesignEditor(location: globalOptions.designLocation)
-            let trans = try editor.deriveOrCreate(options.deriveRef)
+            let session = try DesignSession(location: globalOptions.designLocation)
+            let trans = try session.createTransaction(deriving: options.deriveRef)
 
             guard let object = trans.object(stringReference: reference) else {
                 throw ToolError.unknownObject(reference)
@@ -34,13 +33,12 @@ extension PoieticTool {
 
             let removed = trans.removeCascading(object.objectID)
 
-            try editor.accept(trans, replacing: options.replaceRef, appendHistory: options.appendHistory)
-            try editor.save()
+            try session.save(replacing: options.replaceRef, appendHistory: options.appendHistory)
 
-            print("Removed object: \(object.objectID)")
+            infoPrint("Removed object: \(object.objectID)")
             if !removed.isEmpty {
                 let list = removed.map { $0.stringValue }.joined(separator: ", ")
-                print("Removed cascading: \(list)")
+                infoPrint("Removed cascading: \(list)")
             }
         }
     }

@@ -22,7 +22,6 @@ struct PoieticTool: ParsableCommand {
             Show.self,
             Validate.self,
             Edit.self,
-//            Print.self,
             Import.self,
             Export.self,
             Run.self,

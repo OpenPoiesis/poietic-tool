@@ -1,5 +1,5 @@
 //
-//  File.swift
+//  LayoutCommand.swift
 //  
 //
 //  Created by Stefan Urbanek on 19/10/2023.
@@ -34,16 +34,22 @@ extension PoieticTool {
         @Option
         var layout: LayoutType = .circle
 
-        @Argument(help: "IDs of objects to be laid out. If not specified, then lay out all.")
+        @Argument(help: "IDs of objects to be laid out. If not specified, then lay out all with position attribute or with DiagramBlock trait.")
         var references: [String] = []
         
         mutating func run() throws {
-            let editor = try DesignEditor(location: globalOptions.designLocation)
-            let trans = try editor.deriveOrCreate(options.deriveRef)
+            let session = try DesignSession(location: globalOptions.designLocation)
+            let trans = try session.createTransaction(deriving: options.deriveRef)
 
             var objects: [TransientObject] = []
             if references.isEmpty {
-                objects = trans.objectIDs.map { trans.mutate($0) }
+                for object in trans.snapshots {
+                    if object.attributes["position"] != nil
+                        || object.type.hasTrait(.DiagramBlock)
+                    {
+                        objects.append(trans.mutate(object.objectID))
+                    }
+                }
             }
             else {
                 for ref in references {
@@ -53,21 +59,23 @@ extension PoieticTool {
                     objects.append(trans.mutate(object.objectID))
                 }
             }
+            
+            guard objects.count > 0 else { return }
+            
             let center = Point(100.0, 100.0)
             let radius: Double = 100.0
             var angle: Double = 0.0
+            
             let step: Double = (2 * Double.pi) / Double(objects.count)
             
             for obj in objects {
-                let obj = trans.mutate(obj.objectID)
                 let position = Point(center.x + radius * Double.cos(angle),
                                      center.y + radius * Double.sin(angle))
                 obj.position = position
                 angle += step
             }
             
-            try editor.accept(trans, replacing: options.replaceRef, appendHistory: options.appendHistory)
-            try editor.save()
+            try session.save(replacing: options.replaceRef, appendHistory: options.appendHistory)
         }
     }
 }

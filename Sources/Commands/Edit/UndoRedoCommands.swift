@@ -1,5 +1,5 @@
 //
-//  File.swift
+//  UndoRedoCommands.swift
 //  
 //
 //  Created by Stefan Urbanek on 04/07/2023.
@@ -18,17 +18,17 @@ extension PoieticTool {
         @OptionGroup var globalOptions: Options
 
         mutating func run() throws {
-            let editor = try DesignEditor(location: globalOptions.designLocation)
+            let session = try DesignSession(location: globalOptions.designLocation)
 
-            if !editor.design.canUndo {
+            if !session.design.canUndo {
                 throw ToolError.noChangesToUndo
             }
             
-            let frameID = editor.design.undoList.last!
-            editor.design.undo(to: frameID)
+            let planeID = session.design.undoList.last!
+            session.design.undo(to: planeID)
 
-            try editor.save()
-            print("Did undo")
+            try session.save()
+            infoPrint("Did undo")
         }
     }
 
@@ -44,17 +44,17 @@ extension PoieticTool {
         @OptionGroup var globalOptions: Options
 
         mutating func run() throws {
-            let editor = try DesignEditor(location: globalOptions.designLocation)
+            let session = try DesignSession(location: globalOptions.designLocation)
 
-            if !editor.design.canRedo {
+            if !session.design.canRedo {
                 throw ToolError.noChangesToRedo
             }
             
-            let frameID = editor.design.redoList.first!
-            editor.design.redo(to: frameID)
+            let planeID = session.design.redoList.first!
+            session.design.redo(to: planeID)
 
-            try editor.save()
-            print("Did redo.")
+            try session.save()
+            infoPrint("Did redo.")
         }
     }
 }

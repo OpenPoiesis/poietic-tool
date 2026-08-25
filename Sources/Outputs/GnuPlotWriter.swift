@@ -36,8 +36,6 @@ func writeToCSV(path: String, result: SimulationResult, plan: SimulationPlan) th
 /// - `chart_NAME.gnuplot` – one file for every chart where the NAME is the
 ///    chart object name.
 ///
-/// If the path is '-' then the current directory will be used.
-///
 class GNUPlotBundleWriter {
     let dataFileName: String
 
@@ -45,19 +43,19 @@ class GNUPlotBundleWriter {
         self.dataFileName = dataFileName
     }
     
-    public func write(result: SimulationResult, toPath path: String, world: World) throws {
+    func write(result: SimulationResult, toPath path: String, world: World) throws {
         guard let plan: SimulationPlan = world.singleton() else {
-            return
+            throw ToolError.internalError("No simulation plan")
         }
         let fm = FileManager()
         try fm.createDirectory(atPath: path, withIntermediateDirectories: true)
         
         try writeToCSV(path: path + "/" + dataFileName, result: result, plan: plan)
 
-        for (chartID, chart) in world.query(ChartComponent.self) {
-            let chartName = chart.name ?? "unnamed_\(chartID)"
-            let gnuplotCommand = chartCommand(chart: chart, plan: plan)
-            let gnuplotCommandPath = path + "/" + "chart_\(chartName).gnuplot"
+        for (entity, chart) in world.query(Chart.self) {
+            let name = chart.label ?? "unnamed_\(entity.runtimeID)"
+            let gnuplotCommand = chartCommand(entity: entity, chart: chart, name: name, plan: plan)
+            let gnuplotCommandPath = path + "/" + "chart_\(name).gnuplot"
 
             guard let data = gnuplotCommand.data(using: .utf8) else {
                 continue
@@ -65,11 +63,10 @@ class GNUPlotBundleWriter {
             try data.write(to: URL(filePath: gnuplotCommandPath))
         }
     }
-    func chartCommand(chart: ChartComponent, plan: SimulationPlan) -> String {
+    func chartCommand(entity: RuntimeEntity, chart: Chart, name: String, plan: SimulationPlan) -> String {
         
-        let chartName = chart.name ?? "unnamed_\(chart.chartObject.objectID)"
-        let imageFile = "chart_\(chartName).png"
-        let plots = plotCommands(chart: chart, plan: plan).joined(separator: ", ")
+        let imageFile = "chart_\(name).png"
+        let plots = plotCommands(entity: entity, chart: chart, plan: plan).joined(separator: ", ")
 
         let command =
         """
@@ -82,14 +79,24 @@ class GNUPlotBundleWriter {
 
         return command
     }
-    func plotCommands(chart: ChartComponent, plan: SimulationPlan) -> [String] {
+    func plotCommands(entity: RuntimeEntity, chart: Chart, plan: SimulationPlan) -> [String] {
         var commands: [String] = []
         let timeIndex = plan.builtins.time
-        for series in chart.series {
-            guard let seriesIndex = plan.variableIndex(series.objectID) else {
-                continue // We continue gracefully, not user's fault
+        for seriesEnt in entity.outgoing(ChildOf.self) {
+            guard let _: ChartSeries = seriesEnt.component(),
+                  let target = seriesEnt.firstOutgoing(RepresentationOf.self),
+                  let targetObjectID = target.objectID,
+                  let seriesIndex = plan.variableIndex(targetObjectID)
+            else { continue }
+
+            let label: String
+            if let simName: SimulationName = target.component() {
+                label = simName.name
             }
-            let label = series.name ?? "unnamed"
+            else {
+                label = "unnamed"
+            }
+                
             let item = "'\(dataFileName)' using \(timeIndex + 1):\(seriesIndex + 1) with lines title '\(label)'"
             commands.append(item)
         }

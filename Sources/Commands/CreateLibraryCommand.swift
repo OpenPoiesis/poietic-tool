@@ -1,5 +1,5 @@
 //
-//  NewCommand.swift
+//  CreateLibraryCommand.swift
 //
 //
 //  Created by Stefan Urbanek on 25/03/2024.
@@ -30,6 +30,8 @@ Command extracts DesignInfo from the designs. If multiple instances of DesignInf
         var designs: [String]
 
         mutating func run() throws {
+            let outputURL = URL(fileURLWithPath: outputFile)
+
             var items: [DesignLibraryItem] = []
             for location in designs {
                 let item = try createLibraryItem(fromDesignAt: location)
@@ -41,13 +43,19 @@ Command extracts DesignInfo from the designs. If multiple instances of DesignInf
             let encoder = JSONEncoder()
             encoder.keyEncodingStrategy = .convertToSnakeCase
             let data: Data
-            do {
-                data = try encoder.encode(library)
-            }
+
+            // This should not fail, we do not have to guard and re-throw this.
+            // If it fails, we have deeper problems...
+            data = try encoder.encode(library)
             
-            try data.write(to: URL(fileURLWithPath: outputFile))
-            print("Created library: \(outputFile)")
-            // TODO: Catch the error and present beautifully
+            do {
+                try data.write(to: outputURL)
+            }
+            catch {
+                throw ToolError.unableToWrite(outputURL, error)
+            }
+
+            infoPrint("Created library: \(outputFile)")
         }
         
     }
@@ -66,13 +74,13 @@ func createLibraryItem(fromDesignAt location: String) throws -> DesignLibraryIte
         url
     }
 
-    let editor = try DesignEditor(url: actualURL)
+    let session = try DesignSession(url: actualURL)
 
-    guard let frame = editor.design.currentPlane else {
-        throw ToolError.emptyDesign
+    guard let plane = session.design.currentPlane else {
+        throw ToolError.planeRequired
     }
 
-    let info = frame.filter(type: ObjectType.DesignInfo).first?.attributes ?? [:]
+    let info = plane.filter(type: ObjectType.DesignInfo).first?.attributes ?? [:]
     
     let name: String
     if let infoName = try? info["name"]?.stringValue() {

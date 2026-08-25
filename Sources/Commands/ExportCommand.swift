@@ -1,5 +1,5 @@
 //
-//  Import.swift
+//  ExportCommand.swift
 //  
 //
 //  Created by Stefan Urbanek on 14/08/2023.
@@ -10,7 +10,6 @@ import Foundation
 import PoieticCore
 import PoieticFlows
 
-// TODO: Merge with PrintCommand, use --format=id
 extension PoieticTool {
     struct Export: ParsableCommand {
         static let configuration
@@ -19,7 +18,7 @@ extension PoieticTool {
         @OptionGroup var globalOptions: Options
 
         @Option(name: [.customLong("plane")], help: "Plane to be exported. Default: current plane.")
-        var frameReference: String?
+        var planeReference: String?
 
         @Option(name: [.customLong("output"), .customShort("o")], help: "Output path. Default or '-' is standard output.")
         var outputPath: String = "-"
@@ -28,8 +27,8 @@ extension PoieticTool {
         var references: [String] = []
 
         mutating func run() throws {
-            let editor = try DesignEditor(location: globalOptions.designLocation)
-            let plane = try editor.frame(frameReference)
+            let session = try DesignSession(location: globalOptions.designLocation)
+            let plane = try session.setPlane(planeReference)
 
             let extractor = DesignExtractor()
             let snapshots: [RawSnapshot]
@@ -49,7 +48,7 @@ extension PoieticTool {
                 snapshots = extractor.extractPruning(objects: validIDs, plane: plane)
             }
 
-            let rawDesign = extractor.extractStub(editor.design)
+            let rawDesign = extractor.extractStub(session.design)
             rawDesign.snapshots = snapshots
             
             let writer = JSONDesignWriter()
@@ -65,8 +64,7 @@ extension PoieticTool {
                     try writer.write(rawDesign, toURL: url)
                 }
                 catch {
-                    // TODO: Add tool error
-                    fatalError("Unable to write to \(url): \(error)")
+                    throw ToolError.unableToWrite(url, error)
                 }
             }
         }

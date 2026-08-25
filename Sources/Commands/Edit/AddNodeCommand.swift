@@ -1,5 +1,5 @@
 //
-//  File.swift
+//  AddNodeCommand.swift
 //  
 //
 //  Created by Stefan Urbanek on 04/07/2023.
@@ -37,8 +37,8 @@ poietic edit add FlowRate name=expenses formula=50
         var attributeAssignments: [String] = []
         
         mutating func run() throws {
-            let editor = try DesignEditor(location: globalOptions.designLocation)
-            let trans = try editor.deriveOrCreate(options.deriveRef)
+            let session = try DesignSession(location: globalOptions.designLocation)
+            let trans = try session.createTransaction(deriving: options.deriveRef)
 
             guard let type = StockFlowMetamodel.objectType(name: typeName) else {
                 throw ToolError.unknownObjectType(typeName)
@@ -52,7 +52,7 @@ poietic edit add FlowRate name=expenses formula=50
             case .node:
                 object = trans.create(type, topology: .node)
             default:
-                throw ToolError.structuralTypeMismatch("node or unstructured",
+                throw ToolError.topologyTypeMismatch("node or unstructured",
                                                        type.topologyType.rawValue)
             }
             
@@ -67,10 +67,9 @@ poietic edit add FlowRate name=expenses formula=50
 
             }
 
-            try editor.accept(trans, replacing: options.replaceRef, appendHistory: options.appendHistory)
-            try editor.save()
+            try session.save(replacing: options.replaceRef, appendHistory: options.appendHistory)
 
-            print("Created node \(object.objectID) in plane \(trans.id)")
+            infoPrint("Created node \(object.objectID) in plane \(trans.id)")
         }
     }
 }

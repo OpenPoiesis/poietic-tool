@@ -1,5 +1,5 @@
 //
-//  File.swift
+//  AutoParametersCommand.swift
 //  
 //
 //  Created by Stefan Urbanek on 04/07/2023.
@@ -9,8 +9,13 @@
 import PoieticCore
 import PoieticFlows
 
-enum ParameterResolutionSchedule: ScheduleLabel {}
-
+let ParameterResolutionSystems: [System.Type] = [
+    ComputationOrderSystem.self,
+    NameResolutionSystem.self,
+    ExpressionParserSystem.self,
+    ParameterResolutionSystem.self,
+    ParameterConnectionProposalSystem.self,
+]
 
 extension PoieticTool {
     struct AutoParameters: ParsableCommand {
@@ -28,26 +33,17 @@ extension PoieticTool {
         var verbose: Bool = false
 
         mutating func run() throws {
-            let editor = try DesignEditor(location: globalOptions.designLocation)
-            let world = editor.world
-
-            let schedule = Schedule(
-                label: ParameterResolutionSchedule.self,
-                systems:
-                    ComputationOrderSystem.self,
-                    NameResolutionSystem.self,
-                    ExpressionParserSystem.self,
-                    ParameterResolutionSystem.self,
-                    ParameterConnectionProposalSystem.self,
-            )
+            let session = try DesignSession(location: globalOptions.designLocation)
+            try session.setPlane(options.deriveRef)
+            let trans = try session.createTransaction(deriving: options.deriveRef)
+            let world = session.world
             
-            world.addSchedule(schedule)
-            try world.run(schedule: ParameterResolutionSchedule.self)
+            try world.run(systems: ParameterResolutionSystems)
 
-            let proposal: ParameterProposal = world.singleton()!
+            guard let proposal: ParameterProposal = world.singleton() else {
+                throw ToolError.internalError("No parameter proposal created")
+            }
             
-            let trans = try editor.deriveOrCreate(options.deriveRef)
-
             for id in proposal.toRemove {
                 if verbose,
                    let object = trans[id],
@@ -55,7 +51,7 @@ extension PoieticTool {
                 {
                     let originName = trans[origin]?.name ?? "(unnamed)"
                     let targetName = trans[target]?.name ?? "(unnamed)"
-                    print("Disconnected parameter \(originName) (\(origin)) from \(targetName) (\(target)), edge: \(object.objectID)")
+                    errorPrint("Disconnected parameter \(originName) (\(origin)) from \(targetName) (\(target)), edge: \(object.objectID)")
                 }
                 trans.removeCascading(id)
             }
@@ -66,18 +62,17 @@ extension PoieticTool {
                 if verbose {
                     let originName = trans[edgeProposal.origin]?.name ?? "(unnamed)"
                     let targetName = trans[edgeProposal.target]?.name ?? "(unnamed)"
-                    print("Connected parameter \(originName) (\(edgeProposal.origin)) to \(targetName) (\(edgeProposal.target)), edge: \(edge.objectID)")
+                    infoPrint("Connected parameter \(originName) (\(edgeProposal.origin)) to \(targetName) (\(edgeProposal.target)), edge: \(edge.objectID)")
                 }
             }
             
 
             if proposal.isEmpty {
-                print("All parameter connections seem to be ok.")
+                infoPrint("All parameter connections seem to be ok.")
             }
             else {
-                try editor.accept(trans, replacing: options.replaceRef, appendHistory: options.appendHistory)
-                try editor.save()
-                print("Added \(proposal.toAdd.count) edges and removed \(proposal.toRemove.count) edges.")
+                try session.save(replacing: options.replaceRef, appendHistory: options.appendHistory)
+                infoPrint("Added \(proposal.toAdd.count) edges and removed \(proposal.toRemove.count) edges.")
             }
         }
     }

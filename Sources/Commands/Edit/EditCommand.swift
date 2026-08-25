@@ -1,5 +1,5 @@
 //
-//  InspectCommand.swift
+//  EditCommand.swift
 //
 //
 //  Created by Stefan Urbanek on 29/06/2023.
@@ -8,7 +8,7 @@
 @preconcurrency import ArgumentParser
 
 struct EditOptions: ParsableArguments {
-    @Option(name: [.customLong("derive")], help: "Plane ID or name to derive from. If not provided, current is used")
+    @Option(name: [.customLong("plane")], help: "Plane ID or name to base edits on. If not provided, current is used")
     var deriveRef: String?
 
     @Option(name: [.customLong("replace")], help: "Plane name to replace")
@@ -34,8 +34,8 @@ extension PoieticTool {
                 Layout.self,
                 Align.self,
                 PruneHistory.self,
-                CreateFrame.self,
-                RemoveFrame.self,
+                CreatePlane.self,
+                RemovePlane.self,
             ]
         )
     }

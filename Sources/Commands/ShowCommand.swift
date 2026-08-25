@@ -19,39 +19,29 @@ extension PoieticTool {
             = CommandConfiguration(abstract: "Describe an object")
         @OptionGroup var options: Options
 
-        enum OutputFormat: String, CaseIterable, ExpressibleByArgument{
-            case text = "text"
-            var defaultValueDescription: String { "text" }
-            
-            static var allValueStrings: [String] {
-                OutputFormat.allCases.map { "\($0)" }
-            }
-        }
-        @Option(name: [.long, .customShort("f")], help: "Output format")
-        var outputFormat: OutputFormat = .text
-
-        @Option(name: [.customLong("plane")], help: "Frame to get object from")
-        var frameRef: String?
+        @Option(name: [.customLong("plane")], help: "Plane to get object from. Default is current plane")
+        var planeRef: String?
         
+        @Flag(name: [.customLong("debug")], help: "Show detailed debug information")
+        var debug: Bool = false
+
         @Argument(help: "ID of an object to be described")
         var reference: String
         
         mutating func run() throws {
-            let editor = try DesignEditor(location: options.designLocation)
-            let frame = try editor.frame(frameRef)
+            let session = try DesignSession(location: options.designLocation)
+            let plane = try session.plane(planeRef)
             
-            guard let object = frame.object(stringReference: reference) else {
+            guard let object = plane.object(stringReference: reference) else {
                 throw ToolError.unknownObject(reference)
             }
             
-            switch outputFormat {
-            case .text: printObjectAsText(object)
-            }
+            printObjectAsText(object, debug: debug)
         }
     }
 }
 
-func printObjectAsText(_ object: ObjectSnapshot) {
+func printObjectAsText(_ object: ObjectSnapshot, debug: Bool) {
     var items: [(String?, String?)] = [
         ("Type", "\(object.type.name)"),
         ("Object ID", "\(object.objectID)"),
@@ -75,12 +65,15 @@ func printObjectAsText(_ object: ObjectSnapshot) {
 
         for attr in trait.attributes {
             let rawValue = object[attr.name]
-            let displayValue: String
+            var displayValue: String
             if let rawValue {
                 displayValue = String(describing: rawValue)
             }
             else {
                 displayValue = "(no value)"
+            }
+            if let rawValue, debug {
+                displayValue += " (\(rawValue.valueType))"
             }
 
             items.append((attr.name, displayValue))
@@ -95,7 +88,11 @@ func printObjectAsText(_ object: ObjectSnapshot) {
         if seenAttributes.contains(name) {
             continue
         }
-        let displayValue = String(describing: value)
+        
+        var displayValue = String(describing: value)
+        if debug {
+            displayValue += " (\(value.valueType))"
+        }
 
         orphanedItems.append((name, displayValue))
     }
@@ -107,7 +104,7 @@ func printObjectAsText(_ object: ObjectSnapshot) {
     }
     
     if items.isEmpty {
-        print("Object has no attributes.")
+        infoPrint("Object has no attributes.")
     }
     else {
         let formattedItems = formatLabelledList(items,

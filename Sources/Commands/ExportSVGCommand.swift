@@ -11,7 +11,6 @@ import PoieticCore
 import PoieticFlows
 import Diagramming
 
-
 extension PoieticTool {
     struct ExportSVG: ParsableCommand {
         static let configuration
@@ -38,19 +37,21 @@ extension PoieticTool {
         @Option(name: [.customLong("zoom")], help: "Zoom level in %")
         var zoom: Double = 100.0
         
-        @Option(name: [.customLong("plane")], help: "Plane ID or name")
-        var frameRef: String?
-        
+        @Option(name: [.customLong("plane")], help: "Plane name or ID. Default: current plane")
+        var planeRef: String?
+
         @Option(name: [.customLong("pictograms")], help: "File with pictogram collection")
         var pictogramCollectionPath: String?
 
         mutating func run() throws {
-            let editor = try DesignEditor(location: options.designLocation)
-            let world = editor.world
+            let session = try DesignSession(location: options.designLocation)
+            try session.setPlane(planeRef)
+            let world = session.world
             
             guard let testURL = URL(string: output) else {
-                fatalError("Invalid resource reference: \(output)")
+                throw ToolError.malformedLocation(output)
             }
+
             let outputURL: URL
 
             if testURL.scheme == nil {
@@ -62,7 +63,7 @@ extension PoieticTool {
 
             let pictograms: PictogramCollection
             if let path = pictogramCollectionPath {
-                print("Loading pictograms from \(path)")
+                infoPrint("Loading pictograms from \(path)")
                 pictograms = try loadPictograms(path: path)
             }
             else {
@@ -73,8 +74,8 @@ extension PoieticTool {
             let scaledPictos = pictograms.pictograms.map { $0.scaled(pictogramScale) }
             pictograms.pictograms = scaledPictos
             
-            print("Exporting to: \(outputURL.path())")
-            print("Creating diagram...")
+            infoPrint("Exporting to: \(outputURL.path())")
+            infoPrint("Creating diagram...")
 
             // 1. Configure the notation
             //
@@ -102,8 +103,7 @@ extension PoieticTool {
             
             let scene = composer.createScene(diagram: diagram, viewport: ViewportState(zoom: zoom / 100.0))
             scene.setComponent(SceneLayoutProvider(provider: svgStyle))
-            let system = SceneCompositionSystem(world)
-            try system.update(world)
+            try SceneCompositionSystem.update(world)
 
             // Export
             let renderer = SVGDiagramSceneRenderer(world: world)
