@@ -43,7 +43,7 @@ class GNUPlotBundleWriter {
         self.dataFileName = dataFileName
     }
     
-    public func write(result: SimulationResult, toPath path: String, world: World) throws {
+    func write(result: SimulationResult, toPath path: String, world: World) throws {
         guard let plan: SimulationPlan = world.singleton() else {
             return
         }

@@ -1,5 +1,5 @@
 //
-//  File.swift
+//  RunCommand.swift
 //  
 //
 //  Created by Stefan Urbanek on 17/07/2022.
@@ -160,7 +160,8 @@ extension PoieticTool {
                              states: result.states)
             case .gnuplot:
                 let writer = GNUPlotBundleWriter()
-                try writer.write(result: result, toPath: outputPath, world: world)
+                let coalescedPath = outputPath == "-" ? "." : outputPath
+                try writer.write(result: result, toPath: coalescedPath, world: world)
 //            case .json:
 //                try writeJSON(path: outputPath,
 //                              variables: outputVariables,

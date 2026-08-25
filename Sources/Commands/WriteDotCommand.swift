@@ -1,5 +1,5 @@
 //
-//  WriteDOTCommand.swift
+//  WriteDotCommand.swift
 //  
 //
 //  Created by Stefan Urbanek on 27/06/2023.
@@ -77,8 +77,8 @@ extension PoieticTool {
         var planeRef: String?
         
         mutating func run() throws {
-            let editor = try DesignSession(location: globalOptions.designLocation)
-            let plane = try editor.plane(planeRef)
+            let session = try DesignSession(location: globalOptions.designLocation)
+            let plane = try session.plane(planeRef)
 
             guard let testURL = URL(string: output) else {
                 throw ToolError.malformedLocation(output)

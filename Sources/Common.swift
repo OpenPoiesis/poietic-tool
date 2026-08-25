@@ -26,8 +26,6 @@ enum ToolError: Error, CustomStringConvertible {
     case designReaderError(RawDesignReaderError, URL?)
     case designLoaderError(DesignLoaderError, URL?)
     case unableToWrite(URL, any Error)
-    // TODO: Do we still need this? -> planeRequired (new rule: use single-plane design for convenience)
-    case emptyDesign
     
     // Design errors
     case designIssues([ObjectID:[Issue]])
@@ -50,9 +48,7 @@ enum ToolError: Error, CustomStringConvertible {
     case unknownObject(String)
     case nodeExpected(String)
     case planeExists(String)
-    // TODO: Do we still need this? -> planeRequired (new rule: use single-plane design for convenience)
-    case noCurrentPlane
-
+    
     // Editing errors
     case noChangesToUndo
     case noChangesToRedo
@@ -104,9 +100,6 @@ enum ToolError: Error, CustomStringConvertible {
         case .unableToWrite(let url, let error):
             return "Unable to write to \(url): \(error)"
 
-        case .emptyDesign:
-            return "The design is empty"
-
         // Design Errors
         case .brokenStructuralIntegrity(let error):
             return "Broken structural integrity: \(error)"
@@ -134,8 +127,6 @@ enum ToolError: Error, CustomStringConvertible {
             return "Unknown object '\(value)'"
         case .unknownPlane(let value):
             return "Unknown plane: \(value)"
-        case .noCurrentPlane:
-            return "No current plane set"
         case .planeExists(let value):
             return "Plane already exists: \(value)"
         case .noChangesToUndo:
@@ -191,8 +182,6 @@ enum ToolError: Error, CustomStringConvertible {
             return "See the list of available objects and their names by using the 'list' command."
         case .unknownPlane(_):
             return nil
-        case .noCurrentPlane:
-            return nil
         case .planeExists(_):
             return "Use another plane name or ID, or use force to replace existing"
         case .noChangesToUndo:
@@ -217,8 +206,6 @@ enum ToolError: Error, CustomStringConvertible {
             return nil
         case .storeError(_):
             return nil
-        case .emptyDesign:
-            return "Design has no planes, create a plane"
         case .simulationFailed(_):
             return nil
         case .planeRequired:
@@ -254,8 +241,7 @@ func setAttributeFromString(object: TransientObject,
 {
     let type = object.type
     if let attr = type.attribute(attributeName), attr.type.isArray {
-        let json = try JSONValue(parsing: string)
-        let arrayValue = try Variant(json: json)
+        let arrayValue = try Variant(jsonWithFallback: string)
         object.setAttribute(value: arrayValue,
                                 forKey: attributeName)
     }

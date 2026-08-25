@@ -84,7 +84,6 @@ Note: Plane with requested IDs can not be --forced to be replaced. Remove the pl
             else {
                 requestedID = nil
             }
-            
             if let name {
                 guard design.plane(name: name) == nil || force else {
                     throw ToolError.planeExists(name)

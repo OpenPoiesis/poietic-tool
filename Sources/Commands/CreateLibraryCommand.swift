@@ -74,10 +74,10 @@ func createLibraryItem(fromDesignAt location: String) throws -> DesignLibraryIte
         url
     }
 
-    let editor = try DesignSession(url: actualURL)
+    let session = try DesignSession(url: actualURL)
 
-    guard let plane = editor.design.currentPlane else {
-        throw ToolError.emptyDesign
+    guard let plane = session.design.currentPlane else {
+        throw ToolError.planeRequired
     }
 
     let info = plane.filter(type: ObjectType.DesignInfo).first?.attributes ?? [:]

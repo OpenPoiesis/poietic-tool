@@ -1,5 +1,5 @@
 //
-//  File.swift
+//  UndoRedoCommands.swift
 //  
 //
 //  Created by Stefan Urbanek on 04/07/2023.
@@ -24,8 +24,8 @@ extension PoieticTool {
                 throw ToolError.noChangesToUndo
             }
             
-            let frameID = session.design.undoList.last!
-            session.design.undo(to: frameID)
+            let planeID = session.design.undoList.last!
+            session.design.undo(to: planeID)
 
             try session.save()
             print("Did undo")
@@ -50,8 +50,8 @@ extension PoieticTool {
                 throw ToolError.noChangesToRedo
             }
             
-            let frameID = session.design.redoList.first!
-            session.design.redo(to: frameID)
+            let planeID = session.design.redoList.first!
+            session.design.redo(to: planeID)
 
             try session.save()
             print("Did redo.")

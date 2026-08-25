@@ -1,5 +1,5 @@
 //
-//  RuntimeFrame+extensions.swift
+//  RuntimeEntity+extensions.swift
 //  poietic
 //
 //  Created by Stefan Urbanek on 07/11/2025.

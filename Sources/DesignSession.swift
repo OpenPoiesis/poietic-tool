@@ -112,7 +112,6 @@ class DesignSession {
         else {
             self.world = World(design: self.design)
         }
-        // TODO: [IMPORTANT][REFACTORING] Validate schedules
         self.world.addSchedule(Schedule(
             label: PlanSchedule.self,
             systems: PoieticFlows.SimulationPlanningSystems
@@ -126,6 +125,7 @@ class DesignSession {
         self.world.addSchedule(Schedule(
             label: DiagramSchedule.self,
             systems:
+                VisualMetadataSystem.self,
                 TraitsToDiagramObjectsSystem.self,
         ))
     }
