@@ -31,7 +31,7 @@ extension PoieticTool {
         var timeDelta: Double?
         
         @Option(name: [.customLong("solver")],
-                help: "Type of the solver to be used for computation")
+                help: "Solver to use: euler, rk4 (default: euler)")
         var solverName: String = "euler"
 
         enum OutputFormat: String, CaseIterable, ExpressibleByArgument{
@@ -127,6 +127,10 @@ extension PoieticTool {
                 }
                 guard let object = plan.simulationObject(named: key) else {
                     throw ToolError.unknownObject(key)
+                }
+                if object.role != .stock {
+                    // FIXME: [IMPORTANT] This must be fixed in Flows
+                    errorPrint("Warning: '\(key)' is not a stock; -p currently applies only to the initial value and is overwritten by its formula from step 1.")
                 }
                 scenarioParams[object.objectID] = Variant(doubleValue)
             }
