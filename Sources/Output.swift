@@ -12,7 +12,6 @@ import Foundation
 func errorPrint(_ string: String) {
     if let data = (string + "\n").data(using: .utf8) {
         FileHandle.standardError.write(data)
-        FileHandle.standardError.synchronizeFile()
     }
 }
 
