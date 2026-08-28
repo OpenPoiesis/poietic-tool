@@ -20,9 +20,9 @@ extension PoieticTool {
         @OptionGroup var globalOptions: Options
 
         @Option(name: [.customLong("import"), .customShort("i")],
-                help: "Poietic plane to import into the first plane")
+                help: "Import from existing poietic designs. Current plane or the only plane is used.")
         var importPaths: [String] = []
-
+        
         mutating func run() throws {
             let design = Design(metamodel: StockFlowMetamodel)
             let session = try DesignSession(location: globalOptions.designLocation, design: design)

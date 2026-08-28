@@ -11,6 +11,9 @@ import RealModule
 
 enum LayoutType: String, CaseIterable, ExpressibleByArgument{
     case circle
+    // case horizontal + option: distribute equally vs keep other coordinate
+    // case vertical + option: distribute equally vs. keep other coordinate
+    
 //    case forceDirected
     
     var defaultValueDescription: String { "circle" }
@@ -62,8 +65,8 @@ extension PoieticTool {
             
             guard objects.count > 0 else { return }
             
-            let center = Point(100.0, 100.0)
-            let radius: Double = 100.0
+            let center = Point(200.0, 200.0)
+            let radius: Double = 200.0
             var angle: Double = 0.0
             
             let step: Double = (2 * Double.pi) / Double(objects.count)
