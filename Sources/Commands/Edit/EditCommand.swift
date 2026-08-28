@@ -25,6 +25,7 @@ extension PoieticTool {
             abstract: "Edit an object or a selection of objects",
             subcommands: [
                 SetAttribute.self,
+                SetMultipleAttributes.self,
                 Undo.self,
                 Redo.self,
                 Add.self,
