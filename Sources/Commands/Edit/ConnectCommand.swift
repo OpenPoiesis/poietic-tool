@@ -63,11 +63,11 @@ extension PoieticTool {
 
             }
 
-            let id = trans.create(type, topology: .edge(originObject.objectID, targetObject.objectID))
+            let edge = trans.create(type, topology: .edge(originObject.objectID, targetObject.objectID))
             
             try session.save(replacing: options.replaceRef, appendHistory: options.appendHistory)
 
-            infoPrint("Created edge \(id)")
+            infoPrint("Created edge \(edge.objectID) in plane \(trans.id)")
         }
     }
 
