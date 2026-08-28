@@ -43,6 +43,14 @@ extension PoieticTool {
             guard let proposal: ParameterProposal = world.singleton() else {
                 throw ToolError.internalError("No parameter proposal created")
             }
+
+            for id in proposal.missingUnnamed {
+                let object = trans[id]
+                let name = object?.name ?? "(unnamed)"
+                let typeName = object?.type.name ?? "object"
+                errorPrint("Warning: \(typeName) '\(name)' is missing its required input parameter connection; connect it manually (name does not matter).")
+            }
+
             
             for id in proposal.toRemove {
                 if verbose,
@@ -68,7 +76,9 @@ extension PoieticTool {
             
 
             if proposal.isEmpty {
-                infoPrint("All parameter connections seem to be ok.")
+                if proposal.missingUnnamed.isEmpty {
+                    infoPrint("All parameter connections seem to be ok.")
+                }
             }
             else {
                 try session.save(replacing: options.replaceRef, appendHistory: options.appendHistory)
