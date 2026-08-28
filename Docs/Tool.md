@@ -291,6 +291,7 @@ poietic run [--design <design>] \
     [--solver <solver>] \
     [--output-format <output-format>] \
     [--variable <variable> ...] \
+    [--all-variables] \
     [--parameter <parameter> ...] \
     [--plane <plane>] \
     [--output <output>]
@@ -303,10 +304,12 @@ Options:
 - `-t, --time-delta <time-delta>`: Time delta, overrides design-specified time delta.
 - `--solver <solver>`: Type of the solver to be used for computation. Default: `euler`.
 - `-f, --output-format <output-format>`: Output format, see below.
-- `-V, --variable <variable>`: Values to observe in the output; can be object IDs or object names.
-  If not specified, all simulation variables are used.
-- `-p, --parameter <parameter>`: Set (override) a numeric value of a parameter node in a
-  form 'object_name=value'.
+- `-V, --variable <variable>`: Variables to observe in the output; can be object IDs or object names.
+  If not specified: time plus all object variables.
+- `--all-variables`: Include internal and all built-in variables when no --variable is given.
+- `-p, --parameter <parameter>`: Override a node value ('name=value').
+  Stocks get a new initial value;
+  other nodes are currently affected only at t=0 and then recomputed from their formula
 - `--plane <plane>`: Plane name or ID to run. Default: current plane.
 - `-o, --output <output>`: Output path. Default or '-' is standard output.
 

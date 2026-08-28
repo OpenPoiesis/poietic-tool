@@ -49,8 +49,12 @@ extension PoieticTool {
         var outputFormat: OutputFormat = .csv
 
         @Option(name: [.customLong("variable"), .customShort("V")],
-                help: "Values to observe in the output; can be object IDs or object names")
+                help: "Variables to observe in the output; can be object IDs or object names. If not specified: time plus all object variables")
         var outputNames: [String] = []
+        
+        @Flag(name: [.customLong("all-variables")],
+              help: "Include internal and all built-in variables when no --variable is given")
+        var includeAllVariables: Bool = false
 
         @Option(name: [.customLong("parameter"), .customShort("p")],
                        help: "Set (override) a numeric value of a parameter node in a form 'object_name=value'")
@@ -98,7 +102,14 @@ extension PoieticTool {
             // -------------------------------------------------------------
             var outputVariables: [StateVariable] = []
             if outputNames.isEmpty {
-                outputVariables = plan.stateVariables
+                if includeAllVariables {
+                    outputVariables = plan.stateVariables
+                }
+                else {
+                    outputVariables = plan.stateVariables.filter {
+                        $0.kind == .object || ($0.kind == .builtin && $0.name == "time")
+                    }
+                }
             }
             else {
                 var unknownNames: [String] = []
