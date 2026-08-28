@@ -57,7 +57,7 @@ extension PoieticTool {
         var includeAllVariables: Bool = false
 
         @Option(name: [.customLong("parameter"), .customShort("p")],
-                       help: "Set (override) a numeric value of a parameter node in a form 'object_name=value'")
+                       help: "Override a node value ('name=value'). Stocks get a new initial value; other nodes are affected only at t=0 and then recomputed from their formula.")
         var overrideValues: [String] = []
 
         @Option(name: [.customLong("plane")], help: "Plane name or ID to run. Default: current plane")

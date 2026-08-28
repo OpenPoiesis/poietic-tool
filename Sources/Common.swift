@@ -402,10 +402,10 @@ func readRawDesign(fromPath path: String) throws (ToolError) -> RawDesign {
 
 func formatLabelledList(_ items: [(String?, String?)],
                         separator: String = ": ",
-                        minimumWidth: Int? = nil) -> [String] {
+                        minimumWidth: Int = 0) -> [String] {
     let maxWidth = items.map { $0.0?.count ?? 0 }.max() ?? 0
-    let width = max(maxWidth, minimumWidth ?? 0)
-    
+    let width = max(maxWidth, minimumWidth)
+
     var result: [String] = []
     
     for (label, value) in items {

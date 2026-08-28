@@ -32,6 +32,7 @@ struct PoieticTool: ParsableCommand {
             Run.self,
             WriteDOT.self,
             MetamodelCommand.self,
+            BuiltinsCommand.self,
             CreateLibrary.self,
             ExportSVG.self,
         ]
