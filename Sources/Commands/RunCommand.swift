@@ -57,7 +57,7 @@ extension PoieticTool {
         var includeAllVariables: Bool = false
 
         @Option(name: [.customLong("parameter"), .customShort("p")],
-                       help: "Override a node value ('name=value'). Stocks get a new initial value; other nodes are affected only at t=0 and then recomputed from their formula.")
+                       help: "Override a node value ('name=value') to a constant. For stocks and other accumulators: used only for initialisation.")
         var overrideValues: [String] = []
 
         @Option(name: [.customLong("plane")], help: "Plane name or ID to run. Default: current plane")
@@ -125,7 +125,7 @@ extension PoieticTool {
                 }
             }
 
-            // Collect parameters to be overridden during initialisation.
+            // Collect parameters to be overridden
             // -------------------------------------------------------------
             var scenarioParams: [ObjectID: Variant] = [:]
             for item in overrideValues {
@@ -139,13 +139,9 @@ extension PoieticTool {
                 guard let object = plan.simulationObject(named: key) else {
                     throw ToolError.unknownObject(key)
                 }
-                if object.role != .stock {
-                    // FIXME: [IMPORTANT] This must be fixed in Flows
-                    errorPrint("Warning: '\(key)' is not a stock; -p currently applies only to the initial value and is overwritten by its formula from step 1.")
-                }
                 scenarioParams[object.objectID] = Variant(doubleValue)
             }
-            let scenario = ScenarioParameters(initialValues: scenarioParams)
+            let scenario = ScenarioParameters(values: scenarioParams)
             
             // Create and initialise the solver
             // -------------------------------------------------------------
