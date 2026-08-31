@@ -11,6 +11,19 @@ import Foundation
 import PoieticCore
 import PoieticFlows
 
+extension VariableNameFormat: @retroactive ExpressibleByArgument {
+    public init?(argument: String) {
+        switch argument.lowercased() {
+        case "normalized": self = .normalized
+        case "display": self = .display
+        default: return nil
+        }
+    }
+    
+    public var defaultValueDescription: String { "display" }
+
+}
+
 extension PoieticTool {
     struct Run: ParsableCommand {
         static let configuration
@@ -49,12 +62,16 @@ extension PoieticTool {
         var outputFormat: OutputFormat = .csv
 
         @Option(name: [.customLong("variable"), .customShort("V")],
-                help: "Variables to observe in the output; can be object IDs or object names. If not specified: time plus all object variables")
+                help: "Names of variables to observe in the output. If not specified: time plus all object variables")
         var outputNames: [String] = []
         
         @Flag(name: [.customLong("all-variables")],
               help: "Include internal and all built-in variables when no --variable is given")
         var includeAllVariables: Bool = false
+
+        @Option(name: [.customLong("name-format")],
+              help: "Format of output variable names")
+        var nameFormat: VariableNameFormat = .display
 
         @Option(name: [.customLong("parameter"), .customShort("p")],
                        help: "Override a node value ('name=value') to a constant. For stocks and other accumulators: used only for initialisation.")
@@ -102,27 +119,15 @@ extension PoieticTool {
             // -------------------------------------------------------------
             var outputVariables: [StateVariable] = []
             if outputNames.isEmpty {
-                if includeAllVariables {
-                    outputVariables = plan.stateVariables
-                }
-                else {
-                    outputVariables = plan.stateVariables.filter {
-                        $0.kind == .object || ($0.kind == .builtin && $0.name == "time")
-                    }
-                }
+                if includeAllVariables { outputVariables = plan.stateVariables }
+                else                   { outputVariables = plan.defaultVariables }
             }
             else {
-                var unknownNames: [String] = []
-                for name in outputNames {
-                    guard let variable = plan.variable(named: name) else {
-                        unknownNames.append(name)
-                        continue
-                    }
-                    outputVariables.append(variable)
+                let variables = plan.variables(named: outputNames, includeTime: true)
+                guard variables.unknown.isEmpty else {
+                    throw ToolError.unknownVariables(variables.unknown)
                 }
-                guard unknownNames.isEmpty else {
-                    throw ToolError.unknownVariables(unknownNames)
-                }
+                outputVariables = variables.known
             }
 
             // Collect parameters to be overridden
@@ -132,12 +137,13 @@ extension PoieticTool {
                 guard let split = parseValueAssignment(item) else {
                     throw ToolError.invalidAttributeAssignment(item)
                 }
-                let (key, stringValue) = split
+                let (variableKey, stringValue) = split
                 guard let doubleValue = Double(stringValue) else {
-                    throw ToolError.typeMismatch("parameter override '\(key)'", stringValue, "double")
+                    throw ToolError.typeMismatch("parameter override '\(variableKey)'", stringValue, "double")
                 }
-                guard let object = plan.simulationObject(named: key) else {
-                    throw ToolError.unknownObject(key)
+                let normalisedKey = NormalizedName.normalize(variableKey)
+                guard let object = plan.simulationObject(withKey: normalisedKey) else {
+                    throw ToolError.unknownObject(variableKey)
                 }
                 scenarioParams[object.objectID] = Variant(doubleValue)
             }
@@ -165,13 +171,15 @@ extension PoieticTool {
             
             switch outputFormat {
             case .csv:
-                try writeCSV(path: outputPath,
-                             variables: outputVariables,
-                             states: result.states)
+                let view = SimulationResultView(result: result, plan: plan, variables: outputVariables)
+                try writeCSV(path: outputPath, view: view, nameFormat: nameFormat, world: world)
             case .gnuplot:
                 let writer = GNUPlotBundleWriter()
                 let coalescedPath = outputPath == "-" ? "." : outputPath
-                try writer.write(result: result, toPath: coalescedPath, world: world)
+                try writer.write(result: result,
+                                 toPath: coalescedPath,
+                                 nameFormat: nameFormat,
+                                 world: world)
 //            case .json:
 //                try writeJSON(path: outputPath,
 //                              variables: outputVariables,
@@ -179,31 +187,5 @@ extension PoieticTool {
             }
         }
     }
-}
-
-func writeCSV(path: String,
-              variables: [StateVariable],
-              states: [SimulationState]) throws {
-    let header: [String] = variables.map { $0.name }
-
-    // TODO: Step
-    let writer: CSVWriter
-    if path == "-" {
-        writer = CSVWriter(.standardOutput)
-    }
-    else {
-        writer = try CSVWriter(path: path)
-    }
-    try writer.write(row: header)
-    for state in states {
-        var row: [String] = []
-        for variable in variables {
-            let value: Variant = state[variable.index]
-            row.append(try value.stringValue())
-        }
-        try writer.write(row: row)
-    }
-    try writer.close()
-    
 }
 

@@ -82,3 +82,4 @@ func printValidationResult(_ result: PlaneValidationResult, in plane: some Plane
     printDesignIssues(result.violationsAsIssues(), plane: plane)
     printIssues(result.objectIssues(), plane: plane)
 }
+

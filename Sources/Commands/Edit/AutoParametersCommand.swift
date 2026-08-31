@@ -10,8 +10,9 @@ import PoieticCore
 import PoieticFlows
 
 let ParameterResolutionSystems: [System.Type] = [
+    NameNormalizationSystem.self,
     ComputationOrderSystem.self,
-    NameResolutionSystem.self,
+    NameValidationSystem.self,
     ExpressionParserSystem.self,
     ParameterResolutionSystem.self,
     ParameterConnectionProposalSystem.self,

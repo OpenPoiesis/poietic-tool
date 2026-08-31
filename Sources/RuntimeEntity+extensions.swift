@@ -15,8 +15,8 @@ extension RuntimeEntity {
     /// - Precondition: Object must exist in the plane.
     ///
     public func displayName(default defaultName: String = "(unnamed)") -> String {
-        if let component: SimulationName = self.component() {
-            return component.name
+        if let component: NormalizedName = self.component() {
+            return component.displayName
         }
         else  {
             return self.designObject?.name ?? defaultName

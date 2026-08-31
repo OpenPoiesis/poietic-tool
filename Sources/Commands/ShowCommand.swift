@@ -25,7 +25,7 @@ extension PoieticTool {
         @Flag(name: [.customLong("debug")], help: "Show detailed debug information")
         var debug: Bool = false
 
-        @Argument(help: "ID of an object to be described")
+        @Argument(help: "ID or a name of an object to be described")
         var reference: String
         
         mutating func run() throws {
@@ -54,6 +54,15 @@ func printObjectAsText(_ object: ObjectSnapshot, debug: Bool) {
     
     var seenAttributes: [String] = []
     
+    items.append((nil, nil))
+    if object.type.hasTrait(.Name),
+       let name: String = object["name"]
+    {
+        let normalized = NormalizedName(name: name)
+        items.append(("Normalized Name", normalized.key))
+        items.append(("Display Name", normalized.displayName))
+
+    }
     items.append((nil, nil))
     items.append(("Attributes", nil))
 

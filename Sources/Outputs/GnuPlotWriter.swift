@@ -9,23 +9,23 @@ import PoieticCore
 import PoieticFlows
 import Foundation
 
-func writeToCSV(path: String, result: SimulationResult, plan: SimulationPlan) throws {
-    let writer: CSVWriter = try CSVWriter(path: path)
-    let header: [String] = plan.stateVariables.map { $0.name }
-
-    try writer.write(row: header)
-    
-    for state in result.states {
-        var row: [String] = []
-        for index in plan.stateVariables.indices {
-            let value: PoieticCore.Variant = state[index]
-            row.append(try value.stringValue())
-        }
-        try writer.write(row: row)
-        
-    }
-    try writer.close()
-}
+//func _writeToCSV(path: String, result: SimulationResult, plan: SimulationPlan) throws {
+//    let writer: CSVWriter = try CSVWriter(path: path)
+//    let header: [String] = plan.stateVariables.map { $0.name }
+//
+//    try writer.write(row: header)
+//    
+//    for state in result.states {
+//        var row: [String] = []
+//        for index in plan.stateVariables.indices {
+//            let value: PoieticCore.Variant = state[index]
+//            row.append(try value.stringValue())
+//        }
+//        try writer.write(row: row)
+//        
+//    }
+//    try writer.close()
+//}
 
 /// Write a Gnuplot directory bundle.
 ///
@@ -43,14 +43,16 @@ class GNUPlotBundleWriter {
         self.dataFileName = dataFileName
     }
     
-    func write(result: SimulationResult, toPath path: String, world: World) throws {
+    func write(result: SimulationResult, toPath path: String, nameFormat: VariableNameFormat, world: World) throws {
         guard let plan: SimulationPlan = world.singleton() else {
             throw ToolError.internalError("No simulation plan")
         }
         let fm = FileManager()
         try fm.createDirectory(atPath: path, withIntermediateDirectories: true)
-        
-        try writeToCSV(path: path + "/" + dataFileName, result: result, plan: plan)
+       
+        let view = SimulationResultView(result: result, plan: plan, variables: plan.stateVariables)
+        let csvPath = path + "/" + dataFileName
+        try writeCSV(path: csvPath, view: view, nameFormat: nameFormat, world: world)
 
         for (entity, chart) in world.query(Chart.self) {
             let name = chart.label ?? "unnamed_\(entity.runtimeID)"
@@ -90,8 +92,8 @@ class GNUPlotBundleWriter {
             else { continue }
 
             let label: String
-            if let simName: SimulationName = target.component() {
-                label = simName.name
+            if let normalizedName: NormalizedName = target.component() {
+                label = normalizedName.displayName
             }
             else {
                 label = "unnamed"
