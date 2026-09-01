@@ -23,9 +23,19 @@ extension PoieticTool {
                 help: "Import from existing poietic designs. Current plane or the only plane is used.")
         var importPaths: [String] = []
         
+        @Flag(name: [.customLong("force")],
+              help: "Force rewrite existing design file")
+        var force: Bool = false
+        
         mutating func run() throws {
             let design = Design(metamodel: StockFlowMetamodel)
             let session = try DesignSession(location: globalOptions.designLocation, design: design)
+
+            let manager = FileManager()
+            let path = session.url.path()
+            guard force || !manager.fileExists(atPath: path) else {
+                throw ToolError.fileAlreadyExists(path)
+            }
 
             if !importPaths.isEmpty {
                 let loader = DesignLoader(metamodel: design.metamodel, options: .useIDAsNameAttribute)

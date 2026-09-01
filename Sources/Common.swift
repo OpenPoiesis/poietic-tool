@@ -21,6 +21,7 @@ enum ToolError: Error, CustomStringConvertible {
     // I/O errors
     case malformedLocation(String)
     case fileDoesNotExist(String)
+    case fileAlreadyExists(String)
     case unableToSaveDesign(Error)
     case storeError(DesignStoreError)
     case designReaderError(RawDesignReaderError, URL?)
@@ -149,7 +150,8 @@ enum ToolError: Error, CustomStringConvertible {
             return "Invalid value for \(variable): '\(value)'"
         case .fileDoesNotExist(let file):
             return "File '\(file)' not found"
-            
+        case .fileAlreadyExists(let file):
+            return "File '\(file)' already exists"
         case .simulationFailed(let message):
             return "Simulation failed: \(message)"
         case .planeRequired:
@@ -209,6 +211,8 @@ enum ToolError: Error, CustomStringConvertible {
             return "Check the design source structure and format version"
         case .fileDoesNotExist(_):
             return nil
+        case .fileAlreadyExists(_):
+            return "Use another file name or use --force to rewrite existing"
         case .storeError(_):
             return nil
         case .simulationFailed(_):
