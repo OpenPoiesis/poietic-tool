@@ -48,7 +48,7 @@ extension PoieticTool {
             
             try session.save(replacing: options.replaceRef, appendHistory: options.appendHistory)
 
-            infoPrint("Property set in \(reference): \(attributeName) = \(value)")
+            infoPrint("Attribute set in \(reference): \(attributeName) = \(value)")
         }
     }
 
@@ -101,7 +101,45 @@ extension PoieticTool {
             try session.save(replacing: options.replaceRef, appendHistory: options.appendHistory)
 
             let nameList = names.joined(separator: ",")
-            infoPrint("Properties set in \(reference): \(nameList)")
+            infoPrint("Attributes set in \(reference): \(nameList)")
+        }
+    }
+
+    // MARK: Unset Attributes
+    struct UnsetAttributes: ParsableCommand {
+        static let configuration
+            = CommandConfiguration(
+                commandName: "unset",
+                abstract: "Remove values of multiple attributes"
+            )
+
+        @OptionGroup var globalOptions: Options
+        @OptionGroup var options: EditOptions
+
+        @Argument(help: "ID of an object to be modified")
+        var reference: String
+
+        @Argument(help: "Attributes to be unset")
+        var names: [String]
+
+        mutating func run() throws {
+            let session = try DesignSession(location: globalOptions.designLocation)
+            let trans = try session.createTransaction(deriving: options.deriveRef)
+
+            guard let object = trans.object(stringReference: reference) else {
+                throw ToolError.unknownObject(reference)
+            }
+
+            let mutableObject = trans.mutate(object.objectID)
+
+            for name in names {
+                mutableObject.removeAttribute(forKey: name)
+            }
+
+            try session.save(replacing: options.replaceRef, appendHistory: options.appendHistory)
+
+            let nameList = names.joined(separator: ",")
+            infoPrint("Attributes removed in \(reference): \(nameList)")
         }
     }
 

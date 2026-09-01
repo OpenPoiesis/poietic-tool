@@ -26,6 +26,7 @@ extension PoieticTool {
             subcommands: [
                 SetAttribute.self,
                 SetMultipleAttributes.self,
+                UnsetAttributes.self,
                 Undo.self,
                 Redo.self,
                 Add.self,
