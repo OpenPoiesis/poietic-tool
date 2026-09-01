@@ -35,8 +35,12 @@ extension PoieticTool {
                 help: "Initial time, overrides design-specified initial time")
         var startTime: Double?
 
+        @Option(name: [.long],
+                help: "Final simulation time, overrides design-specified initial time")
+        var endTime: Double?
+
         @Option(name: [.long, .customShort("s")],
-                help: "Maximum number of steps to run, before end-time is reached")
+                help: "Maximum number of steps to run, before end-time is reached [DEPRECATED]")
         var steps: UInt?
         
         @Option(name: [.long, .customShort("t")],
@@ -110,8 +114,23 @@ extension PoieticTool {
             var settings: SimulationSettings = world.singleton() ?? SimulationSettings()
             
             if let startTime { settings.initialTime = startTime }
-            if let timeDelta { settings.timeDelta = timeDelta }
-            if let steps     { settings.steps = steps }
+            if let timeDelta {
+                guard timeDelta > 0 else {
+                    throw ToolError.invalidOption("time-delta", "Time delta must be greater than 0")
+                }
+                settings.timeDelta = timeDelta
+            }
+            if let endTime {
+                guard endTime >= settings.initialTime else {
+                    throw ToolError.invalidOption("end-time", "End time must be greater or equal than start time")
+                }
+
+                settings.endTime = endTime
+            }
+            else if let steps {
+                errorPrint("WARNING: Settings steps is deprecated, use --end-time")
+                settings.endTime = settings.initialTime + settings.timeDelta * Double(steps)
+            }
 
             settings.solverType = solverName
             
