@@ -31,7 +31,9 @@ extension PoieticTool {
         @Argument(help: "Reference to the connection's target node")
         var target: String
 
-        
+        @Argument(help: "Attributes to be set in form 'attribute=value'")
+        var attributeAssignments: [String] = []
+
         mutating func run() throws {
             let session = try DesignSession(location: globalOptions.designLocation)
             let trans = try session.createTransaction(deriving: options.deriveRef)
@@ -64,6 +66,17 @@ extension PoieticTool {
             }
 
             let edge = trans.create(type, topology: .edge(originObject.objectID, targetObject.objectID))
+            
+            for item in attributeAssignments {
+                guard let split = parseValueAssignment(item) else {
+                    throw ToolError.invalidAttributeAssignment(item)
+                }
+                let (name, stringValue) = split
+                try setAttributeFromString(object: edge,
+                                           attribute: name,
+                                           string: stringValue)
+
+            }
             
             try session.save(replacing: options.replaceRef, appendHistory: options.appendHistory)
 
