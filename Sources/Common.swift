@@ -60,7 +60,7 @@ enum ToolError: Error, CustomStringConvertible {
     case invalidAttributeAssignment(String)
     case typeMismatch(String, String, String)
     case invalidValue(String, String)
-    
+    case invalidOption(String, String)
     public var description: String {
         switch self {
         case .internalError(let message):
@@ -142,6 +142,8 @@ enum ToolError: Error, CustomStringConvertible {
         case .nodeExpected(let value):
             return "Object is not a node: '\(value)'"
             
+        case .invalidOption(let option, let message):
+            return "Invalid option '\(option)': \(message)"
         case .invalidAttributeAssignment(let value):
             return "Invalid attribute assignment: \(value)"
         case .typeMismatch(let subject, let value, let expected):
@@ -219,6 +221,8 @@ enum ToolError: Error, CustomStringConvertible {
             return nil
         case .planeRequired:
             return "Specify --plane"
+        case .invalidOption(_, _):
+            return nil
         }
     }
 

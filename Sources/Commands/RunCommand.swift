@@ -11,7 +11,7 @@ import Foundation
 import PoieticCore
 import PoieticFlows
 
-extension VariableNameFormat: @retroactive ExpressibleByArgument {
+extension VariableNameFormat: ExpressibleByArgument {
     public init?(argument: String) {
         switch argument.lowercased() {
         case "normalized": self = .normalized
@@ -36,7 +36,7 @@ extension PoieticTool {
         var startTime: Double?
 
         @Option(name: [.long],
-                help: "Final simulation time, overrides design-specified initial time")
+                help: "Final simulation time, overrides design-specified end time")
         var endTime: Double?
 
         @Option(name: [.long, .customShort("s")],
@@ -188,9 +188,11 @@ extension PoieticTool {
                 throw ToolError.internalError("Unknown error (no result produced)")
             }
             
+            // FIXME: Collect references instead of whole variables.
             switch outputFormat {
             case .csv:
-                let view = SimulationResultView(result: result, plan: plan, variables: outputVariables)
+                let view = SimulationResultView(result: result,
+                                                selection: outputVariables.map {$0.reference} )
                 try writeCSV(path: outputPath, view: view, nameFormat: nameFormat, world: world)
             case .gnuplot:
                 let writer = GNUPlotBundleWriter()
