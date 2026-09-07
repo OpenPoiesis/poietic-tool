@@ -80,7 +80,7 @@ func createLibraryItem(fromDesignAt location: String) throws -> DesignLibraryIte
         throw ToolError.planeRequired
     }
 
-    let info = plane.filter(type: ObjectType.DesignInfo).first?.attributes ?? [:]
+    let info = plane.filter(type: BasicDomain.Types.DesignInfo).first?.attributes ?? [:]
     
     let name: String
     if let infoName = try? info["name"]?.stringValue() {

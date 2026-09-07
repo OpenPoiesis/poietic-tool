@@ -40,7 +40,7 @@ poietic edit add FlowRate name=expenses formula=50
             let session = try DesignSession(location: globalOptions.designLocation)
             let trans = try session.createTransaction(deriving: options.deriveRef)
 
-            guard let type = StockFlowMetamodel.objectType(name: typeName) else {
+            guard let type = StockFlowDomain.StockFlowMetamodel.objectType(name: typeName) else {
                 throw ToolError.unknownObjectType(typeName)
             }
 

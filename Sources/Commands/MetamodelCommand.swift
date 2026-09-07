@@ -39,7 +39,7 @@ extension PoieticTool {
 
         mutating func run() throws {
             // TODO: Once we support multiple metamodels, allow selection of a metamodel
-            let metamodel = StockFlowMetamodel
+            let metamodel = StockFlowDomain.StockFlowMetamodel
             
             if let typeName = objectType {
                 guard let type = metamodel.objectType(name: typeName) else {

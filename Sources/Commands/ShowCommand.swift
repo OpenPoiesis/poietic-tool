@@ -55,7 +55,7 @@ func printObjectAsText(_ object: ObjectSnapshot, debug: Bool) {
     var seenAttributes: [String] = []
     
     items.append((nil, nil))
-    if object.type.hasTrait(.Name),
+    if object.type.hasTrait(BasicDomain.Traits.Name),
        let name: String = object["name"]
     {
         let normalized = NormalizedName(name: name)

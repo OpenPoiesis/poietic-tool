@@ -48,7 +48,7 @@ extension PoieticTool {
             if references.isEmpty {
                 for object in trans.snapshots {
                     if object.attributes["position"] != nil
-                        || object.type.hasTrait(.DiagramBlock)
+                        || object.type.hasTrait(DiagramDomain.Traits.DiagramBlock)
                     {
                         objects.append(trans.mutate(object.objectID))
                     }

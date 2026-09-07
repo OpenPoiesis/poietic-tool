@@ -42,7 +42,7 @@ extension PoieticTool {
             let trans = try session.createTransaction(deriving: options.deriveRef)
 
             let rawDesign = try readRawDesign(fromPath: fileName)
-            let loader = DesignLoader(metamodel: StockFlowMetamodel, options: .useIDAsNameAttribute)
+            let loader = DesignLoader(metamodel: StockFlowDomain.StockFlowMetamodel, options: .useIDAsNameAttribute)
             let strategy: DesignLoader.IdentityStrategy
 
             switch identityMode {

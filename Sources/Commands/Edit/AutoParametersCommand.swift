@@ -65,7 +65,7 @@ extension PoieticTool {
                 trans.removeCascading(id)
             }
             for edgeProposal in proposal.toAdd {
-                let edge = trans.createEdge(.Parameter,
+                let edge = trans.createEdge(StockFlowDomain.Types.Parameter,
                                             origin: edgeProposal.origin,
                                             target: edgeProposal.target)
                 if verbose {
