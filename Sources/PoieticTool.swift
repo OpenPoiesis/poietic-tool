@@ -14,7 +14,7 @@
 struct PoieticTool: ParsableCommand {
     
     // IMPORTANT: Keep this in sync with Core and with git tag
-    static let Version: String = "0.8"
+    static let Version: String = "0.9"
     
     static let configuration = CommandConfiguration(
         commandName: "poietic",
