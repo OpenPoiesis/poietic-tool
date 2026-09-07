@@ -67,14 +67,14 @@ extension PoieticTool {
                     ("Unstructured", "\(unstructuredCount)"),
                 ]
 
-                if let obj = plane.first(trait: .Simulation) {
-                    let params = SimulationSettings(fromObject: obj)
+                if let obj = plane.first(trait: .StockFlowSimulationSettings) {
+                    let params = SimulationTimeSettings(fromObject: obj)
                     items += [
                         (nil, nil),
-                        ("Simulation Parameters", nil),
-                        ("Initial time", "\(params.initialTime)"),
-                        ("End time", "\(params.endTime)"),
-                        ("Time delta", "\(params.timeDelta)"),
+                        ("Time Settings", nil),
+                        ("Start time", "\(params.startTime)"),
+                        ("Final time", "\(params.finalTime)"),
+                        ("Time step", "\(params.timeStep)"),
                     ]
                 }
             }

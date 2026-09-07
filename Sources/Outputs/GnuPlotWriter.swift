@@ -37,6 +37,7 @@ import Foundation
 ///    chart object name.
 ///
 class GNUPlotBundleWriter {
+    // TODO: This whole writer is finicky, due for rewrite.
     let dataFileName: String
 
     init(dataFileName: String = "data.csv") {
@@ -50,13 +51,18 @@ class GNUPlotBundleWriter {
         let fm = FileManager()
         try fm.createDirectory(atPath: path, withIntermediateDirectories: true)
        
-        let view = SimulationResultView(result: result, plan: plan, variables: plan.stateVariables)
+        let view = SimulationResultView(result: result)
+
         let csvPath = path + "/" + dataFileName
         try writeCSV(path: csvPath, view: view, nameFormat: nameFormat, world: world)
 
         for (entity, chart) in world.query(Chart.self) {
             let name = chart.label ?? "unnamed_\(entity.runtimeID)"
-            let gnuplotCommand = chartCommand(entity: entity, chart: chart, name: name, plan: plan)
+
+            let gnuplotCommand = chartCommand(entity: entity,
+                                              chart: chart,
+                                              name: name,
+                                              result: result)
             let gnuplotCommandPath = path + "/" + "chart_\(name).gnuplot"
 
             guard let data = gnuplotCommand.data(using: .utf8) else {
@@ -65,10 +71,10 @@ class GNUPlotBundleWriter {
             try data.write(to: URL(filePath: gnuplotCommandPath))
         }
     }
-    func chartCommand(entity: RuntimeEntity, chart: Chart, name: String, plan: SimulationPlan) -> String {
+    func chartCommand(entity: RuntimeEntity, chart: Chart, name: String, result: SimulationResult) -> String {
         
         let imageFile = "chart_\(name).png"
-        let plots = plotCommands(entity: entity, chart: chart, plan: plan).joined(separator: ", ")
+        let plots = plotCommands(entity: entity, chart: chart, result: result).joined(separator: ", ")
 
         let command =
         """
@@ -81,14 +87,17 @@ class GNUPlotBundleWriter {
 
         return command
     }
-    func plotCommands(entity: RuntimeEntity, chart: Chart, plan: SimulationPlan) -> [String] {
+    func plotCommands(entity: RuntimeEntity, chart: Chart, result: SimulationResult) -> [String] {
         var commands: [String] = []
-        let timeIndex = plan.builtins.time
+        let timeRef = result.plan.variable(forBuiltin: .time)!.reference
+        let timeIndex = result.seriesIndex(timeRef)!
+        
         for seriesEnt in entity.children {
             guard let _: ChartSeries = seriesEnt.component(),
                   let target = seriesEnt.firstOutgoing(RepresentationOf.self),
                   let targetObjectID = target.objectID,
-                  let seriesIndex = plan.variableIndex(targetObjectID)
+                  let seriesRef = result.plan.variableReference(targetObjectID),
+                  let seriesIndex = result.seriesIndex(seriesRef)
             else { continue }
 
             let label: String

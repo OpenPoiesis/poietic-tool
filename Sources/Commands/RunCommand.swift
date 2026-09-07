@@ -11,7 +11,7 @@ import Foundation
 import PoieticCore
 import PoieticFlows
 
-extension VariableNameFormat: @retroactive ExpressibleByArgument {
+extension VariableNameFormat: ExpressibleByArgument {
     public init?(argument: String) {
         switch argument.lowercased() {
         case "normalized": self = .normalized
@@ -36,17 +36,17 @@ extension PoieticTool {
         var startTime: Double?
 
         @Option(name: [.long],
-                help: "Final simulation time, overrides design-specified initial time")
-        var endTime: Double?
+                help: "Final simulation time, overrides design-specified end time")
+        var finalTime: Double?
 
         @Option(name: [.long, .customShort("s")],
                 help: "Maximum number of steps to run, before end-time is reached [DEPRECATED]")
         var steps: UInt?
         
         @Option(name: [.long, .customShort("t")],
-                help: "Time delta, overrides design-specified time delta")
-        var timeDelta: Double?
-        
+                help: "Time step, overrides design-specified time step")
+        var timeStep: Double?
+
         @Option(name: [.customLong("solver")],
                 help: "Solver to use: euler, rk4 (default: euler)")
         var solverName: String = "euler"
@@ -111,28 +111,29 @@ extension PoieticTool {
                 throw ToolError.designIssues(world.issues)
             }
             
-            var settings: SimulationSettings = world.singleton() ?? SimulationSettings()
+            var timeSettings: SimulationTimeSettings = world.singleton() ?? SimulationTimeSettings()
+            var simSettings: SimulationSettings = world.singleton() ?? SimulationSettings()
             
-            if let startTime { settings.initialTime = startTime }
-            if let timeDelta {
-                guard timeDelta > 0 else {
-                    throw ToolError.invalidOption("time-delta", "Time delta must be greater than 0")
+            if let startTime { timeSettings.startTime = startTime }
+            if let timeStep {
+                guard timeStep > 0 else {
+                    throw ToolError.invalidOption("time-step", "Time delta must be greater than 0")
                 }
-                settings.timeDelta = timeDelta
+                timeSettings.timeStep = timeStep
             }
-            if let endTime {
-                guard endTime >= settings.initialTime else {
+            if let finalTime {
+                guard finalTime >= timeSettings.startTime else {
                     throw ToolError.invalidOption("end-time", "End time must be greater or equal than start time")
                 }
 
-                settings.endTime = endTime
+                timeSettings.finalTime = finalTime
             }
             else if let steps {
                 errorPrint("WARNING: Settings steps is deprecated, use --end-time")
-                settings.endTime = settings.initialTime + settings.timeDelta * Double(steps)
+                timeSettings.finalTime = timeSettings.startTime + timeSettings.timeStep * Double(steps)
             }
 
-            settings.solverType = solverName
+            simSettings.solverType = solverName
             
             // Collect names of nodes to be observed
             // -------------------------------------------------------------
@@ -170,7 +171,8 @@ extension PoieticTool {
             
             // Create and initialise the solver
             // -------------------------------------------------------------
-            world.setSingleton(settings)
+            world.setSingleton(simSettings)
+            world.setSingleton(timeSettings)
             world.setSingleton(scenario)
             
             // Run the simulation
@@ -188,9 +190,11 @@ extension PoieticTool {
                 throw ToolError.internalError("Unknown error (no result produced)")
             }
             
+            // FIXME: Collect references instead of whole variables.
             switch outputFormat {
             case .csv:
-                let view = SimulationResultView(result: result, plan: plan, variables: outputVariables)
+                let view = SimulationResultView(result: result,
+                                                selection: outputVariables.map {$0.reference} )
                 try writeCSV(path: outputPath, view: view, nameFormat: nameFormat, world: world)
             case .gnuplot:
                 let writer = GNUPlotBundleWriter()
