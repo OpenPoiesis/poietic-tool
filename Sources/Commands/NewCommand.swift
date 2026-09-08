@@ -28,7 +28,7 @@ extension PoieticTool {
         var force: Bool = false
         
         mutating func run() throws {
-            let design = Design(metamodel: StockFlowMetamodel)
+            let design = Design(metamodel: StockFlowDomain.StockFlowMetamodel)
             let session = try DesignSession(location: globalOptions.designLocation, design: design)
 
             let manager = FileManager()

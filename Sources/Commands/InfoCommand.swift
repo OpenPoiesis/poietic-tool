@@ -32,7 +32,7 @@ extension PoieticTool {
                 ("Design", session.url.relativeString)
             ]
 
-            if let info = plane?.filter(type: ObjectType.DesignInfo).first {
+            if let info = plane?.filter(type: BasicDomain.Types.DesignInfo).first {
                 if let text = try info["title"]?.stringValue() {
                     items.append(("Title", text))
                 }
@@ -67,7 +67,7 @@ extension PoieticTool {
                     ("Unstructured", "\(unstructuredCount)"),
                 ]
 
-                if let obj = plane.first(trait: .StockFlowSimulationSettings) {
+                if let obj = plane.first(trait: StockFlowDomain.Traits.StockFlowSimulationSettings) {
                     let params = SimulationTimeSettings(fromObject: obj)
                     items += [
                         (nil, nil),

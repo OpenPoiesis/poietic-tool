@@ -99,7 +99,7 @@ class DesignSession {
             let store = DesignStore(url: url)
             do {
                 // TODO: remove the metamodel here
-                useDesign = try store.load(metamodel: StockFlowMetamodel)
+                useDesign = try store.load(metamodel: StockFlowDomain.StockFlowMetamodel)
             }
             catch {
                 throw ToolError.storeError(error)
