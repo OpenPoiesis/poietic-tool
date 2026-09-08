@@ -99,7 +99,12 @@ public class DotExporter {
 
         output += formatter.footer()
        
-        try output.write(toFile: path, atomically: true, encoding: .utf8)
+        if path == "-" {
+            try output.write(toFile: path, atomically: true, encoding: .utf8)
+        }
+        else {
+            print(output)
+        }
     }
     
     public func format(graph: some Plane, node: ObjectSnapshot) -> [String:String] {
