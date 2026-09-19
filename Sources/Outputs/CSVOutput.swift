@@ -24,7 +24,7 @@ func header(variables: [StateVariable],
         switch format {
         case .normalized: item = variable.name
         case .display:
-            if let objectID = variable.objectID,
+            if case .object(let objectID) = variable.content,
                let entity = world.entity(objectID),
                let normalized: NormalizedName = entity.component()
             {
