@@ -100,10 +100,10 @@ public class DotExporter {
         output += formatter.footer()
        
         if path == "-" {
-            try output.write(toFile: path, atomically: true, encoding: .utf8)
+            print(output)
         }
         else {
-            print(output)
+            try output.write(toFile: path, atomically: true, encoding: .utf8)
         }
     }
     
