@@ -36,11 +36,11 @@ extension PoieticTool {
         var startTime: Double?
 
         @Option(name: [.long],
-                help: "Final simulation time, overrides design-specified end time")
+                help: "Final simulation time, overrides design-specified final time")
         var finalTime: Double?
 
         @Option(name: [.long, .customShort("s")],
-                help: "Maximum number of steps to run, before end-time is reached [DEPRECATED]")
+                help: "Maximum number of steps to run, before final-time is reached [DEPRECATED]")
         var steps: UInt?
         
         @Option(name: [.long, .customShort("t")],
@@ -123,13 +123,13 @@ extension PoieticTool {
             }
             if let finalTime {
                 guard finalTime >= timeSettings.startTime else {
-                    throw ToolError.invalidOption("end-time", "End time must be greater or equal than start time")
+                    throw ToolError.invalidOption("final-time", "End time must be greater or equal than start time")
                 }
 
                 timeSettings.finalTime = finalTime
             }
             else if let steps {
-                errorPrint("WARNING: Settings steps is deprecated, use --end-time")
+                errorPrint("WARNING: Settings steps is deprecated, use --final-time")
                 timeSettings.finalTime = timeSettings.startTime + timeSettings.timeStep * Double(steps)
             }
 

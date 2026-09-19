@@ -300,7 +300,7 @@ poietic run [--design <design>] \
 Options:
 
 - `--start-time <start-time>`: Initial time, overrides design-specified initial time.
-- `-s, --steps <steps>`: Maximum number of steps to run, before end-time is reached.
+- `-s, --steps <steps>`: Maximum number of steps to run, before final-time is reached.
 - `-t, --time-delta <time-delta>`: Time delta, overrides design-specified time delta.
 - `--solver <solver>`: Type of the solver to be used for computation. Default: `euler`.
 - `-f, --output-format <output-format>`: Output format, see below.
