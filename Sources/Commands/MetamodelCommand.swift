@@ -101,12 +101,19 @@ func printTypeAsText(_ type: ObjectType) {
     }
     else {
         for attr in type.attributes {
-            if let abstract = attr.abstract {
-                print("    \(attr.name) (\(attr.type))")
-                print("        - \(abstract)")
+            var type = attr.type.description
+            let abstract: String
+            if attr.optional {
+                type += ", optional"
             }
-            else {
-                print("    \(attr.name) (\(attr.type))")
+            if let value = attr.defaultValue,
+               let defaultString = try? value.stringValue()
+            {
+                type += ", default=" + defaultString
+            }
+            print("    \(attr.name): \(type)")
+            if let abstract = attr.abstract {
+                print("        - " + abstract)
             }
         }
     }
