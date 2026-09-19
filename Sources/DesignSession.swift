@@ -69,6 +69,20 @@ class DesignSession {
     let design: Design
     let world: World
     
+    
+    /// String representing the design location derived from the URL.
+    ///
+    /// For file URL: absolute path, for other URLs: absolute string of the URL.
+    ///
+    var locationString: String {
+        if url.isFileURL {
+            return url.path()
+        }
+        else {
+            return url.absoluteString
+        }
+    }
+    
     /// Plane we are working with.
     ///
     var plane: DesignPlane? { world.plane }

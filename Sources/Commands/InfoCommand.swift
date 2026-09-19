@@ -28,9 +28,9 @@ extension PoieticTool {
                 plane = try session.setPlane(planeReference)
             }
             
-            var items: [(String?, String?)] = [
-                ("Design", session.url.relativeString)
-            ]
+            var items: [(String?, String?)] = []
+            
+            items.append(("Design", session.locationString))
 
             if let info = plane?.filter(type: BasicDomain.Types.DesignInfo).first {
                 if let text = try info["title"]?.stringValue() {
