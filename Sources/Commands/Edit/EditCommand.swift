@@ -24,8 +24,7 @@ extension PoieticTool {
         = CommandConfiguration(
             abstract: "Edit an object or a selection of objects",
             subcommands: [
-                SetAttribute.self,
-                SetMultipleAttributes.self,
+                SetAttributes.self,
                 UnsetAttributes.self,
                 Undo.self,
                 Redo.self,
