@@ -10,9 +10,9 @@ let package = Package(
         .package(url: "https://github.com/apple/swift-argument-parser.git", from: "1.2.0"),
         .package(url: "https://github.com/apple/swift-numerics", from: "1.0.0"),
         .package(url: "https://github.com/swiftlang/swift-markdown.git", from: "0.9.0"),
-        .package(url: "https://github.com/openpoiesis/poietic-core", from: "0.9.0"),
-        .package(url: "https://github.com/openpoiesis/poietic-flows", from: "0.9.0"),
-        .package(url: "https://github.com/openpoiesis/poietic-diagram", from: "0.8.0"),
+        .package(url: "https://github.com/openpoiesis/poietic-core", from: "0.10.0"),
+        .package(url: "https://github.com/openpoiesis/poietic-flows", from: "0.10.0"),
+        .package(url: "https://github.com/openpoiesis/poietic-diagram", from: "0.10.0"),
     ],
     targets: [
         // Targets are the basic building blocks of a package, defining a module or a test suite.
