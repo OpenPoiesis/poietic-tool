@@ -17,31 +17,31 @@ let DefaultDOTStyle = DotStyle(
                      attributes: [
                         "labelloc": "b",
                      ]),
-        DotNodeStyle(predicate: .isType(StockFlowDomain.Types.FlowRate),
+        DotNodeStyle(predicate: .isType("FlowRate"),
                      attributes: [
                         "shape": "ellipse",
                         "style": "bold",
 
                      ]),
-        DotNodeStyle(predicate: .isType(StockFlowDomain.Types.Stock),
+        DotNodeStyle(predicate: .isType("Stock"),
                      attributes: [
                         "style": "bold",
                         "shape": "box",
                      ]),
-        DotNodeStyle(predicate: .isType(StockFlowDomain.Types.Auxiliary),
+        DotNodeStyle(predicate: .isType("Auxiliary"),
                      attributes: [
                         "shape": "ellipse",
                         "style": "dotted",
                      ]),
     ],
     edges: [
-        DotEdgeStyle(predicate: .isType(StockFlowDomain.Types.Flow),
+        DotEdgeStyle(predicate: .isType("Flow"),
                      attributes: [
                         "color": "blue:white:blue",
                         "arrowhead": "empty",
                         "arrowsize": "2",
                      ]),
-        DotEdgeStyle(predicate: .isType(StockFlowDomain.Types.Parameter),
+        DotEdgeStyle(predicate: .isType("Parameter"),
                      attributes: [
                         "arrowhead": "open",
                         "color": "red",
